@@ -1,0 +1,532 @@
+// +----------------------------------------------------------------------------+
+// |  VideoOffsetCC                                                             |
+// +----------------------------------------------------------------------------+
+// |  Used to set the video offsets for the following boards:                   |
+// |                                                                            |
+// |  ARC-41                                                                    |
+// |  ARC-42                                                                    |
+// |  ARC-45                                                                    |
+// |                                                                            |
+// +----------------------------------------------------------------------------+
+import javax.swing.border.TitledBorder;
+import javax.swing.BoxLayout;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.owltypes.OwlTextField;
+import owl.main.owltypes.OwlBoldButton;
+import owl.gui.utils.OwlUtilities;
+
+
+public class VideoOffsetFrame extends CCScriptFrame implements Runnable, ItemListener
+{
+	final String APPLY_ACTION	=	"APPLY";
+	final String STOP_ACTION	=	"ABORT";
+	final String CLEAR_ACTION	=	"CLEAR";
+	final String SAVE_ACTION	=	"SAVE";
+	final String LOAD_ACTION	=	"LOAD";
+
+	final int	INVALID_DATA	=	99999;
+	final int	MAX_BOARD_ID	=  	16;
+
+	JToolBar		m_toolbar;
+	OwlBoldButton	m_applyButton;
+	JComboBox		m_boardComboBox;
+	OwlNumberField	m_aTxtfld;
+	OwlNumberField	m_bTxtfld;
+	boolean			m_bStop;
+	int[]			m_aOffset;
+	int[]			m_bOffset;
+	int				m_dBoardID;
+	String			m_sBoard;
+
+
+	public VideoOffsetFrame( String sBoard )
+	{
+		super( "ARC-" + sBoard + " Video Offset CC" );
+
+		m_dBoardID	= 0;
+		m_aOffset	= new int[ MAX_BOARD_ID ];
+		m_bOffset	= new int[ MAX_BOARD_ID ];
+		m_sBoard	= "ARC-" + sBoard;
+
+		for ( i=0; i<MAX_BOARD_ID; i++ )
+		{
+			m_aOffset[ i ] = INVALID_DATA;
+			m_bOffset[ i ] = INVALID_DATA;
+		}
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_applyButton = createBoldToolbarButton( APPLY_ACTION, Color.RED );
+		m_toolbar.add( m_applyButton);
+
+		clearButton = createNewToolbarButton( CLEAR_ACTION );
+		m_toolbar.add( clearButton );
+
+		saveButton = createNewToolbarButton( SAVE_ACTION );
+		m_toolbar.add( saveButton );
+
+		loadButton = createNewToolbarButton( LOAD_ACTION );
+		m_toolbar.add( loadButton );
+
+		appendToolbar( m_toolbar );
+
+		panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+		panel.setBackground( java.awt.Color.WHITE );
+		panel.add( createTitlePanel() );
+		panel.add( createBoardPanel() );
+		panel.add( createValuePanel() );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( panel,   BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	public JPanel createTitlePanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+		spaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+
+ 		label = new JLabel( "<html><b><font size=4 color=#000000>" +
+							spaces + m_sBoard + " VIDEO PROCESSOR" + spaces +
+							"</font></b></html>" );
+
+		label.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		label.setOpaque( true );
+		label.setBackground( owl.gui.utils.OwlColors.getGolden2() );
+
+		panel.add( label );
+
+		return panel;
+	}
+
+	public JPanel createBoardPanel()
+	{	
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+		String[] boardList = { "0", "1", "2", "3", "4", "5", "6",
+							   "7", "8", "9", "10", "11", "12",
+							   "13", "14", "15" };
+
+		m_boardComboBox = new JComboBox( boardList );
+		m_boardComboBox.setBackground( java.awt.Color.WHITE );
+		m_boardComboBox.setSelectedIndex( 0 );
+		m_boardComboBox.setActionCommand( "Board Id" );
+		m_boardComboBox.addItemListener( this );
+
+		rangeLabel         = new JLabel ( "( 0 =< N <= 15 )" );
+		boardLabel         = new JLabel( "Board Number: " );
+
+		panel.add( boardLabel );
+		panel.add( m_boardComboBox );
+		panel.add( rangeLabel );
+
+		return panel;
+	}
+
+	private JPanel createValuePanel()
+	{	
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+		panel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createEmptyBorder(),
+														   "Channel Offsets ( 0 <= offset <= 4095 )",
+														   TitledBorder.CENTER,
+														   TitledBorder.DEFAULT_POSITION,
+														   null,
+														   Color.black ) );
+
+		JLabel aLabel = new JLabel( "<html><b><font size=3>A: </font></b></html>" );
+		JLabel bLabel = new JLabel( "<html><b><font size=3>B: </font></b></html>" );
+
+		m_aTxtfld = new OwlNumberField( "", 6 );
+		m_aTxtfld.setInvalidValue( INVALID_DATA );
+		m_aTxtfld.hideErrors( true );
+
+		m_bTxtfld = new OwlNumberField( "", 6 );
+		m_bTxtfld.setInvalidValue( INVALID_DATA );
+		m_bTxtfld.hideErrors( true );
+
+		panel.add( aLabel );
+		panel.add( m_aTxtfld );
+		panel.add( bLabel );
+		panel.add( m_bTxtfld );
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( APPLY_ACTION ) )
+		{
+			m_bStop = false;
+			new Thread( this ).start();
+		}
+
+		else if ( event.getActionCommand().equals( STOP_ACTION ) )
+		{
+			m_bStop = true;
+		}
+
+		else if ( event.getActionCommand().equals( CLEAR_ACTION ) )
+		{
+			brdId = m_boardComboBox.getSelectedIndex();
+
+			m_aTxtfld.setText( "" );
+			m_aOffset[ brdId ] = INVALID_DATA;
+
+			m_bTxtfld.setText( "" );
+			m_bOffset[ brdId ] = INVALID_DATA;
+		}
+
+		else if ( event.getActionCommand().equals( SAVE_ACTION ) )
+		{
+			JFileChooser fc = new JFileChooser( System.getProperty( "user.dir" ) );
+
+			fc.addChoosableFileFilter(
+						new owl.main.owltypes.OwlFileFilter(
+								"ccp", "Controller Configuration Parameter [ .ccp ]" ) );
+
+			if ( fc.showSaveDialog( null ) == JFileChooser.APPROVE_OPTION )
+			{
+				try
+				{
+					writeParameters( fc.getSelectedFile().getPath() );
+				}
+				catch ( Exception e )
+				{
+					if ( !e.getMessage().equals( "" ) )
+					{
+						logger.error( e.getMessage() );
+					}
+				}
+			}
+		}
+
+		else if ( event.getActionCommand().equals( LOAD_ACTION ) )
+		{
+			JFileChooser fc = new JFileChooser( System.getProperty( "user.dir" ) );
+
+			fc.addChoosableFileFilter(
+						new owl.main.owltypes.OwlFileFilter(
+								"ccp", "Controller Configuration Parameter [ .ccp ]" ) );
+
+			if ( fc.showOpenDialog( null ) == JFileChooser.APPROVE_OPTION )
+			{
+				try
+				{
+					readParameters( fc.getSelectedFile().getPath() );
+				}
+				catch ( Exception e )
+				{
+					if ( !e.getMessage().equals( "" ) )
+					{
+						logger.error( e.getMessage() );
+					}
+				}
+			}
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void itemStateChanged( ItemEvent ie )
+	{
+		if ( ie.getSource() instanceof javax.swing.JComboBox )
+		{
+			JComboBox src = ( JComboBox )ie.getSource();
+	
+			if ( src.getActionCommand().equals( "Board Id" ) )
+			{
+				//  Get the channel A offset
+				// +--------------------------------------+
+				if ( !m_aTxtfld.isEmpty() )
+				{
+					m_aOffset[ m_dBoardID ] = m_aTxtfld.getInt();
+				}
+				else
+				{
+					m_aOffset[ m_dBoardID ] = INVALID_DATA;
+				}
+
+				//  Get the channel B offset
+				// +--------------------------------------+
+				if ( !m_bTxtfld.isEmpty() )
+				{
+					m_bOffset[ m_dBoardID ] = m_bTxtfld.getInt();
+				}
+				else
+				{
+					m_bOffset[ m_dBoardID ] = INVALID_DATA;
+				}
+
+				//  Get the board ID
+				// +--------------------------------------+
+				m_dBoardID = src.getSelectedIndex();
+
+				//  Set the channel A offset
+				// +--------------------------------------+
+				if ( m_aOffset[ m_dBoardID ] != INVALID_DATA )
+				{
+					m_aTxtfld.setValue( m_aOffset[ m_dBoardID ] );
+				}
+				else
+				{
+					m_aTxtfld.setText( "" );
+				}
+
+				//  Set the channel B offset
+				// +--------------------------------------+
+				if ( m_bOffset[ m_dBoardID ] != INVALID_DATA )
+				{
+					m_bTxtfld.setValue( m_bOffset[ m_dBoardID ] );
+				}
+				else
+				{
+					m_bTxtfld.setText( "" );
+				}
+			}
+		}
+	}
+
+	public void writeParameters( filename ) throws Exception
+	{
+		try
+		{
+			//  Force the current dac values to be arrayed before saving
+			// +---------------------------------------------------------+
+			itemStateChanged( new ItemEvent( m_boardComboBox,
+											 ItemEvent.ITEM_STATE_CHANGED,
+											 null,
+											 0 ) );
+
+			fw = new FileWriter( filename, false );
+			pw = new PrintWriter( fw, true );
+
+			for ( brd=0; brd<MAX_BOARD_ID; brd++ )
+			{
+				if ( m_aOffset[ brd ] != INVALID_DATA )
+				{
+					pw.println( "BRD: " + brd + "\tCHANNEL: A\t" +
+								 m_aOffset[ brd ] );
+				}
+
+				if ( m_bOffset[ brd ] != INVALID_DATA )
+				{
+					pw.println( "BRD: " + brd + "\tCHANNEL: B\t" +
+								 m_bOffset[ brd ] );
+				}
+			}
+
+			fw.close();
+			pw.close();
+		}
+		catch ( Exception e ) { fw.close(); pw.close(); throw e; }
+	}
+
+	public void readParameters( String filename ) throws Exception
+	{
+		try
+		{
+			inReader = new FileReader( filename );
+			inBuffReader = new BufferedReader( inReader );
+
+			while ( ( line = inBuffReader.readLine() ) != null )
+			{
+				if ( line.equals( "" ) ) { continue; }
+
+				String[] tokens = line.split( "[ \t]" );
+
+				if ( tokens.length != 5 )
+				{
+					continue;
+				}
+
+				brd = Integer.parseInt( tokens[ 1 ].trim() );
+				chn = tokens[ 3 ].trim();
+				off = Integer.parseInt( tokens[ 4 ].trim() );
+
+				if ( chn.equals( "A" ) )
+				{
+					m_aOffset[ brd ] = off;
+				}
+				else
+				{
+					m_bOffset[ brd ] = off;
+				}
+
+				if ( m_boardComboBox.getSelectedIndex() == brd )
+				{
+					if ( m_aOffset[ brd ] != INVALID_DATA )
+					{
+						m_aTxtfld.setValue( m_aOffset[ brd ] );
+					}
+
+					if ( m_bOffset[ brd ] != INVALID_DATA )
+					{
+						m_bTxtfld.setValue( m_bOffset[ brd ] );
+					}
+				}
+			}
+
+			inBuffReader.close();
+			inReader.close();
+		}
+		catch ( Exception e ) { inBuffReader.close(); inReader.close(); throw e; }
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	public void setBoardId( id )
+	{
+		m_dBoardID = id;
+	}
+
+	public void setOffsets( a, b )
+	{
+		m_aOffset[ m_dBoardID ] = a;
+		m_bOffset[ m_dBoardID ] = b;
+	}
+
+	public void run()
+	{
+		m_applyButton.setText( STOP_ACTION );
+		m_applyButton.setColored();
+		m_dBoardID = m_boardComboBox.getSelectedIndex();
+
+		try
+		{
+			if ( m_dBoardID < 0 )
+			{
+				throw new Exception( "Invalid board id: " + m_dBoardID );
+			}
+
+			m_aOffset[ m_dBoardID ] = m_aTxtfld.getInt();
+			m_bOffset[ m_dBoardID ] = m_bTxtfld.getInt();
+
+			if ( m_bStop ) { throw new Exception( STOP_ACTION ); }
+
+			if ( ( m_aOffset[ m_dBoardID ] == INVALID_DATA ) ||
+				 ( m_aOffset[ m_dBoardID ] < 0 )             ||
+				 ( m_aOffset[ m_dBoardID ] > 4095 ) )
+			{
+				throw new Exception( "Video offset A out of range ( 0-4095 )" );
+			}
+
+			if ( ( m_aOffset[ m_dBoardID ] == INVALID_DATA ) ||
+				 ( m_bOffset[ m_dBoardID ] < 0 )             ||
+				 ( m_bOffset[ m_dBoardID ] > 4095 ) )
+			{
+				throw new Exception( "Video offset B out of range ( 0-4095 )" );
+			}
+
+			if ( m_bStop ) { throw new Exception( STOP_ACTION ); }
+
+			// -------------------------------------
+			// Send the channel A offset
+			// -------------------------------------
+			logger.infoStart( "Setting " + m_sBoard + " video offset A" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID,
+						   CameraAPI.SBN,
+						   m_dBoardID,
+						   0,
+						   CameraAPI.VID,
+						   m_aOffset[ m_dBoardID ],
+						   CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( m_bStop ) { throw new Exception( STOP_ACTION ); }
+
+			// -------------------------------------
+			// Send the channel B offset
+			// -------------------------------------
+			logger.infoStart( "Setting " + m_sBoard + " video offset B" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID,
+						   CameraAPI.SBN,
+						   m_dBoardID,
+						   1,
+ 						   CameraAPI.VID,
+						   m_bOffset[ m_dBoardID ],
+						   CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( m_bStop ) { throw new Exception( STOP_ACTION ); }
+
+			fireScriptApplied();
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+
+			logger.error( "( VideoOffsetCC script ): SBN reply error. Expected: " +
+						   re.getExpectedHexString() + " Received: " +
+						   re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+
+			if ( !e.getMessage().equals( STOP_ACTION ) )
+			{
+				logger.error( "( VideoOffsetCC script ): " + e.toString() );
+			}
+		}
+		finally
+		{
+			m_applyButton.setBlack( APPLY_ACTION );
+		}
+	}
+}
+
+
+VideoOffsetCC()
+{
+	CCScriptFrame frame = null;
+	String sBoard = "";
+
+	if ( CameraAPI.IsCCParamSupported( CameraAPI.ARC45 ) )
+	{
+		sBoard = "45";
+	}
+
+	else if ( CameraAPI.IsCCParamSupported( CameraAPI.ARC42 ) )
+	{
+		sBoard = "42";
+	}
+
+	else if ( CameraAPI.IsCCParamSupported( CameraAPI.ARC41 ) )
+	{
+		sBoard = "41";
+	}
+
+	if ( !sBoard.isEmpty() )
+	{
+		frame = ( CCScriptFrame )( new VideoOffsetFrame( sBoard ) );
+		frame.setVisible( true );
+	}
+
+	else
+	{
+		logger.warn(
+				"Additional VIDEO PROCESSOR options not available! CC Param Value: 0x" +
+				 Integer.toHexString( CameraAPI.GetCCParams() ) );
+	}
+
+	return frame;
+}

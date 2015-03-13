@@ -1,0 +1,99 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">GetCCParams</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.GetCCParams();
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">int - </span>The value that represents the available
+controller options, known as controller configuration parameters. Below
+are the current bit definitions:<br><br>
+<pre>
+BIT #'s		FUNCTION
+2,1,0		Video Processor
+ 			000	CCD Rev. 3
+ 			001	CCD Gen I
+ 			010	IR Rev. 4
+ 			011	IR Coadder
+ 			100	CCD Rev. 5, Differential input
+ 			101	8x IR
+ 
+ 4,3		Timing Board
+ 			00	Rev. 4, Gen II
+ 			01	Gen I
+ 			10	Rev. 5, Gen III, 250 MHz
+ 
+ 6,5		Utility Board
+ 			00	No utility board
+ 			01	Utility Rev. 3
+ 
+ 7		Shutter
+ 			0	No shutter support
+ 			1	Yes shutter support
+ 
+ 9,8		Temperature readout
+ 			00	No temperature readout
+ 			01	Polynomial Diode calibration
+ 			10	Linear temperature sensor calibration
+ 
+ 10		Subarray readout
+ 			0	Not supported
+ 			1	Yes supported
+ 
+ 11		Binning
+ 			0	Not supported
+ 			1	Yes supported
+ 
+ 12		Split-Serial readout
+ 			0	Not supported
+ 			1	Yes supported
+ 
+ 13		Split-Parallel readout
+ 			0	Not supported
+ 			1	Yes supported
+ 
+ 14		MPP = Inverted parallel clocks
+ 			0	Not supported
+ 			1	Yes supported
+ 
+ 16,15		Clock Driver Board
+ 			00	Rev. 3
+ 			11	No clock driver board (Gen I)
+ 
+ 19,18,17		Special implementations
+ 			000 	Somewhere else
+ 			001	Mount Laguna Observatory
+ 			010	NGST Aladdin
+ 			xxx	Other	
+</pre>
+</div>
+
+<div id="header">Remarks</div>
+Returns the controller configuration parameter value, which specifies
+the options available on the controller. Throws java.lang.Exception if
+an error occurs. All exceptions can be caught using a
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,57 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">Expose</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+Expose( duration, shutter, deinterlace, filename );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">double duration</span></td>
+<td valign="top">Duration of exposure in seconds.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code">boolean shutter</span></td>
+<td valign="top">Open shutter during exposure if true, false for dark.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code">int deinterlace</span></td>
+<td valign="top">Deinterlace algorithm: CameraAPI.DEINTERLACE_NONE,
+CameraAPI.DEINTERLACE_PARALLEL, CameraAPI.DEINTERLACE_SERIAL,
+CameraAPI.DEINTERLACE_CCD_QUAD, CameraAPI.DEINTERLACE_IR_QUAD,
+CameraAPI.DEINTERLACE_CDS_IR_QUAD, CameraAPI.DEINTERLACE_HAWAII_RG,
+CameraAPI.DEINTERLACE_STA1600.
+</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Starts an exposure. Throws an Exception if an error occurs, which can be caught
+using <a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

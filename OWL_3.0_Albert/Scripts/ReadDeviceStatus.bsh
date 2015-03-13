@@ -1,0 +1,27 @@
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+
+int dStatus = CameraAPI.GetDeviceStatus();
+
+System.out.println( "Device Status: 0x" + Integer.toHexString( dStatus ) );
+
+if ( owl.main.DeviceConnect.driverInUse.contains( "PCIe" ) )
+{
+	System.out.println( "----------------------------------------------------" );
+                      
+	System.out.println( "Reply Recvd: " + ( ( dStatus & 0x03 ) == 2 ? "true" : "false" ) );
+
+	System.out.println( "Reply Timeout: " + ( ( ( dStatus & 0x20 ) >> 5 ) == 1 ? "true" : "false" ) );
+
+	System.out.println( "Controller Reset: 0x" + Integer.toHexString( ( dStatus & 0x08 ) >> 3 ) );
+
+	System.out.println( "Is Readout: 0x" + Integer.toHexString( ( dStatus & 0x04 ) >> 2 ) );
+
+	System.out.println( "Idle: " + ( ( dStatus & 0x03 ) == 0 ?"true" : "false" ) );
+
+	System.out.println( "Command Sent: " + ( ( dStatus & 0x03 ) == 1 ? "true" : "false" ) );
+
+	System.out.println( "Header Error: 0x" + Integer.toHexString( ( dStatus & 0x10 ) >> 4 ) );
+
+	System.out.println( "----------------------------------------------------" );
+}

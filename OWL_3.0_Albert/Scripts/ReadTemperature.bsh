@@ -1,0 +1,156 @@
+import javax.swing.border.TitledBorder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import java.lang.process;
+
+ReadTemperature( booleanUseDemoMode )
+{
+	final String CLOSE_ACTION = "CLOSE";
+
+	JFrame frame;
+	GridBagLayout gbl;
+	GridBagConstraints gbc;
+	JToolBar toolbar;
+	JButton closeButton;
+	JLabel temperatureLabel;
+	boolean stop;
+	boolean useDemoMode;
+
+	private buildFrame()
+	{
+		frame = new JFrame();
+		frame.setTitle( "Camera Temperature" );
+		frame.getContentPane().setLayout( new BorderLayout() );
+		frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+
+		toolbar = new JToolBar();
+		toolbar.setFloatable( false );
+
+		closeButton = new JButton( CLOSE_ACTION );
+		closeButton.setBorderPainted( false );
+		closeButton.setFocusPainted( false );
+		closeButton.addActionListener( this );
+		toolbar.add( closeButton );
+
+		gbl = new GridBagLayout();
+		gbc = new GridBagConstraints();
+
+		frame.getContentPane().add( toolbar, BorderLayout.PAGE_START );
+		frame.getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		frame.addWindowListener( this );
+
+		frame.pack();
+		centerFrame();
+		frame.show();
+	}
+
+	private centerFrame()
+	{
+		Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+		int xPos = d.width / 2 - frame.getWidth() / 2 - 50;
+		int yPos = d.height / 4  - frame.getHeight() / 2;
+		frame.setLocation( xPos, yPos );
+	}
+
+	private JPanel createComponents()
+	{
+			panel = new JPanel();
+			panel.setLayout( gbl );
+
+			staticTempLabel = new JLabel( new ImageIcon( bitmapPath + "Temperature2.gif" ) );
+			temperatureLabel = new JLabel( "0000.00" );
+			temperatureLabel.setFont( new Font( "GILSANUB", Font.PLAIN, 24 ) );
+
+			addComponent( panel, staticTempLabel,  0, 0, 0, 5, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 0, 1, 1 );
+			addComponent( panel, temperatureLabel, 0, 5, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 1, 1, 1 );
+
+			return panel;
+	}
+
+	void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( CLOSE_ACTION ) )
+		{
+			stop = true;
+			frame.dispose();
+		}
+	}
+
+	addComponent( JPanel panel, JComponent comp, int insetTOP, int insetLEFT,
+				  int insetBOTTOM, int insetRIGHT, int fill, int anchr, int row,
+				  int col, int rowSpan, int colSpan )
+	{
+      		// Set the grid layout constraints.
+      		gbc.fill = fill;
+      		gbc.anchor = anchr;
+      		gbc.insets = new Insets( insetTOP, insetLEFT, insetBOTTOM, insetRIGHT );
+      		gbc.gridx = col;
+      		gbc.gridy = row;
+      		gbc.gridwidth = colSpan;
+      		gbc.gridheight = rowSpan;
+
+      		// Add the component to the panel.
+      		gbl.setConstraints( comp, gbc );
+      		panel.add( comp );
+	}
+
+	// NOTE: There's no point in "stopping" this thread, since it only
+	// sends one command, which blocks until complete.
+	public void run()
+	{
+		//Process process = new ProcessBuilder("/home/bearing/cmdline.py","MODE 0").start();
+		//process.waitFor();
+		CameraAPI.SetDemoTemperature( useDemoMode );
+
+		while( true )
+		{
+			if ( !CameraAPI.IsDriverConnected() )
+			{
+				if ( stop ) break;
+				else continue;
+			}
+
+			try
+			{
+				if ( stop ) break;
+
+				java.text.DecimalFormat df = new java.text.DecimalFormat( "#0.0" );
+				temperatureLabel.setText( df.format( CameraAPI.GetArrayTemperature() ) + " C" );
+
+				if ( stop ) break;
+
+				Thread.sleep( 5000 );
+			}
+			catch ( Exception e )
+			{
+				logger.error( e );
+			}
+		}
+
+		CameraAPI.SetDemoTemperature( useDemoMode );
+	}
+
+	void windowClosing( WindowEvent e )
+	{
+		stop = true;
+	}
+
+	void windowClosed( WindowEvent e ) {}
+	void windowActivated(WindowEvent e) {}
+	void windowDeactivated(WindowEvent e) {}
+	void windowDeiconified(WindowEvent e) {}
+	void windowIconified(WindowEvent e) {}
+	void windowOpened(WindowEvent e) {}
+
+	frame = null;
+	buildFrame();
+	stop = false;
+	useDemoMode = booleanUseDemoMode;
+	new Thread( this ).start();
+
+	return this;
+}
+
+// ReadTemperature( true );
+

@@ -1,0 +1,115 @@
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlTextField;
+import owl.gui.utils.OwlUtilities;
+
+
+public class CRFrame extends CCScriptFrame implements Runnable
+{
+	private final String RUN_ACTION		=  "RUN";
+	private final String DISABLE_ACTION	=  "Disable Continuous Readout";
+	private final int    DISABLED_VALUE	=  0;
+
+	JToolBar			m_toolbar;
+	JButton				m_runButton;
+	JCheckBox			m_crChkbox;
+	OwlTextField		m_crTxtfld;
+
+	public CRFrame()
+	{
+		super( "Continuous Readout" );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			( new Thread( this ) ).start();
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void run()
+	{
+		if ( m_crChkbox.isSelected() )
+		{
+			int dVal = ( new Integer( m_crTxtfld.getText() ) ).intValue();
+
+			if ( dVal > DISABLED_VALUE )
+			{
+				setObject( new Integer( dVal ) );
+				setDescription( "On : " + dVal );
+				fireScriptApplied();
+			}
+			else
+			{
+				logger.error(
+						"Invalid number of frames: " + dVal + "\n" +
+						"Number of frames must be greater than or equal to 1" );
+			}
+		}
+		else
+		{
+			setObject( new Integer( DISABLED_VALUE ) );
+			setDescription( "Off" );
+			fireScriptApplied();
+		}
+	}
+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout() );
+
+		JLabel picLabel = new JLabel(
+								new ImageIcon(
+										owl.main.MainApp.getBitmapPath() +
+										"RefreshMenu.gif" ) );
+
+		m_crChkbox = new JCheckBox( "Enable Continuous Readout" );
+		m_crChkbox.setFocusPainted( false );
+		m_crChkbox.setName( "Enable" );
+
+		m_crTxtfld = new OwlTextField( "8", 8 );
+		m_crTxtfld.setName( "FrameCount" );
+
+		panel.add( picLabel );
+		panel.add( m_crChkbox );
+		panel.add( m_crTxtfld );
+
+		return panel;
+	}
+}
+
+
+ContinuousReadoutCC()
+{
+	CCScriptFrame frame = null;
+
+	frame = ( CCScriptFrame )( new CRFrame() );
+	frame.setVisible( true );
+
+	return frame;
+}

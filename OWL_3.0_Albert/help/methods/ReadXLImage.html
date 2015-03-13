@@ -1,0 +1,78 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">ReadXLImage</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.ReadXLImage( exp_runnable, exp_info, exp_time, rows, cols );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">Object exp_runnable</span></td>
+<td valign="top">The exposure code that will control the readout. The exposure
+code must be a class that implements the java.lang.Runnable interface.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">Object exp_info</span></td>
+<td valign="top">A reference to a owl.main.exposure.ExposeInfo class. This
+class is used to provide readout info and feedback, such as showing the
+current pixel count.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int exp_time</span></td>
+<td valign="top">The exposure time in milliseconds.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int rows</span></td>
+<td valign="top">The row size of the image.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">int cols</span></td>
+<td valign="top">The column size of the image.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Readout an image using extra-large image buffers. Throws java.lang.Exception
+if an error occurs. All exceptions can be caught using a
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.<br><br>
+
+<pre>
+1. This code requires the use of
+   Dsplib\V1.8\BigImagePCI\TotalPixelCountZPT\pci.lod
+
+2. The above pci.lod file assumes the image buffer is 4096x4096,
+   so the primary image buffer MUST be at least that big. The
+   PCI code fills and loops on the 4K x 4K buffer. However, it
+   is up to this code to make sure the pointer to the image buffer
+   stays within the 4K x 4K buffer while copying the smaller
+   sub-buffers to the CXLBuffer class.
+</pre>
+
+</div>
+
+</body>
+
+</html>

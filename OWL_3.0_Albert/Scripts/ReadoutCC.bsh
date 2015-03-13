@@ -1,0 +1,380 @@
+import javax.swing.border.TitledBorder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.gui.utils.OwlUtilities;
+
+
+public class ReadoutFrame extends CCScriptFrame implements Runnable
+{
+	final String	RUN_ACTION	 	=	"RUN";
+	final String	STOP_ACTION 	=	"ABORT";
+
+ 	// +---------------------------------------------------------------------------
+	// | Set output source ('SOS') labels
+	// +---------------------------------------------------------------------------
+	final String	amp0_LABEL		=	"0";
+	final String	amp1_LABEL		=	"1";
+	final String	amp2_LABEL		=	"2";
+	final String	amp3_LABEL		=	"3";
+	final String	ampL_LABEL		=	"L";
+	final String	ampR_LABEL		=	"R";
+	final String	ampLR_LABEL		=	"LR";
+	final String	ampALL_LABEL	=	"ALL";
+	final String	ampLL_LABEL		=	"LL";
+	final String	ampUR_LABEL		=	"UR";
+	final String	ampBOTH_LABEL	=	"BOTH";
+
+	final ImageIcon amp0_Bitmap		= new ImageIcon( bitmapPath + "AMP_0.gif"   );
+	final ImageIcon amp1_Bitmap  	= new ImageIcon( bitmapPath + "AMP_1.gif"   );
+	final ImageIcon amp2_Bitmap  	= new ImageIcon( bitmapPath + "AMP_2.gif"   );
+	final ImageIcon amp3_Bitmap  	= new ImageIcon( bitmapPath + "AMP_3.gif"   );
+	final ImageIcon ampL_Bitmap  	= new ImageIcon( bitmapPath + "AMP_L.gif"   );
+	final ImageIcon ampR_Bitmap  	= new ImageIcon( bitmapPath + "AMP_R.gif"   );
+	final ImageIcon ampLR_Bitmap 	= new ImageIcon( bitmapPath + "AMP_LR.gif"  );
+	final ImageIcon ampALL_Bitmap	= new ImageIcon( bitmapPath + "AMP_ALL.gif" );
+	final ImageIcon ampLL_Bitmap  	= new ImageIcon( bitmapPath + "AMP_LL.gif"   );
+	final ImageIcon ampUR_Bitmap 	= new ImageIcon( bitmapPath + "AMP_UR.gif"  );
+	final ImageIcon ampBOTH_Bitmap	= new ImageIcon( bitmapPath + "AMP_BOTH.gif" );
+
+	JToolBar		m_toolbar;
+	OwlBoldButton	m_runButton;
+	JLabel			m_displayBitmap;
+
+	JRadioButton	m_amp0RadioButton;
+	JRadioButton	m_amp1RadioButton;
+	JRadioButton	m_amp2RadioButton;
+	JRadioButton	m_amp3RadioButton;
+	JRadioButton	m_ampALLRadioButton;
+	JRadioButton	m_ampLRadioButton;
+	JRadioButton	m_ampRRadioButton;
+	JRadioButton	m_ampLRRadioButton;
+
+	boolean			m_bIsSAP;		// Is serial and parallel
+	boolean			m_bIsS;			// Is serial
+	boolean			m_bIsP;			// Is parallel
+	boolean			m_bIsSet;
+
+	int				m_dAmp;
+
+
+	public ReadoutFrame( boolean isSAP, boolean isS, boolean isP )
+	{
+		super( "Readout CC" );
+
+		m_bIsSAP = isSAP;
+		m_bIsS   = isS;
+		m_bIsP   = isP;
+
+		m_bIsSet = false;
+		m_dAmp   = 0;
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		//
+		// This allows all AMP commands to be handled and
+		// all default window commands to be passed to the
+		// super class.
+		//
+		else if ( event.getActionCommand().length() <= 4 )
+		{
+			setSelection( event.getActionCommand() );
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void setAmp( int ampToUse ) { m_dAmp = ampToUse; }
+
+	public void run()
+	{
+		m_runButton.setColored( STOP_ACTION );
+
+		// +---------------------------------------------------------------------------------------
+		// |  Jan 28, 2011 - Set output source ('SOS') will now accept arguments 0, 1, 2, 3, 'ALL'
+		// |  or '__A', '__B', '__C', '__D', 'ALL'.  The following is the matchup for the values:
+		// |
+		// |  Amp 0 -> 0 | '__C'
+		// |  Amp 1 -> 1 | '__D'
+		// |  Amp 2 -> 2 | '__B'
+		// |  Amp 3 -> 3 | '__A'
+		// |  Quad  -> 'ALL'
+		// |
+		// |  The program should attempt to use parameter 0 and then send '__C' if it fails before
+		// |  reporting any errors.
+		// +---------------------------------------------------------------------------------------
+		try
+		{
+			int _amp = 0;
+
+			logger.infoStart( "Setting readout mode" );
+
+			if ( m_dAmp == CameraAPI.AMP_0 )
+			{
+				_amp = 0;
+			}
+
+			else if ( m_dAmp == CameraAPI.AMP_1 )
+			{
+				_amp = 1;
+			}
+
+			else if ( m_dAmp == CameraAPI.AMP_2 )
+			{
+				_amp = 2;
+			}
+
+			else if ( m_dAmp == CameraAPI.AMP_3 )
+			{
+				_amp = 3;
+			}
+
+			else
+			{
+				_amp = m_dAmp;
+			}
+
+			dReply = CameraAPI.Cmd2( CameraAPI.TIM_ID, CameraAPI.SOS, _amp );
+
+			if ( dReply != CameraAPI.DON )
+			{
+				dReply = CameraAPI.Cmd2( CameraAPI.TIM_ID, CameraAPI.SOS, m_dAmp );
+
+				if ( dReply != CameraAPI.DON )
+				{
+					logger.infoFail();
+					logger.error( "Reply expected: 'DON' actual: " + dReply );
+				}
+				else
+				{
+					logger.infoEnd();
+					fireScriptApplied();
+				}
+			}
+			else
+			{
+				logger.infoEnd();
+				fireScriptApplied();
+			}
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			m_runButton.setBlack( RUN_ACTION );
+		}
+	}
+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.X_AXIS ) );
+
+		m_displayBitmap = new JLabel( amp0_Bitmap );
+
+		panel.add( m_displayBitmap );
+
+		if ( m_bIsSAP )
+		{
+			panel.add( createSAPPanel() );
+		}
+
+		else if ( m_bIsS || m_bIsP )
+		{
+			panel.add( createSOPPanel() );
+		}
+
+		else
+		{
+			throw new Exception( "UnKnown readout type!" );
+		}
+
+		return panel;
+	}
+
+	private JPanel createSAPPanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		TitledBorder title = BorderFactory.createTitledBorder( "Serial-Parallel" );
+		panel.setBorder( title );
+
+		setSelection( amp0_LABEL );
+
+		m_amp0RadioButton  = new JRadioButton( amp0_LABEL, true );
+		m_amp0RadioButton.addActionListener( this );
+		m_amp0RadioButton.setName( "Amp0" );
+
+		m_amp1RadioButton  = new JRadioButton( amp1_LABEL );
+		m_amp1RadioButton.addActionListener( this );
+		m_amp1RadioButton.setName( "Amp1" );
+
+		m_amp2RadioButton = new JRadioButton( amp2_LABEL );
+		m_amp2RadioButton.addActionListener( this );
+		m_amp2RadioButton.setName( "Amp2" );
+
+		m_amp3RadioButton = new JRadioButton( amp3_LABEL );
+		m_amp3RadioButton.addActionListener( this );
+		m_amp3RadioButton.setName( "Amp3" );
+
+		m_ampALLRadioButton = new JRadioButton( ampALL_LABEL );
+		m_ampALLRadioButton.addActionListener( this );
+		m_ampALLRadioButton.setName( "AmpALL" );
+
+		ButtonGroup buttonGroup = new ButtonGroup();
+		buttonGroup.add( m_amp0RadioButton );
+		buttonGroup.add( m_amp1RadioButton );
+		buttonGroup.add( m_amp2RadioButton );
+		buttonGroup.add( m_amp3RadioButton );
+		buttonGroup.add( m_ampALLRadioButton );
+
+		addComponent( panel, m_amp0RadioButton,   0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 0, 1, 1 );
+		addComponent( panel, m_amp1RadioButton,   0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 1, 1, 1 );
+		addComponent( panel, m_amp2RadioButton,   0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 2, 1, 1 );
+		addComponent( panel, m_amp3RadioButton,   0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 3, 1, 1 );
+		addComponent( panel, m_ampALLRadioButton, 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 4, 1, 1 );
+
+		return panel;
+	}
+
+	private JPanel createSOPPanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		TitledBorder title = BorderFactory.createTitledBorder( ( m_bIsS ? "Serial" : "Parallel" ) );
+		panel.setBorder( title );
+
+		setSelection( ( m_bIsS == true ? ampL_LABEL : ampLL_LABEL ) );
+
+		m_ampLRadioButton  = new JRadioButton( ( m_bIsS ? ampL_LABEL : ampLL_LABEL ), true );
+		m_ampLRadioButton.addActionListener( this );
+		m_ampLRadioButton.setName( "AmpL" );
+
+		m_ampRRadioButton  = new JRadioButton( ( m_bIsS ? ampR_LABEL : ampUR_LABEL ) );
+		m_ampRRadioButton.addActionListener( this );
+		m_ampRRadioButton.setName( "AmpR" );
+
+		m_ampLRRadioButton = new JRadioButton( ( m_bIsS ? ampLR_LABEL : ampBOTH_LABEL ) );
+		m_ampLRRadioButton.addActionListener( this );
+		m_ampLRRadioButton.setName( "AmpLR" );
+
+		ButtonGroup buttonGroup = new ButtonGroup();
+		buttonGroup.add( m_ampLRadioButton );
+		buttonGroup.add( m_ampRRadioButton );
+		buttonGroup.add( m_ampLRRadioButton );
+
+		addComponent( panel, m_ampLRadioButton,  0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 0, 1, 1 );
+		addComponent( panel, m_ampRRadioButton,  0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 1, 1, 1 );
+		addComponent( panel, m_ampLRRadioButton, 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 2, 1, 1 );
+
+		return panel;
+	}
+
+	private void setSelection( String selection )
+	{
+		// Set the display bitmap with the appropriate amp bitmap
+		// -------------------------------------------------------
+		if      ( selection.equals( amp0_LABEL    ) ) { m_dAmp = CameraAPI.AMP_0;  m_displayBitmap.setIcon( amp0_Bitmap );    setObject( new Integer( CameraAPI.DEINTERLACE_NONE   ) );   }
+		else if ( selection.equals( amp1_LABEL    ) ) { m_dAmp = CameraAPI.AMP_1;  m_displayBitmap.setIcon( amp1_Bitmap );    setObject( new Integer( CameraAPI.DEINTERLACE_NONE   ) );   }
+		else if ( selection.equals( amp2_LABEL    ) ) { m_dAmp = CameraAPI.AMP_2;  m_displayBitmap.setIcon( amp2_Bitmap );    setObject( new Integer( CameraAPI.DEINTERLACE_NONE   ) );   }
+		else if ( selection.equals( amp3_LABEL    ) ) { m_dAmp = CameraAPI.AMP_3;  m_displayBitmap.setIcon( amp3_Bitmap );    setObject( new Integer( CameraAPI.DEINTERLACE_NONE   ) );   }
+		else if ( selection.equals( ampL_LABEL    ) ) { m_dAmp = CameraAPI.AMP_L;  m_displayBitmap.setIcon( ampL_Bitmap );    setObject( new Integer( CameraAPI.DEINTERLACE_NONE   ) );   }
+		else if ( selection.equals( ampR_LABEL    ) ) { m_dAmp = CameraAPI.AMP_R;  m_displayBitmap.setIcon( ampR_Bitmap );    setObject( new Integer( CameraAPI.DEINTERLACE_NONE   ) );   }
+		else if ( selection.equals( ampLR_LABEL   ) ) { m_dAmp = CameraAPI.AMP_LR; m_displayBitmap.setIcon( ampLR_Bitmap );   setObject( new Integer( CameraAPI.DEINTERLACE_SERIAL ) );   }
+		else if ( selection.equals( ampLL_LABEL   ) ) { m_dAmp = CameraAPI.AMP_L;  m_displayBitmap.setIcon( ampLL_Bitmap );   setObject( new Integer( CameraAPI.DEINTERLACE_NONE   ) );   }
+		else if ( selection.equals( ampUR_LABEL   ) ) { m_dAmp = CameraAPI.AMP_R;  m_displayBitmap.setIcon( ampUR_Bitmap );   setObject( new Integer( CameraAPI.DEINTERLACE_NONE   ) );   }
+		else if ( selection.equals( ampBOTH_LABEL ) ) { m_dAmp = CameraAPI.AMP_LR; m_displayBitmap.setIcon( ampBOTH_Bitmap ); setObject( new Integer( CameraAPI.DEINTERLACE_PARALLEL ) ); }
+
+		else if ( selection.equals( ampALL_LABEL ) )
+		{
+			m_dAmp = CameraAPI.AMP_ALL;
+
+			m_displayBitmap.setIcon( ampALL_Bitmap );
+
+			if ( CameraAPI.IsCCD() )
+			{
+				setObject( new Integer( CameraAPI.DEINTERLACE_CCD_QUAD ) );
+			}
+			else
+			{
+				setObject( new Integer( CameraAPI.DEINTERLACE_IR_QUAD ) );
+			}
+		}
+
+		setDescription( selection );
+	}
+
+	private void setSelection( int dAmp, boolean bIsP )
+	{
+		// Set the display bitmap with the appropriate amp bitmap
+		// -------------------------------------------------------
+		if      ( dAmp == CameraAPI.AMP_0 )   { m_amp0RadioButton.setSelected( true );   m_displayBitmap.setIcon( amp0_Bitmap );   }
+		else if ( dAmp == CameraAPI.AMP_1 )   { m_amp1RadioButton.setSelected( true );   m_displayBitmap.setIcon( amp1_Bitmap );   }
+		else if ( dAmp == CameraAPI.AMP_2 )   { m_amp2RadioButton.setSelected( true );   m_displayBitmap.setIcon( amp2_Bitmap );   }
+		else if ( dAmp == CameraAPI.AMP_3 )   { m_amp3RadioButton.setSelected( true );   m_displayBitmap.setIcon( amp3_Bitmap );   }
+		else if ( dAmp == CameraAPI.AMP_ALL ) { m_ampALLRadioButton.setSelected( true ); m_displayBitmap.setIcon( ampALL_Bitmap ); }
+		else if ( dAmp == CameraAPI.AMP_L )   { m_ampLRadioButton.setSelected( true );   m_displayBitmap.setIcon( ( bIsP ? ampL_Bitmap  : ampLL_Bitmap ) );   }
+		else if ( dAmp == CameraAPI.AMP_R )   { m_ampRRadioButton.setSelected( true );   m_displayBitmap.setIcon( ( bIsP ? ampR_Bitmap  : ampUR_Bitmap ) );   }
+		else if ( dAmp == CameraAPI.AMP_LR )  { m_ampLRRadioButton.setSelected( true );  m_displayBitmap.setIcon( ( bIsP ? ampLR_Bitmap : ampBOTH_Bitmap ) ); }
+	}
+}
+
+
+ReadoutCC()
+{
+	CCScriptFrame frame = null;
+
+	boolean bIsSAP = CameraAPI.IsCCParamSupported( CameraAPI.SPLIT_SERIAL | CameraAPI.SPLIT_PARALLEL );
+	boolean bIsS   = CameraAPI.IsCCParamSupported( CameraAPI.SPLIT_SERIAL );
+	boolean bIsP   = CameraAPI.IsCCParamSupported( CameraAPI.SPLIT_PARALLEL );
+
+	if ( bIsSAP || bIsS || bIsP )
+	{
+		frame = ( CCScriptFrame )( new ReadoutFrame( bIsSAP, bIsS, bIsP ) );
+		frame.setVisible( true );
+	}
+	else
+	{
+		logger.warn(
+				"Additional READOUT options not available! CC Param Value: 0x" +
+				 Integer.toHexString( CameraAPI.GetCCParams() ) );
+	}
+
+	return frame;
+}

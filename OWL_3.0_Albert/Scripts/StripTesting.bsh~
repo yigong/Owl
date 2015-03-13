@@ -1,0 +1,153 @@
+// +----------------------------------------------------------------------------+
+// |  Strip Testing Utilities for CCDS Project                                  |
+// +----------------------------------------------------------------------------+
+
+import javax.swing.border.TitledBorder;
+import javax.swing.BoxLayout;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.owltypes.OwlTextField;
+import owl.main.owltypes.OwlBoldButton;
+import owl.gui.utils.OwlUtilities;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.util.Hashtable;
+
+
+public class StripTestingFrame extends CCScriptFrame implements Runnable, ItemListener {
+       	static final String TITLE     	       		=       "Strip Testing";
+    	final String SERIAL_SHIFT_ACTION 	=	"SERIAL SHIFT";
+    	final String PARALLEL_SHIFT_ACTION	=	"PARALLEL SHIFT";
+
+	/* Address of command entry in command table must be found.
+	 * No good way to do this. Since five entries after SSS, and SSP is one entry after SSS, the address of CLK is found as below.
+	 */
+	int CLK_COMMAND_VALUE = CameraAPI.SSS + ((CameraAPI.SSP - CameraAPI.SSS)*5);
+
+	Hashtable modes = new Hashtable();
+
+	JToolBar		m_toolbar;
+	OwlBoldButton		m_serialShiftButton;
+	OwlBoldButton		m_parallelShiftButton;
+	JComboBox		m_repetitionsComboBox;
+	int			m_repetitions;
+	int			m_mode;
+
+	public StripTestingFrame() {
+		super( TITLE );
+		modes.put(SERIAL_SHIFT_ACTION, new Integer(0));
+	        modes.put(PARALLEL_SHIFT_ACTION, new Integer(1));
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_serialShiftButton = super.createBoldToolbarButton( SERIAL_SHIFT_ACTION, Color.RED );
+		m_toolbar.add( m_serialShiftButton);
+
+		m_parallelShiftButton = super.createBoldToolbarButton( PARALLEL_SHIFT_ACTION, Color.RED );
+		m_toolbar.add( m_parallelShiftButton);
+
+		super.appendToolbar( m_toolbar );
+
+		panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+		panel.setBackground( java.awt.Color.WHITE );
+
+		panel.add( createTitlePanel() );
+		panel.add( createPanel() );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( panel,   BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+
+	}
+
+	public JPanel createTitlePanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+ 		JLabel label = new JLabel(
+ 							 "<html><b><font size=4 color=#FFFFFF>" +
+							 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+							 TITLE +
+							 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+							 "</font></b></html>" );
+
+		label.setBorder( BorderFactory.createLineBorder( owl.gui.utils.OwlColors.getGreen1() ) );
+		label.setOpaque( true );
+		label.setBackground( owl.gui.utils.OwlColors.getGreen2() );
+
+		panel.add( label );
+
+		return panel;
+	}
+
+	public JPanel createPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		//  Add Repetitions List
+		String[] repetitionsList = { "1", "2", "5", "10", "20", "50", "100" };
+
+		m_repetitionsComboBox = new JComboBox( repetitionsList );
+		m_repetitionsComboBox.setPreferredSize( new Dimension( 60, 25 ) );
+		m_repetitionsComboBox.setBackground( java.awt.Color.WHITE );
+		m_repetitionsComboBox.setSelectedIndex( 0 );
+
+		JLabel repetitionsLabel = new JLabel( "Repetitions: " );
+
+		addComponent( panel, repetitionsLabel,    0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.EAST, 1, 0, 1, 1 );
+		addComponent( panel, m_repetitionsComboBox, 0, 5, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 1, 1, 1, 1 );
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event ) {
+
+		if (  modes.containsKey(event.getActionCommand()) ) {
+			m_mode = modes.get(event.getActionCommand()).intValue();
+			new Thread( this ).start();
+		}
+
+		else {
+		     	super.actionPerformed( event );
+		}
+	}
+
+	public void destroy() {
+		dispose();
+	}
+
+	public void run() {
+		m_repetitions = Integer.parseInt(m_repetitionsComboBox.getSelectedItem());
+
+		try {
+			logger.infoStart( TITLE );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CLK_COMMAND_VALUE, m_mode, m_repetitions, CameraAPI.DON );
+			logger.infoEnd();
+			fireScriptApplied();
+		} catch ( ReplyException re ) {
+			logger.infoFail();
+			logger.error( "( Strip Testing script ): CLK reply error. Expected: " +
+						   re.getExpectedHexString() + " Received: " +
+						   re.getActualHexString() );
+		} catch ( Exception e ) {
+			logger.infoFail();
+			logger.error( "( Strip Testing script ): " + e.getMessage() );
+		}
+	}
+}
+
+
+
+StripTesting() {
+	CCScriptFrame frame = null;
+	frame = ( CCScriptFrame )( new StripTestingFrame() );
+	frame.setVisible( true );
+	return frame;
+}

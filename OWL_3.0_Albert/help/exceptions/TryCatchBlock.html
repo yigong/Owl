@@ -1,0 +1,75 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">Try/Catch Block</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+try {<br>
+	... your code here ...<br>
+}<br>
+catch ( Exception e ) { ... your code here ... }
+</span>
+</div>
+
+<div id="header">Remarks</div>
+The way to catch an exception or error is with a try/catch
+block. This can be placed around any piece of code. Note
+that any variables declared within the try/catch block are
+only accessible from within the block. To make a variable
+visible in and out of a try/catch block, declare the variable
+outside the try/catch block. For example:
+
+<br><pre>
+	try {
+		long x = 5;
+		x = x * 10;   // ok
+	} catch ( Exception e ) {}
+	x = x + 9;   // error! undefined variable!
+</pre><br>
+
+The variable x is only valid within the try/catch block.
+To fix, do this:
+
+<br><pre>
+	long x = 5;
+	try {
+		x = x * 10;   // ok
+	} catch ( Exception e ) {}
+	x = x + 9;   // ok
+</pre>
+
+<br><br>
+<span style="text-decoration: underline">Example</span>:<br>
+If any error occurs with the method call, an Exception will
+be thrown.
+
+<br>
+<pre>
+	try
+	{
+		... do something here, such as ...
+
+		CameraAPI.WriteFitsFile( "Image.fit", 600, 512 );
+	}
+	catch ( Exception e }
+	{
+		... do something here,
+                such as log an error ...
+
+		logger.error( e );
+	}
+</pre>
+
+</div>
+
+</body>
+
+</html>

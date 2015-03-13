@@ -1,0 +1,74 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">GetImageDifStats</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.GetImageDifStats( filename1, filename2, row1, row2, col1, col2 );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">String filename1</span></td>
+<td valign="top">FITS filename #1.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">String filename2</span></td>
+<td valign="top">FITS filename #2.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">long row1</span></td>
+<td valign="top">The start row. Range: 0 to image rows minus 1.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">long row2</span></td>
+<td valign="top">The end row. Range: 0 to image rows minus 1.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">long col1</span></td>
+<td valign="top">The start column. Range: 0 to image columns minus 1.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">long col2</span></td>
+<td valign="top">The end column. Range: 0 to image columns minus 1.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">ImageDifStats - </span>The image statistics: min, max,
+mean, variance, and standard deviation for each image and for the difference
+between the images. See <a href="ImageStats.html">ImageStats</a> and
+<a href="ImageDifStats.html">ImageDifStats</a> for details.
+</div>
+
+<div id="header">Remarks</div>
+Calculates the image statistics (min, max, mean, variance, standard
+deviation) for each image and for the difference of the two images.
+The statistics are calculated over the specified row and column range.
+This is primarily used for PTC (photon transfer curve). Throws a
+java.lang.Exception if an error occurs, which can be caught using
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

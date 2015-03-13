@@ -1,0 +1,174 @@
+import javax.swing.border.TitledBorder;
+import javax.swing.BorderFactory;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.main.owltypes.OwlFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlNumberField;
+import owl.gui.utils.OwlUtilities;
+import owl.main.setup.SetupEvent;
+import owl.main.setup.SetupListener;
+import owl.main.setup.SetupFrame;
+import owl.main.MainApp;
+import arc.mlo.MloGpsAPI;
+
+
+public class MLOGpsFrame extends OwlFrame implements Runnable
+{
+	final String RUN_ACTION		=	"RUN";
+	final String STOP_ACTION	=	"ABORT";
+
+	JToolBar			m_toolbar;
+	OwlBoldButton		m_runButton;
+	OwlNumberField		m_oldRowsTxtfld;
+	OwlNumberField		m_oldColsTxtfld;
+	OwlNumberField		m_newRowsTxtfld;
+	OwlNumberField		m_newColsTxtfld;
+
+	public MLOGpsFrame()
+	{
+		super( "MLO GPS Device", false );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = super.createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		super.appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+
+		OwlUtilities.centerFrame( this );
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	// NOTE: There's no point in "stopping" this thread, since
+	// it only sends one command, which blocks until complete.
+	// +-------------------------------------------------------+
+	public void run()
+	{
+		m_runButton.setColored( STOP_ACTION );
+
+		try
+		{
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+
+			if ( e.getMessage() != null )
+			{
+				logger.error( e.getMessage() );
+			}
+		}
+		finally
+		{
+			m_runButton.setBlack( RUN_ACTION );
+		}
+	}
+
+	private JPanel createComponents()
+	{
+		JPanel datePanel = new JPanel();
+		datePanel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createLineBorder( Color.red ), "Set Date" ) );
+		datePanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
+
+		m_yearTxtfld  = new OwlNumberField( 0, 5 );
+		m_monthTxtfld = new OwlNumberField( 0, 5 );
+		m_dayTxtfld   = new OwlNumberField( 0, 5 );
+
+		datePanel.add( new JLabel( "Year: " ) );
+		datePanel.add( m_yearTxtfld );
+		datePanel.add( new JLabel( "Month: " ) );
+		datePanel.add( m_monthTxtfld );
+		datePanel.add( new JLabel( "Day: " ) );
+		datePanel.add( m_dayTxtfld );
+
+		JPanel timePanel = new JPanel();
+		timePanel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createLineBorder( Color.blue ), "Set Time" ) );
+		timePanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
+
+		m_hourTxtfld = new OwlNumberField( 0, 5 );
+		m_minTxtfld  = new OwlNumberField( 0, 5 );
+		m_secTxtfld  = new OwlNumberField( 0, 5 );
+
+		timePanel.add( new JLabel( "Hour: " ) );
+		timePanel.add( m_hourTxtfld );
+		timePanel.add( new JLabel( "Min: " ) );
+		timePanel.add( m_minTxtfld );
+		timePanel.add( new JLabel( "Sec: " ) );
+		timePanel.add( m_secTxtfld );
+
+		JPanel panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+		panel.add( datePanel );
+		panel.add( timePanel );
+
+		updateDate();
+
+		return panel;
+	}
+
+/****
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		m_yearTxtfld  = new OwlNumberField( 0, 5 );
+		m_monthTxtfld = new OwlNumberField( 0, 5 );
+		m_dayTxtfld   = new OwlNumberField( 0, 5 );
+
+		m_hourTxtfld = new OwlNumberField( 0, 5 );
+		m_minTxtfld  = new OwlNumberField( 0, 5 );
+		m_secTxtfld  = new OwlNumberField( 0, 5 );
+
+		addComponent( panel, m_yearTxtfld,	0,  0,  0,  0, GridBagConstraints.CENTER, 0, 0, 1, 1 );
+		addComponent( panel, m_monthTxtfld, 0,  0,  0,  0, GridBagConstraints.CENTER, 0, 1, 1, 1 );
+		addComponent( panel, m_dayTxtfld,   0,  0,  0,  0, GridBagConstraints.CENTER, 0, 2, 1, 1 );
+
+		addComponent( panel, m_hourTxtfld,  0,  0,  0,  0, GridBagConstraints.CENTER, 1, 0, 1, 1 );
+		addComponent( panel, m_minTxtfld,   0,  0,  0,  0, GridBagConstraints.CENTER, 1, 1, 1, 1 );
+		addComponent( panel, m_secTxtfld,   0,  0,  0,  0, GridBagConstraints.CENTER, 1, 2, 1, 1 );
+
+		return panel;
+	}
+****/
+
+	private void updateDate()
+	{
+		try
+		{
+			System.out.println( "IS OPEN : " + MloGpsAPI.IsOpen() );
+		}
+		catch ( Exception e )
+		{
+			System.err.println( e.getMessage() );
+		}
+	}
+}
+
+
+MLOGpsFrame frame = new MLOGpsFrame();
+frame.setVisible( true );

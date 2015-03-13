@@ -1,0 +1,93 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">InfoMessage</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+InfoMessage( msg, icon );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top">String msg</td>
+<td>The message to display.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top">Icon icon</td>
+<td>
+The icon to show next to the message. Can be set to null.
+</td>
+</tr>
+</table>
+</span>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+InfoMessage Object
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void start()</td>
+<td>Displays the message box.</td>
+</tr>
+
+<tr>
+<td valign="top">void stop()</td>
+<td>Hides/exits the message box.</td>
+</tr>
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Displays a message (with or without an icon) in a rectangluar
+box that has a white background and a thick red border. The
+message box will not display until start() has been called; and
+will remain on the screen until stop() has been called. Can
+be used to display important messages to the user. For example,
+if a task may take some time to complete, a message to that
+effect can be displayed until the task finishes.
+
+<br><br>
+Example:
+<pre>
+	msg = new InfoMessage( "Performing task, please wait ... ", null );
+	msg.start();
+
+	... do some task here ...
+
+	msg.stop();
+</pre>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+import java.awt.geom.Point2D;
+import owl.plot.*;
+
+PlotTest()
+{
+	try
+	{
+		Point2D.Float[] data = new Point2D.Float[ 8 ];
+
+//		for ( i=0; i<data.length; i++ )
+//			data[ i ] = new Point2D.Float( ( float )i/2.f, ( float )i/2.f );
+
+/**
+		data[ 0 ] = new Point2D.Float( 0, 0 );
+		data[ 1 ] = new Point2D.Float( 0.25f, 0.25f );
+		data[ 2 ] = new Point2D.Float( 0.5f, 0.5f );
+		data[ 3 ] = new Point2D.Float( 0.65f, 0.65f );
+		data[ 4 ] = new Point2D.Float( 0.75f, 0.75f );
+		data[ 5 ] = new Point2D.Float( 0.88f, 0.88f );
+		data[ 6 ] = new Point2D.Float( 0.90f, 0.90f );
+		data[ 7 ] = new Point2D.Float( 0.99f, 0.99f );
+**/
+
+		for ( i=0; i<data.length; i++ )
+		{
+			float val = ( float )( 0.5f * Math.random() );
+			data[ i ] = new Point2D.Float( val, val );
+		}
+
+		plot = new XYPlot();
+		plot.setData( data );
+		plot.showFrame();
+	}
+	catch ( Exception e )
+	{
+		System.err.println( e.toString() );
+	}
+
+	return this;
+}
+
+PlotTest();

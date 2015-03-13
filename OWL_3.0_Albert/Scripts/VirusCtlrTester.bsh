@@ -1,0 +1,565 @@
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.text.DecimalFormat;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.gui.utils.ProgressWindow;
+import owl.img.analysis.ImageStats;
+import owl.gui.utils.OwlUtilities;
+import owl.main.owltypes.*;
+import owl.main.exposure.*;
+import owl.main.MainApp;
+import java.awt.event.*;
+import javax.swing.text.*;
+import javax.swing.*;
+
+
+// +------------------------------------------------------+
+// |  CLASS VirusCtlrTester                               |
+// +------------------------------------------------------+
+// |  Operates the ARC controller tester.                 |
+// +------------------------------------------------------+
+public class VirusCtlrTesterFrame extends OwlFrame implements Runnable, ExposeInfo
+{
+	final String RUN_ACTION		=	"RUN";
+	final String STOP_ACTION	=	"ABORT";
+
+	final double TEMP_CONST1	=	168.7;
+	final double TEMP_CONST2	=	0.004186;
+
+	final double HEATER_CONST1	=	0.010;
+	final double HEATER_CONST2	=	0.000075684;
+
+	final int CDT				=	0x434454;	// Control Device Temperature
+	final int RDT				=	0x524454;	// Read Device Temperature
+	final int RHV				=	0x524856;	// Read Heater Voltage
+	final int ACT				=	0x414354;	// Activate Tester
+	final int STC				=	0x535443;	// Select Test Channel
+
+	final int LEFT_SIDE_ID		=	0;
+	final int RIGHT_SIDE_ID		=	1;
+	final int COLD_FINGER_ID	=	2;
+
+	private JToolBar		m_toolbar;
+	private OwlBoldButton	m_runButton;
+	private JCheckBox		m_htrChkbox;
+	private JCheckBox		m_imgChkbox;
+	private JCheckBox		m_loopChkbox;
+	private JCheckBox		m_htrMoreChkbox;
+	private JTextArea		m_textArea;
+	private JLabel			m_htrMsgLabel;
+	private DecimalFormat	m_jFormatter;
+	private OwlMessageBox	m_oMsgBox;
+	private ProgressWindow	m_oPixelWindow;
+	private ExposeRunnable	m_jExpRun;
+	private boolean			m_bStop;
+
+
+	// +------------------------------------------------------+
+	// |  Constructor                                         |
+	// +------------------------------------------------------+
+	public VirusCtlrTesterFrame()
+	{
+		super( "Virus Controller Tester", true );
+
+		m_jFormatter = new DecimalFormat( "#####.000" );
+		m_oPixelWindow = new ProgressWindow( 0, 100 );
+		m_oMsgBox = null;
+		m_bStop = false;
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = super.createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		super.appendToolbar( m_toolbar );
+
+		m_textArea = new JTextArea( 45, 50 );
+		m_textArea.setEditable( false );
+		m_textArea.setFont( new Font( Font.SANS_SERIF, Font.PLAIN, 12 ) );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( new JScrollPane( m_textArea ), BorderLayout.CENTER );
+		getContentPane().add( createComponents(), BorderLayout.SOUTH );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	// +------------------------------------------------------+
+	// |  createComponents                                    |
+	// +------------------------------------------------------+
+	// |  Creates the user interface                          |
+	// +------------------------------------------------------+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
+
+		m_htrChkbox  = new JCheckBox( "Heater Test", true );
+		m_imgChkbox  = new JCheckBox( "Image Test", true );
+		m_loopChkbox = new JCheckBox( "Loop", true );
+
+		m_htrMoreChkbox =
+				new JCheckBox( "More Heater Test Details", false );
+
+		panel.add( m_htrChkbox );
+		panel.add( m_imgChkbox );
+		panel.add( m_loopChkbox );
+		panel.add( Box.createHorizontalStrut( 120 ) );
+		panel.add( m_htrMoreChkbox );
+
+		return panel;
+	}
+
+	// +------------------------------------------------------+
+	// |  actionPerformed                                     |
+	// +------------------------------------------------------+
+	// |  ActionListener override. See ActionLister class.    |
+	// +------------------------------------------------------+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		if ( event.getActionCommand().equals( STOP_ACTION ) )
+		{
+			stop();
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void println( String sText )
+	{
+		m_textArea.append( sText + "\n" );
+	}
+
+	// +------------------------------------------------------+
+	// |  stop                                                |
+	// +------------------------------------------------------+
+	// |  Cleans up program.                                  |
+	// +------------------------------------------------------+
+	public void stop()
+	{
+		m_bStop = true;
+
+		if ( m_jExpRun != null )
+		{
+			m_jExpRun.stop();
+		}
+
+		if ( m_oMsgBox != null )
+		{
+			m_oMsgBox.stop();
+		}
+
+		m_oPixelWindow.close();
+	}
+
+	// +------------------------------------------------------+
+	// |  activate                                            |
+	// +------------------------------------------------------+
+	// |  Activates the controller tester ( 'ACT' )           |
+	// +------------------------------------------------------+
+	public void activate() throws Exception
+	{
+		logger.infoStart( "Activating controller tester" );
+		CameraAPI.Cmd( CameraAPI.TIM_ID, ACT, CameraAPI.DON );
+		logger.infoEnd();
+	}
+
+	// +------------------------------------------------------+
+	// |  heaterTest                                          |
+	// +------------------------------------------------------+
+	// |  Runs the heater test.                               |
+	// +------------------------------------------------------+
+	void heaterTest( boolean bDoLeft, double gLeftCtrlTemp, boolean bDoRight, double gRightCtrlTemp ) throws Exception
+	{
+		double gLeftTemp		= 0.0;
+		double gLeftVoltage		= 0.0;
+		double gRightTemp		= 0.0;
+		double gRightVoltage	= 0.0;
+		double gColdFinger		= 0.0;
+		int    dLastLeftCount	= 0;
+		int    dLastRightCount	= 0;
+		int    dTimeoutCount	= 0;
+		int    hv				= 0;
+		int    adu				= 0xFFFFFF;
+
+		if ( m_bStop ) { return; }
+
+		if ( bDoLeft )
+		{
+			adu = calculateADU( gLeftCtrlTemp );
+		}
+
+		if ( m_bStop ) { return; }
+
+		logger.infoStart( "Sending LEFT control info" );
+		CameraAPI.Cmd( CameraAPI.TIM_ID, CDT, LEFT_SIDE_ID, adu, CameraAPI.DON );
+		logger.infoEnd();
+
+		if ( m_bStop ) { return; }
+
+		adu = 0xFFFFFF;
+
+		if ( bDoRight )
+		{
+			adu = calculateADU( gRightCtrlTemp );
+		}
+
+		if ( m_bStop ) { return; }
+
+		logger.infoStart( "Sending RIGHT control info" );
+		CameraAPI.Cmd( CameraAPI.TIM_ID, CDT, RIGHT_SIDE_ID, adu, CameraAPI.DON );
+		logger.infoEnd();
+
+		if ( m_bStop ) { return; }
+
+		println( "+---------------------------------------------------------------------+" );
+		println( "|  TEMPERATURE / HEATER DATA                                  |" );
+		println( "+---------------------------------------------------------------------+" );
+		println( "\n" );
+		println( "Controlling LEFT:\t" + bDoLeft );
+		println( "Controlling RIGHT:\t" + bDoRight );
+		println( "Control LEFT Temp:\t" + gLeftCtrlTemp );
+		println( "Control RIGHT Temp:\t" + gRightCtrlTemp );
+		println( "\n" );
+		println( "LEFT TEMP\tLEFT VOLT\tRIGHT TEMP\tRIGHT VOLT\tCOLD FINGER\tLOOP #" );
+		println( "-----------\t-----------\t------------\t------------\t-------------\t--------" );
+
+		if ( m_bStop ) { return; }
+
+		for ( ;; )
+		{
+			adu = CameraAPI.Cmd2( CameraAPI.TIM_ID, RDT, LEFT_SIDE_ID );
+			gLeftTemp = calculateTemp( adu );
+
+			if ( m_bStop ) { break; }
+
+			hv = CameraAPI.Cmd2( CameraAPI.TIM_ID, RHV, LEFT_SIDE_ID );
+			gLeftVoltage = calculateVoltage( hv );
+
+			if ( m_bStop ) { break; }
+
+			if ( gLeftVoltage > 2.6 )
+			{
+				String sMsg = "!!!! ERROR !!!! LEFT voltage out of range: " +
+								m_jFormatter.format( gLeftVoltage );
+
+				println( sMsg );
+				logger.error( sMsg );
+
+				break;
+			}
+
+			if ( m_bStop ) { break; }
+
+			adu = CameraAPI.Cmd2( CameraAPI.TIM_ID, RDT, RIGHT_SIDE_ID );
+			gRightTemp = calculateTemp( adu );
+
+			if ( m_bStop ) { break; }
+
+			hv = CameraAPI.Cmd2( CameraAPI.TIM_ID, RHV, RIGHT_SIDE_ID );
+			gRightVoltage = calculateVoltage( hv );
+
+			if ( m_bStop ) { break; }
+
+			if ( gRightVoltage > 2.6 )
+			{
+				String sMsg = "!!!! ERROR !!!! RIGHT voltage out of range: " +
+								m_jFormatter.format( gRightVoltage );
+
+				println( sMsg );
+				logger.error( sMsg );
+
+				break;
+			}
+
+			if ( m_bStop ) { break; }
+
+			adu = CameraAPI.Cmd2( CameraAPI.TIM_ID, RDT, COLD_FINGER_ID );
+			gColdFinger = calculateTemp( adu );
+
+			if ( m_bStop ) { break; }
+
+			if ( m_htrMoreChkbox.isSelected() )
+			{
+				println( m_jFormatter.format( gLeftTemp ) + "\t" +
+							   m_jFormatter.format( gLeftVoltage ) + "\t" +
+							   m_jFormatter.format( gRightTemp ) + "\t" +
+							   m_jFormatter.format( gRightVoltage ) + "\t" +
+							   m_jFormatter.format( gColdFinger ) +  "\t" +
+							   dTimeoutCount );
+			}
+
+			if ( gLeftVoltage == gLastLeftVoltage )
+			{
+				dLastLeftCount++;
+			}
+			else
+			{
+				dLastLeftCount = 0;
+			}
+
+			gLastLeftVoltage = gLeftVoltage;
+
+			if ( gRightVoltage == gLastRightVoltage )
+			{
+				dLastRightCount++;
+			}
+			else
+			{
+				dLastRightCount = 0;
+			}
+
+			gLastRightVoltage = gRightVoltage;
+
+			if ( dLastLeftCount > 3 || dLastRightCount > 3 || dTimeoutCount > 800 )
+			{
+				break;
+			}
+
+			dTimeoutCount++;
+
+			Thread.sleep( 5 );
+		}
+
+		if ( !m_htrMoreChkbox.isSelected() )
+		{
+			println( m_jFormatter.format( gLeftTemp ) + "\t" +
+					 m_jFormatter.format( gLeftVoltage ) + "\t" +
+					 m_jFormatter.format( gRightTemp ) + "\t" +
+					 m_jFormatter.format( gRightVoltage ) + "\t" +
+					 m_jFormatter.format( gColdFinger ) +  "\t" +
+					 dTimeoutCount );
+		}
+
+		println( "\n\n" );
+	}
+
+	// +------------------------------------------------------+
+	// |  calculateADU                                        |
+	// +------------------------------------------------------+
+	// |  Calculates the ADU from the specified temperature.  |
+	// +------------------------------------------------------+
+	public int calculateADU( double temp )
+	{
+		return ( int )( ( temp + TEMP_CONST1 ) / TEMP_CONST2 );
+	}
+
+	// +------------------------------------------------------+
+	// |  calculateTemp                                       |
+	// +------------------------------------------------------+
+	// |  Calculates the temperature from the specified ADU.  |
+	// +------------------------------------------------------+
+	public double calculateTemp( int adu )
+	{
+		return ( ( -1.0 * TEMP_CONST1 ) + ( TEMP_CONST2 * adu ) );
+	}
+
+	// +------------------------------------------------------+
+	// |  calculateVoltage                                    |
+	// +------------------------------------------------------+
+	// |  Calculates the heater voltage from the heater ADU.  |
+	// +------------------------------------------------------+
+	public double calculateVoltage( int hv )
+	{
+		return ( HEATER_CONST1 + ( ( double )hv * HEATER_CONST2 ) );
+	}
+
+	public int[][] getQuadCoords( int dRows, int dCols )
+	{
+		final int[][] aCoords =
+				{ { 20, ( ( dRows / 2 ) - 20 ), 20, ( ( dCols / 2 ) - 20 ) },
+				{ 20, ( ( dRows / 2 ) - 20 ), ( ( dCols / 2 ) + 20 ), ( dCols - 20 ) },
+				{ ( ( dRows / 2 ) + 20 ), ( dRows - 20 ), ( ( dCols / 2 ) + 20 ), ( dCols - 20 ) },
+				{ ( ( dRows / 2 ) + 20 ), ( dRows - 20 ), 20, ( ( dCols / 2 ) - 20 ) } };
+
+		return aCoords;
+	}
+
+	// +-------------------------------------------------------+
+	// |  ExposeInfo Methods                                   |
+	// +-------------------------------------------------------+
+	// |  Overrides for ExposeInfo interface class. Used to    |
+	// |  control the exposure sequence.                       |
+	// +-------------------------------------------------------+
+	public void setElapsedTime( int dElapsedTime ) {}
+	public void setPixelRange( int min, int max ) {}
+	public void setPixelCount( int dPixelCount ) { m_oPixelWindow.setReadoutValue( dPixelCount ); }
+	public void setReadoutTime( double gTime ) {}
+	public void setFrameCount( long frame ) {}
+	public void setFilename( String sFilename ) {}
+
+	public void randomPixelCountColor( java.awt.Color color ) {}
+	public void incrementFilename() {}
+	public owl.main.fits.FitsHeaderFrame getFitsHeaderFrame() { return null; }
+
+	public boolean isBeep() { return false; }
+	public boolean isDelay() { return false; }
+	public boolean isSubtract() { return false; }
+	public boolean isDisplay() { return false; }
+	public boolean isSaveToDisk() { return false; }
+	public boolean isSynthImage() { return false; }
+	public boolean isOpenShutter() { return false; }
+	public boolean isMultipleExposure() { return false; }
+	public boolean isFillBuffer() { return false; }
+	public double  getExposeTime() throws Exception { return 0.0; }
+	public double  getDelay() { return 0.0; }
+	public int     getBufferFill() { return 0; }
+	public int     getMultipleExposureCount() throws Exception { return 0; }
+	public int     getDeinterlaceAlgorithm() { return CameraAPI.DEINTERLACE_CCD_QUAD; }
+	public String  getDeinterlaceDescription() { return "Quad CCD Readout"; }
+	public String  getFileExtension() { return "fit"; }
+	public String  getFilename() { return "Image.fit"; }
+
+	// +-------------------------------------------------------+
+	// |  imageTest                                            |
+	// +-------------------------------------------------------+
+	// |  Performs the image test, which calculates the mean   |
+	// |  and std deviations for all four controller channels. |
+	// +-------------------------------------------------------+
+	public void imageTest()
+	{
+		int dRows = CameraAPI.GetImageRows();
+		int dCols = CameraAPI.GetImageCols();
+
+		int[][] aCoords = getQuadCoords( dRows, dCols );
+
+		m_jExpRun = new ExposeRunnable( this, null );
+		ImageStats jImgStats = null;
+
+		m_oPixelWindow.setNewMax( dRows * dCols );
+		m_oPixelWindow.setVisible( true );
+
+		println( "    +---------------------------------------------------------------------+" );
+		println( "    |  IMAGE STATISTICS                                                        |" );
+		println( "    +---------------------------------------------------------------------+" );
+		println( "\n" );
+		println( "    +---------------+--------------+" );
+		println( "    |   CHAN 3   |   CHAN 2   |" );
+		println( "    +---------------+--------------+" );
+		println( "    |   CHAN 0   |   CHAN 1   |" );
+		println( "    +---------------+--------------+" );
+		println( "\n" );
+		println( "    CHAN\tQUAD\tMEAN     \tSTD DEV" );
+		println( "    ---------\t---------\t---------\t---------" );
+
+		//  Loop over tester channels
+		// +---------------------------+
+		for ( int i=0; i<4; i++ )
+		{
+			if ( m_bStop ) { break; }
+
+			logger.infoStart( "Selecting test channel #" + i );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, STC, i, CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( m_bStop ) { break; }
+
+			m_oPixelWindow.setReadoutValue( 0 );
+
+			m_jExpRun.run();
+
+			if ( m_bStop ) { break; }
+
+			//  Loop over all four quadrants
+			// +------------------------------+
+			for ( int j=0; j<4; j++ )
+			{
+				if ( m_bStop ) { break; }
+
+				jImgStats = CameraAPI.GetImageStats( aCoords[ j ][ 0 ],
+													 aCoords[ j ][ 1 ],
+													 aCoords[ j ][ 2 ],
+													 aCoords[ j ][ 3 ],
+													 dRows,
+													 dCols );
+
+				println( "    " + i + "\t" + j + "\t" +
+							   m_jFormatter.format( jImgStats.gMean ) + "\t" +
+							   m_jFormatter.format( jImgStats.gStdDev ) );
+			}
+
+			if ( m_bStop ) { break; }
+
+			println( "" );
+		}
+
+		m_oPixelWindow.setVisible( false );
+	}
+
+	// +-------------------------------------------------------+
+	// |  run                                                  |
+	// +-------------------------------------------------------+
+	// |  Override for Runnable class.                         |
+	// +-------------------------------------------------------+
+	public void run()
+	{
+		m_bStop = false;
+
+		m_textArea.setText( "" );
+
+		if ( !m_htrChkbox.isSelected() && !m_imgChkbox.isSelected() )
+		{
+			println( "\n\n\t**** Nothing to do! Check something! ****" );
+			return;
+		}
+
+		m_runButton.setColored( STOP_ACTION );
+
+		try
+		{
+			for ( ;; )
+			{
+				m_textArea.setText( "" );
+
+				if ( CameraAPI.IsControllerConnected() )
+				{
+					activate();
+
+					if ( !m_bStop && m_htrChkbox.isSelected() )
+					{
+						heaterTest( true, -100, true, -100 );
+						try { Thread.sleep( 1000 ); } catch ( Exception ex ) {}
+						heaterTest( true, -150, true, -150 );
+						pack();
+					}
+
+					if ( !m_bStop && m_imgChkbox.isSelected() )
+					{
+						imageTest();
+						pack();
+					}
+				}
+				else
+				{
+					logger.error( "No controller connected or powered on!" );
+				}
+
+				if ( m_bStop || !m_loopChkbox.isSelected() ) { break; }
+			}
+		}
+		catch ( Exception e )
+		{
+			logger.error( e.getMessage() );
+		}
+
+		stop();
+
+		m_runButton.setBlack( RUN_ACTION );
+	}
+}
+
+frame = new VirusCtlrTesterFrame();
+frame.setVisible( true );

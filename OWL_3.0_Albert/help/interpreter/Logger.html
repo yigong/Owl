@@ -1,0 +1,133 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+
+<style type="text/css">
+#red { color: red; }
+#yel { color: rgb( 255, 204, 0 ); }
+#blu { color: blue; }
+</style>
+
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">OwlLogger</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+logger
+</span>
+</div>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void info( String text )</td>
+<td>Sends the text to the Owl log window. The text is preceded
+by: "<b>INFO - </b>".</td>
+</tr>
+
+<tr>
+<td valign="top">void error( String text )</td>
+<td>Sends the text to the Owl log window. The text is preceded
+by: "<b id="red">ERROR</b><b> - </b>". Also prints a
+stack trace.</td>
+</tr>
+
+<tr>
+<td valign="top">void error( Exception e )</td>
+<td>Prints any message contained with the exception and then
+ prints a stack trace.</td>
+</tr>
+
+<tr>
+<td valign="top">void warn( String text )</td>
+<td>Sends the text to the Owl log window. The text is preceded
+by: "<b id="yel">WARN</b><b> - </b>".</td>
+</tr>
+
+<tr>
+<td valign="top">void debug( String text )</td>
+<td>Sends the text to the Owl log window. The text is preceded
+by: "<b id="blu">DEBUG</b><b> - </b>".</td>
+</tr>
+
+<tr>
+<td valign="top">void startInfo( String text )</td>
+<td>Sends the text to the Owl log window. The text is preceded
+by: <b>INFO - </b> and ended with: " ... ". Used to wrap a
+message around a command. Should be closed with a call to
+endInfo() or failInfo().</td>
+</tr>
+
+<tr>
+<td valign="top">void endInfo()</td>
+<td>Closes the preceding startInfo() method call by placing
+a "done." after the " ... " sequence. Represents a successful
+completion of the code between startInfo() and endInfo().</td>
+</tr>
+
+<tr>
+<td valign="top">void failInfo()</td>
+<td>Closes the preceding startInfo() method call by placing
+a "<span style="color: #ff0000;">failed!</span>" after the 
+" ... " sequence. Represents a failure of the code between
+startInfo() and failInfo().</td>
+</tr>
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Built in class that all scripts have direct access to and
+allows log (info/warning/error/debug) messages to be sent 
+to the Owl log window. The class should not be instantiated, 
+as it already is. It can just be used.
+<br><br>
+Example:
+<pre>
+	logger.info( "Hello info message!" );
+	logger.warn( "Hello warning message!" );
+	logger.error( "Hello error message!" );
+	logger.debug( "Hello debug message!" );
+
+	try
+	{
+		logger.startInfo( "Sending a command" );
+		... do something here ...
+		logger.endInfo();
+	}
+	catch ( Exception e )
+	{
+		logger.failInfo();
+		logger.error( e );
+	}
+</pre>
+
+The above example will produce the following:<br><br>
+<b>INFO - </b> Hello info message!<br>
+<b id="yel">WARN</b><b> - </b> Hello warning message!<br>
+<b id="red">ERROR</b><b> - </b> Hello error message!<br>
+<b id="blu">DEBUG</b><b> - </b> Hello debug message!<br><br>
+
+<b>INFO - </b> Sending a command ... <span style="color: #ff0000;">failed!</span>  // Exception Thrown
+<br>... stack trace here ...<br>or:<br>
+<b>INFO - </b> Sending a command ... done.</span>  // No Errors
+
+</div>
+
+</body>
+
+</html>

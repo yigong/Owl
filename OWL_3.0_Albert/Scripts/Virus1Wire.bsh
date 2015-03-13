@@ -1,0 +1,955 @@
+import javax.swing.border.TitledBorder;
+import javax.swing.JTextField;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlTextField;
+import owl.main.owltypes.OwlNumberLabel;
+import owl.main.owltypes.OwlInputDialog;
+import owl.main.owltypes.OwlFrame;
+import owl.main.owltypes.OwlPanel;
+import owl.gui.utils.OwlUtilities;
+import owl.main.setup.SetupEvent;
+import owl.main.setup.SetupListener;
+import owl.main.setup.SetupFrame;
+import owl.main.MainApp;
+
+
+// +---------------------------------------------------------------------------------------+
+// |  CLASS OneWireDevPanel                                                                |
+// +---------------------------------------------------------------------------------------+
+// |  Creates a panel to control the block data for a 1-wire device.                       |
+// +---------------------------------------------------------------------------------------+
+public class OneWireDevPanel extends OwlPanel
+{
+	JTextField		m_jRomField;
+	JLabel[]		m_jBlockLabels;
+	OwlTextField[]	m_jBlockFields;
+	String			m_sAction;
+	int				m_dDeviceNumber;
+
+	// +-----------------------------------------------------------------+
+	// |  Default Constructor                                            |
+	// +-----------------------------------------------------------------+
+	public OneWireDevPanel()
+	{
+		this( -1, false );
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  Constructor                                                    |
+	// +-----------------------------------------------------------------+
+	public OneWireDevPanel( int dDeviceNumber, boolean bReadOnly )
+	{
+		super();
+
+		m_dDeviceNumber = dDeviceNumber;
+		m_sAction       = "";
+
+		if ( dDeviceNumber >= 0 )
+		{
+			setBorder( BorderFactory.createTitledBorder(
+							BorderFactory.createLineBorder( Color.black ),
+							"Serial ID #" + dDeviceNumber ) );
+		}
+		else
+		{
+			setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
+		}
+
+		setLayout( gbl );
+
+		m_jRomField = new OwlTextField( "", 16 );
+		m_jRomField.setHorizontalAlignment( JTextField.CENTER );
+		m_jRomField.setEditable( false );
+
+		addComponent( this, new JLabel( "ROM: " ), 2,  0,  0,  0, GridBagConstraints.EAST,   1, 0, 1, 1 );
+		addComponent( this, m_jRomField,           2,  0,  0,  0, GridBagConstraints.CENTER, 1, 1, 1, 2 );
+
+		m_jBlockLabels = new JLabel[ Virus1WireFrame.PROM_BLOCK_COUNT ];
+		m_jBlockFields = new OwlTextField[ Virus1WireFrame.PROM_BLOCK_COUNT ];
+
+		for ( int i=0; i<Virus1WireFrame.PROM_BLOCK_COUNT; i++ )
+		{
+			m_jBlockLabels[ i ] = new JLabel( "#" + i + ": " );
+
+			m_jBlockFields[ i ] = new OwlTextField( "", 16 );
+			m_jBlockFields[ i ].setHorizontalAlignment( JTextField.CENTER );
+			m_jBlockFields[ i ].setEditable( !bReadOnly );
+
+			addComponent( this, m_jBlockLabels[ i ],  2,  0,  0,  0, GridBagConstraints.EAST,   ( 2 + i ), 0, 1, 1 );
+			addComponent( this, m_jBlockFields[ i ],  2,  0,  0,  0, GridBagConstraints.CENTER, ( 2 + i ), 1, 1, 1 );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  getRomId                                                       |
+	// +-----------------------------------------------------------------+
+	// |  Returns the ROM textfield value.                               |
+	// +-----------------------------------------------------------------+
+	public String getRomId()
+	{
+		return m_jRomField.getText();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  setRomId                                                       |
+	// +-----------------------------------------------------------------+
+	// |  Sets the ROM textfield to the specified value.                 |
+	// +-----------------------------------------------------------------+
+	public void setRomId( String sRomId )
+	{
+		m_jRomField.setText( sRomId );
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  getBlockFields                                                 |
+	// +-----------------------------------------------------------------+
+	// |  Returns all the block textfield values as a vector.            |
+	// +-----------------------------------------------------------------+
+	public Vector getBlockFields()
+	{
+		Vector vec = new Vector();
+
+		for ( int j=0; j<Virus1WireFrame.PROM_BLOCK_COUNT; j++ )
+		{
+			vec.add( m_jBlockFields[ j ].getText() );
+		}
+
+		return vec;
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  setBlockFields                                                 |
+	// +-----------------------------------------------------------------+
+	// |  Sets all the block textfields using the vector parameter.      |
+	// +-----------------------------------------------------------------+
+	public void setBlockFields( Vector vec )
+	{
+		for ( int j=0; j<vec.size(); j++ )
+		{
+			m_jBlockFields[ j ].setText( vec.get( j ) );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  clearBlockFields                                               |
+	// +-----------------------------------------------------------------+
+	// |  Clears all block textfield values.                             |
+	// +-----------------------------------------------------------------+
+	public void clearBlockFields()
+	{
+		for ( int j=0; j<Virus1WireFrame.PROM_BLOCK_COUNT; j++ )
+		{
+			m_jBlockFields[ j ].setText( "" );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  clearAllFields                                                 |
+	// +-----------------------------------------------------------------+
+	// |  Clears ALL textfields, including both PROM and block fields.   |
+	// +-----------------------------------------------------------------+
+	public void clearAllFields()
+	{
+		m_jRomField.setText( "" );
+
+		clearBlockFields();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  read                                                           |
+	// +-----------------------------------------------------------------+
+	// |  Reads all block data from the controller.                      |
+	// +-----------------------------------------------------------------+
+	public void read()
+	{
+		read( m_dDeviceNumber );
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  read                                                           |
+	// +-----------------------------------------------------------------+
+	// |  Reads all block data from the controller for the specified     |
+	// |  device number.                                                 |
+	// +-----------------------------------------------------------------+
+	public void read( int dDeviceNumber )
+	{
+		byte[] byteArr = new byte[ Virus1WireFrame.ROM_BYTE_LENGTH ];
+
+		logger.infoStart( "Selecting device #" + dDeviceNumber );
+		CameraAPI.Cmd( CameraAPI.TIM_ID, Virus1WireFrame.SDN, dDeviceNumber, CameraAPI.DON );
+		logger.infoEnd();
+
+		for ( int r=0; r<Virus1WireFrame.ROM_BYTE_LENGTH; r++ )
+		{
+			byteArr[ r ] = ( byte )CameraAPI.Cmd2( CameraAPI.TIM_ID, Virus1WireFrame.ROR );
+		}
+
+		m_jRomField.setText(
+						Long.toHexString(
+								( ByteBuffer.wrap( byteArr ).order(
+										ByteOrder.LITTLE_ENDIAN ) ).getLong() ).toUpperCase() );
+
+		logger.infoStart( "Reading BLOCK data" );
+
+		for ( int i=0; i<Virus1WireFrame.PROM_BLOCK_COUNT; i++ )
+		{
+			m_jBlockFields[ i ].setText( "" );
+
+			for ( int j=0; j<Virus1WireFrame.BLOCK_BYTE_LENGTH; j++ )
+			{
+				byteArr[ j ] = ( byte )CameraAPI.Cmd2( CameraAPI.TIM_ID, Virus1WireFrame.ROM );
+			}
+
+			m_jBlockFields[ i ].setText( longToAscii( ByteBuffer.wrap( byteArr ).getLong() ) );
+		}
+
+		logger.infoEnd();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  write                                                          |
+	// +-----------------------------------------------------------------+
+	// |  Writes all block data to the controller.                       |
+	// +-----------------------------------------------------------------+
+	public void write()
+	{
+		write( m_dDeviceNumber );
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  write                                                          |
+	// +-----------------------------------------------------------------+
+	// |  Writes all block data to the controller for the specified      |
+	// |  device number.                                                 |
+	// +-----------------------------------------------------------------+
+	public void write( int dDeviceNumber )
+	{
+		logger.infoStart( "Selecting device #" + dDeviceNumber );
+		CameraAPI.Cmd( CameraAPI.TIM_ID, Virus1WireFrame.SDN, dDeviceNumber, CameraAPI.DON );
+		logger.infoEnd();
+
+		logger.infoStart( "Writing block data" );
+
+		for ( int i=0; i<Virus1WireFrame.PROM_BLOCK_COUNT; i++ )
+		{
+			Vector blockVec = asciiBlockToVec( m_jBlockFields[ i ].getText(), i );
+
+			if ( !blockVec.isEmpty() )
+			{
+				CameraAPI.Cmd( CameraAPI.TIM_ID,
+							   Virus1WireFrame.WOM,
+							   i,
+							   blockVec.get( 0 ).intValue(),
+							   blockVec.get( 1 ).intValue(),
+							   blockVec.get( 2 ).intValue(),
+							   CameraAPI.DON );
+			}
+		}
+
+		logger.infoEnd();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  longToAscii                                                    |
+	// +-----------------------------------------------------------------+
+	// |  Converts the specified value to a string. Invalid bytes are    |
+	// |  set to spaces ( 0x20 ).                                        |
+	// +-----------------------------------------------------------------+
+	public String longToAscii( long value )
+	{
+		char[] charVals = { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };	// Assumes long is 8 bytes
+		long byteMask = 0x00000000000000FF;
+
+		for ( int i=charVals.length-1; i>=0; i-- )
+		{
+			charVals[ i ] = ( char )( ( value & byteMask ) >> ( ( charVals.length - 1 - i ) * 8 ) );
+
+			byteMask = byteMask << 8;
+
+			if ( charVals[ i ] < 0x20 || charVals[ i ] > 0x7E )
+			{
+				charVals[ i ] = ' ';
+			}
+		}
+
+		return ( new String( charVals ) ).trim();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  asciiBlockToVec                                                |
+	// +-----------------------------------------------------------------+
+	// |  Converts the specified string to formatted integers contained  |
+	// |  within a vector.  The block parameter is purely used for error |
+	// |  reporting.                                                     |
+	// +-----------------------------------------------------------------+
+	public Vector asciiBlockToVec( String str, int block )
+	{
+		Vector vec = new Vector();
+		byte[] byteArr = new byte[ 8 ];
+
+		if ( str.equals( "" ) ) { return vec; }
+
+		if ( str.length() > 8 )
+		{
+			String msg = "Block #" + block +
+						 " - Illegal argument size ( " + str.length() +
+						 " )! Must be 8 characters or less in length!";
+
+			logger.error( msg );
+
+			JOptionPane.showMessageDialog( this,
+										   msg,
+										   "Block Size Error",
+										   JOptionPane.ERROR_MESSAGE );
+			return vec;
+		}
+
+		try
+		{
+			byteArr = str.toUpperCase().getBytes( "US-ASCII" );
+		}
+		catch ( java.io.UnsupportedEncodingException nee )
+		{
+			MainApp.error( nee.getMessage() );
+		}
+
+		byte[] longByteArr = Arrays.copyOf( byteArr, 9 );
+
+		ByteBuffer jByteBuffer = ByteBuffer.wrap( longByteArr );
+
+		for ( int i=0; i<3; i++ )
+		{
+			byte[] argByteArr = new byte[ 3 ];
+
+			jByteBuffer.get( argByteArr, 0, 3 );
+			vec.add( new Integer( bytesToInt( argByteArr ) ) );
+		}
+
+		return vec;
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  bytesToInt                                                     |
+	// +-----------------------------------------------------------------+
+	// |  Converts the specified bytes to an integer value.              |
+	// +-----------------------------------------------------------------+
+	public int bytesToInt( byte[] bytes )
+	{
+		if ( bytes.length < 3  )
+		{
+			String msg = "Byte array must be at least 3 elements in length!";
+
+			logger.error( msg );
+
+			JOptionPane.showMessageDialog( this,
+										   msg,
+										   "Conversion Error",
+										   JOptionPane.ERROR_MESSAGE );
+			return 0;
+		}
+
+		return ( ( int )bytes[ 0 ] << 16 ) | ( ( int )bytes[ 1 ] << 8 ) | ( int )bytes[ 2 ];
+	}
+}
+
+
+// +---------------------------------------------------------------------------------------+
+// |  CLASS OneWireWriteDialog                                                             |
+// +---------------------------------------------------------------------------------------+
+// |  Creates a dialog window used to write block data to a 1-wire device.                 |
+// +---------------------------------------------------------------------------------------+
+public class OneWireWriteDialog extends OwlFrame implements ItemListener, Runnable
+{
+	final String SELECT_DEV_ITEM	= "Select Device ....";
+	final String WRITE_ACTION		= "WRITE";
+	final String PULL_ACTION		= "PULL";
+
+	OneWireDevPanel	m_jDevPanel;
+	JToolBar		m_jToolBar;
+	JComboBox		m_jDevCombo;
+	JPanel			m_jPanel;
+	TreeMap			m_jDevMap;
+	TreeMap			m_jBlkMap;
+	String			m_sAction;
+
+	// +-----------------------------------------------------------------+
+	// |  Constructor                                                    |
+	// +-----------------------------------------------------------------+
+	public OneWireWriteDialog()
+	{
+		super( "VIRUS 1-Wire Write", false );
+		super.setLayout( new BorderLayout() );
+
+		m_jDevMap = new TreeMap();
+		m_jBlkMap = new TreeMap();
+		m_sAction = "";
+
+		m_jToolBar = new JToolBar();
+		m_jToolBar.setFloatable( false );
+
+		JButton jWriteButton = super.createNewToolbarButton( WRITE_ACTION );
+		m_jToolBar.add( jWriteButton );
+
+		JButton jPullButton = super.createNewToolbarButton( PULL_ACTION );
+		m_jToolBar.add( jPullButton );
+
+		super.appendToolbar( m_jToolBar );
+
+		String[] sDevArr = { SELECT_DEV_ITEM };
+
+		m_jDevCombo = new JComboBox( sDevArr );
+		m_jDevCombo.addItemListener( this );
+
+		m_jDevPanel = new OneWireDevPanel();
+
+		m_jPanel = new JPanel();
+		m_jPanel.setLayout( new BoxLayout( m_jPanel, BoxLayout.Y_AXIS ) );
+
+		m_jPanel.add( m_jDevCombo );
+		m_jPanel.add( m_jDevPanel );
+
+		getContentPane().add( m_jToolBar, BorderLayout.PAGE_START );
+		getContentPane().add( m_jPanel,  BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadData();
+		loadPreferences();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  close                                                          |
+	// +-----------------------------------------------------------------+
+	// |  Saves all block data and disposes of the window.               |
+	// +-----------------------------------------------------------------+
+	public void close()
+	{
+		saveData();
+		dispose();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  setDeviceList                                                  |
+	// +-----------------------------------------------------------------+
+	// |  Sets the device list to the specified map data. The device     |
+	// |  list contains device numbers ( keys ) and strings ( values ).  |
+	// +-----------------------------------------------------------------+
+	public void setDeviceList( TreeMap map )
+	{
+		if ( m_jDevCombo != null && map.size() > 0 )
+		{
+			if ( m_jDevCombo.getItemCount() > 1 )
+			{
+				m_jDevCombo.removeAllItems();
+				m_jDevCombo.addItem( SELECT_DEV_ITEM );
+			}
+
+			for ( int i=0; i<map.size(); i++ )
+			{
+				m_jDevCombo.addItem( "Serial ID #" + i );
+			}
+
+			m_jDevMap = new TreeMap( map );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  itemStateChanged                                               |
+	// +-----------------------------------------------------------------+
+	// |  Override from ItemListener class                               |
+	// +-----------------------------------------------------------------+
+	public void itemStateChanged( ItemEvent ie )
+	{
+		if ( ie.getStateChange() == ItemEvent.SELECTED )
+		{
+			if ( ie.getItem().equals( SELECT_DEV_ITEM ) )
+			{
+				m_jDevPanel.clearAllFields();
+			}
+
+			else
+			{
+				int dItem = getDeviceId( ie.getItem() );
+
+				if ( dItem >= 0 )
+				{
+					m_jDevPanel.setRomId( m_jDevMap.get( dItem ) );
+
+					if ( m_jBlkMap.containsKey( dItem ) )
+					{
+						m_jDevPanel.setBlockFields( m_jBlkMap.get( dItem ) );
+					}
+					else
+					{
+						m_jDevPanel.clearBlockFields();
+					}
+				}
+				else
+				{
+					m_jDevPanel.clearBlockFields();
+				}
+			}
+		}
+
+		else
+		{
+			updateBlockMap( ie.getItem() );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  updateBlockMap                                                 |
+	// +-----------------------------------------------------------------+
+	// |  The device string MUST be passed in, as itemStateChanged will  |
+	// |  pass the last unselected device, while the saveData method     |
+	// |  calls this method with the current selected device ( from the  |
+	// |  comboBox.                                                      |
+	// +-----------------------------------------------------------------+
+	public void updateBlockMap( String sDevice )
+	{
+		if ( !sDevice.equals( SELECT_DEV_ITEM ) )
+		{
+			int dItem = getDeviceId( sDevice );
+
+			if ( dItem >= 0 )
+			{
+				m_jBlkMap.put( dItem, m_jDevPanel.getBlockFields() );
+			}
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  actionPerformed                                                |
+	// +-----------------------------------------------------------------+
+	// |  Override for ActionListener class                              |
+	// +-----------------------------------------------------------------+
+	public void actionPerformed( ActionEvent ae )
+	{
+		m_sAction = ae.getActionCommand();
+
+		// |  WRITE ACTION
+		// +----------------------------------------------+
+		if ( ae.getActionCommand().equals( WRITE_ACTION ) )
+		{
+			if ( !m_jDevCombo.getSelectedItem().equals( SELECT_DEV_ITEM ) &&
+				  m_jDevCombo.getItemCount() > 1 )
+			{
+				( new Thread( this ) ).start();
+			}
+		}
+
+		// |  PULL ACTION
+		// +----------------------------------------------+
+		else if ( ae.getActionCommand().equals( PULL_ACTION ) )
+		{
+			( new Thread( this ) ).start();
+		}
+
+		// |  SUPER
+		// +----------------------------------------------+
+		else
+		{
+			super.actionPerformed( ae );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  run                                                            |
+	// +-----------------------------------------------------------------+
+	// |  Override for Runnable class                                    |
+	// +-----------------------------------------------------------------+
+	public void run()
+	{
+		if ( !CameraAPI.IsDeviceOpen() )
+		{
+			logger.error( "No device is open!" );
+			return;
+		}
+
+		if ( !CameraAPI.IsControllerConnected() )
+		{
+			logger.error( "No controller is connected!" );
+			return;
+		}
+
+		try
+		{
+			if ( m_sAction.equals( WRITE_ACTION ) )
+			{
+				m_jDevPanel.write( m_jDevCombo.getSelectedIndex() - 1 );
+				saveData();
+			}
+
+			else if ( m_sAction.equals( PULL_ACTION ) )
+			{
+				int dItem = getDeviceId( m_jDevCombo.getSelectedItem() );
+
+				if ( dItem >= 0 )
+				{
+					m_jDevPanel.read( dItem );
+				}
+			}
+		}
+		catch ( Exception e )
+		{
+			logger.error( e.getMessage() );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  isDataBlank                                                    |
+	// +-----------------------------------------------------------------+
+	// |  Returns 'true' if the vector parameter contains any non-blank  |
+	// |  data values. Returns 'false' otherwise.                        |
+	// +-----------------------------------------------------------------+
+	protected boolean isDataBlank( Vector vec )
+	{
+		boolean bBlank = true;
+
+		for ( int i=0; i<vec.size(); i++ )
+		{
+			if ( !vec.get( i ).trim().isEmpty() )
+			{
+				bBlank = false;
+				break;
+			}
+		}
+
+		return bBlank;
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  getDeviceId                                                    |
+	// +-----------------------------------------------------------------+
+	// |  Strips the device id from the specified device string.         |
+	// +-----------------------------------------------------------------+
+	protected int getDeviceId( String sDevice )
+	{
+		int dItem = -1;
+
+		try
+		{
+			int dNumIndex = sDevice.lastIndexOf( "#" );
+
+			if ( dNumIndex > 0 )
+			{
+				dItem =
+					Integer.parseInt( sDevice.substring( dNumIndex + 1 ) );
+			}
+		}
+		catch ( Exception e ) { dItem = -1; }
+
+		return dItem;
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  saveData                                                       |
+	// +-----------------------------------------------------------------+
+	// |  Saves all block data to the system preferences node. Only non  |
+	// |  blank data is saved.                                           |
+	// +-----------------------------------------------------------------+
+	protected void saveData()
+	{
+		String sDevId = super.getTitle() + "_DevId_";
+
+		try
+		{
+			updateBlockMap( m_jDevCombo.getSelectedItem() );
+
+			Integer[] keys =
+						m_jBlkMap.keySet().toArray(
+								new Integer[ m_jBlkMap.size() ] );
+
+			for ( int b=0; b<keys.length; b++ )
+			{
+				Vector vec = ( Vector )m_jBlkMap.get( keys[ b ] );
+
+				if ( vec != null && !isDataBlank( vec ) )
+				{
+					for ( int i=0; i<vec.size(); i++ )
+					{
+						MainApp.getPreferences().put(
+										sDevId + keys[ b ] + "_Blk_" + i,
+										vec.get( i ) );
+					}
+				}
+			}
+		}
+		catch ( Exception e )
+		{
+			MainApp.error( e.toString() );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  loadData                                                       |
+	// +-----------------------------------------------------------------+
+	// |  Loads all block data from the system preferences node.         |
+	// +-----------------------------------------------------------------+
+	protected void loadData()
+	{
+		try
+		{
+			String sDevId = super.getTitle() + "_DevId_";
+
+			for ( int i=0; i<Virus1WireFrame.MAX_DEV_COUNT; i++ )
+			{
+				Vector vec = new Vector();
+
+				for ( int j=0; j<Virus1WireFrame.PROM_BLOCK_COUNT; j++ )
+				{
+					vec.add(
+						MainApp.getPreferences().get(
+									sDevId + i + "_Blk_" + j, "" ) );
+				}
+
+				if ( !isDataBlank( vec ) )
+				{
+					m_jBlkMap.put( i, vec );
+				}
+			}
+		}
+		catch ( Exception e )
+		{
+			MainApp.error( e.toString() );
+		}
+	}
+}
+
+
+// +---------------------------------------------------------------------------------------+
+// |  CLASS Virus1WireFrame                                                                |
+// +---------------------------------------------------------------------------------------+
+// |  Creates the primary window used to display block data from all 1-wire devices.       |
+// +---------------------------------------------------------------------------------------+
+public class Virus1WireFrame extends CCScriptFrame implements Runnable, SetupListener
+{
+	public static final int ROM_BYTE_LENGTH		= 8;
+	public static final int BLOCK_BYTE_LENGTH	= 8;
+	public static final int PROM_BLOCK_COUNT	= 16;
+	public static final int MAX_DEV_COUNT		= 10;
+
+	public static final int FAD					= 0x464144;
+	public static final int SDN					= 0x53444E;
+	public static final int ROR					= 0x524F52;
+	public static final int ROM					= 0x524F4D;
+	public static final int WOM					= 0x574F4D;
+
+	final String FAD_ACTION						= "FIND";
+	final String WRITE_ACTION					= "WRITE";
+
+	JToolBar			m_toolbar;
+	OneWireWriteDialog	m_oWriteDialog;
+	OneWireDevPanel[]	m_oDevPanel;
+	JButton				m_jWriteButton;
+	JPanel				m_jPanel;
+	int					m_dDevCount;
+
+	// +-----------------------------------------------------------------+
+	// |  Constructor                                                    |
+	// +-----------------------------------------------------------------+
+	public Virus1WireFrame()
+	{
+		super( "VIRUS 1-Wire" );
+
+		m_dDevCount = 0;
+		m_oWriteDialog = new OneWireWriteDialog();;
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		JButton fadButton = super.createNewToolbarButton( FAD_ACTION );
+		m_toolbar.add( fadButton );
+
+		m_jWriteButton = super.createNewToolbarButton( WRITE_ACTION );
+		m_jWriteButton.setEnabled( false );
+		m_toolbar.add( m_jWriteButton );
+
+		super.appendToolbar( m_toolbar );
+
+		m_oDevPanel = new OneWireDevPanel[ MAX_DEV_COUNT ];
+
+		m_jPanel = new JPanel();
+		m_jPanel.setBorder( BorderFactory.createEmptyBorder( 7, 7, 7, 7 ) );
+		m_jPanel.setLayout( gbl );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( m_jPanel,  BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		SetupFrame.addSetupListener( this );
+
+		loadPreferences();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  destroy                                                        |
+	// +-----------------------------------------------------------------+
+	// |  Disposes of the window                                         |
+	// +-----------------------------------------------------------------+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  actionPerformed                                                |
+	// +-----------------------------------------------------------------+
+	// |  Override for ActionListener class                              |
+	// +-----------------------------------------------------------------+
+	public void actionPerformed( ActionEvent event )
+	{
+		// |  FIND ALL DEVICES ACTION
+		// +----------------------------------------------+
+		if ( event.getActionCommand().equals( FAD_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		// |  WRITE ACTION
+		// +----------------------------------------------+
+		else if ( event.getActionCommand().equals( WRITE_ACTION ) )
+		{
+			m_oWriteDialog.setVisible( true );
+		}
+
+		// |  SUPER / CLOSE ACTION
+		// +----------------------------------------------+
+		else
+		{
+			if ( event.getActionCommand().equals( CLOSE_ACTION ) )
+			{
+				if ( m_oWriteDialog != null )
+				{
+					m_oWriteDialog.close();
+				}
+			}
+
+			super.actionPerformed( event );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  run                                                            |
+	// +-----------------------------------------------------------------+
+	// |  Override for Runnable class                                    |
+	// +-----------------------------------------------------------------+
+	public void run()
+	{
+		if ( !CameraAPI.IsDeviceOpen() )
+		{
+			logger.error( "No device is open!" );
+			return;
+		}
+
+		if ( !CameraAPI.IsControllerConnected() )
+		{
+			logger.error( "No controller is connected!" );
+			return;
+		}
+
+		try
+		{
+			findAllDevices();
+
+			if ( m_dDevCount > 0 )
+			{
+				for ( int d=0; d<m_dDevCount; d++ )
+				{
+					m_oDevPanel[ d ].read();
+				}
+
+				m_jWriteButton.setEnabled( ( m_dDevCount > 0 ? true : false ) );
+
+				TreeMap map = new TreeMap();
+
+				for ( int i=0; i<m_dDevCount; i++ )
+				{
+					map.put( i, m_oDevPanel[ i ].getRomId() );
+				}
+
+				m_oWriteDialog.setDeviceList( map );
+			}
+			else
+			{
+				logger.error( "No 1-wire devices found!" );
+			}
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  setupChanged                                                   |
+	// +-----------------------------------------------------------------+
+	// |  Override for SetupListener class                               |
+	// +-----------------------------------------------------------------+
+	public void setupChanged( SetupEvent event )
+	{
+		m_jPanel.removeAll();
+		pack();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  findAllDevices                                                 |
+	// +-----------------------------------------------------------------+
+	// |  Finds all 1-wire devices and creates one control panel per     |
+	// |  device.                                                        |
+	// +-----------------------------------------------------------------+
+	private void findAllDevices()
+	{
+		logger.infoStart( "Finding all devices" );
+		m_dDevCount = CameraAPI.Cmd2( CameraAPI.TIM_ID, FAD );
+		logger.infoEnd();
+
+		if ( m_dDevCount > MAX_DEV_COUNT )
+		{
+			throw new Exception( "Device count [ " + m_dDevCount +
+								 " | 0x" + Integer.toHexString( m_dDevCount ) +
+								 " ]  exceeds MAX VALUE [ " +
+								 MAX_DEV_COUNT + "]!" );
+		}
+
+		m_jPanel.removeAll();
+
+		for ( int i=0; i<m_dDevCount; i++ )
+		{
+			m_oDevPanel[ i ] = new OneWireDevPanel( i, true );
+
+			addComponent( m_jPanel,
+						  m_oDevPanel[ i ],
+						  0,  0,  0,  0,
+						  GridBagConstraints.CENTER,
+						  1, i, 1, 1 );
+		}
+
+		pack();
+		OwlUtilities.centerFrame( this );
+	}
+}
+
+
+//Virus1Wire()
+//{
+	CCScriptFrame frame =
+			( CCScriptFrame )( new Virus1WireFrame() );
+
+	frame.setVisible( true );
+
+//	return frame;
+//}
+
+
+//t = Virus1Wire();
+//t.show();

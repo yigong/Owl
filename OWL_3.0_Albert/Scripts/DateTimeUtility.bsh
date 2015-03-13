@@ -1,0 +1,76 @@
+// +--------------------------------------------------------------------------+
+// | This class contains is a utility for getting date and time info.         |
+// +--------------------------------------------------------------------------+
+
+DateTimeUtility()
+{
+	private boolean isOK;
+	private Calendar calendar;
+
+	public void init()
+	{
+		isOK = false;
+
+ 		// Get the supported ids for GMT-08:00 (Pacific Standard Time)
+ 		String[] ids = TimeZone.getAvailableIDs( -8 * 60 * 60 * 1000 );
+ 
+ 		// if no ids were returned, something is wrong. get out.
+ 		if ( ids.length > 0 )
+ 		{
+			isOK = true;
+
+			// Create a Pacific Standard Time time zone
+			SimpleTimeZone pdt = new SimpleTimeZone( -8 * 60 * 60 * 1000, ids[ 0 ] );
+
+ 			// Set up rules for daylight savings time
+ 			pdt.setStartRule( Calendar.APRIL, 1, Calendar.SUNDAY, 2 * 60 * 60 * 1000 );
+ 			pdt.setEndRule( Calendar.OCTOBER, -1, Calendar.SUNDAY, 2 * 60 * 60 * 1000 );
+
+ 			// Create a GregorianCalendar with the Pacific Daylight time zone
+ 			// and the current date and time.
+ 			calendar = new GregorianCalendar( pdt );
+ 			Date currentTime = new Date();
+ 			calendar.setTime( currentTime );
+		}
+	}
+
+	public String getDateString()
+	{
+		String retVal = null;
+
+		if ( isOK )
+		{
+			month  = Integer.toString( calendar.get( Calendar.MONTH ) + 1 );
+			day    = Integer.toString( calendar.get( Calendar.DAY_OF_MONTH ) );
+			year   = Integer.toString( calendar.get( Calendar.YEAR ) );
+
+			retVal = month + "/" + day + "/" + year;
+		}
+
+ 		return retVal;
+	}
+
+	public String getTimeString()
+	{
+		String retVal = null;
+
+		init();
+
+		if ( isOK )
+		{
+			hour   = Integer.toString( calendar.get( Calendar.HOUR_OF_DAY ) );
+			minute = Integer.toString( calendar.get( Calendar.MINUTE ) );
+			second = Integer.toString( calendar.get( Calendar.SECOND ) );
+			milsec = Integer.toString( calendar.get( Calendar.MILLISECOND ) );
+
+			retVal = hour + ":" + minute + ":" + second + ":" + milsec;
+		}
+
+ 		return retVal;
+	}
+
+	init();
+
+	return this;
+}
+

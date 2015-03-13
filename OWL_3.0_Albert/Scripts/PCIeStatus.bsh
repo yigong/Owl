@@ -1,0 +1,471 @@
+// +-------------------------------------------------------------------+
+// |  PCIeStatus Class                                                 |
+// +-------------------------------------------------------------------+
+// |  Allows the user to view and clear the PCIe board status.         |
+// +-------------------------------------------------------------------+
+import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
+import javax.swing.ImageIcon;
+import javax.swing.Timer;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.gui.utils.OwlUtilities;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlToggleLabel;
+import owl.main.MainApp;
+
+
+// +-------------------------------------------------------------------+
+// |  TimerUpdater Class                                               |
+// +-------------------------------------------------------------------+
+// |  Live update m_timer event handler                                |
+// +-------------------------------------------------------------------+
+public class TimerUpdater implements ActionListener
+{
+	PCIeStatusFrame	m_frame;
+	UpdateRunnable	m_updateRunnable;
+
+	public TimerUpdater( PCIeStatusFrame frame )
+	{
+		m_frame = frame;
+		m_updateRunnable = null;
+	}
+
+	public void actionPerformed( ActionEvent ae )
+	{
+		if ( !CameraAPI.IsReadout() )
+		{
+			logger.info( "Reading PCIe status ... " );
+
+			if ( m_updateRunnable == null )
+			{
+				m_updateRunnable = new UpdateRunnable( m_frame );
+			}
+
+			m_updateRunnable.run();
+		}
+	}
+}
+
+// +-------------------------------------------------------------------+
+// |  UpdateRunnable Class                                             |
+// +-------------------------------------------------------------------+
+// |  PCIe status update runnable                                      |
+// +-------------------------------------------------------------------+
+public class UpdateRunnable implements Runnable
+{
+	PCIeStatusFrame m_frame;
+
+	public UpdateRunnable( PCIeStatusFrame frame )
+	{
+		m_frame = frame;
+	}
+
+	public void run()
+	{
+		if ( m_frame != null )
+		{
+			m_frame.updateStatus();
+		}
+		else
+		{
+			throw new Exception(
+			"( UpdateRunnable ): Invalid PCIe frame pointer ( NULL )!" );
+		}
+	}
+}
+
+// +-------------------------------------------------------------------+
+// |  ClearRunnable Class                                              |
+// +-------------------------------------------------------------------+
+// |  Clear PCIe status runnable                                       |
+// +-------------------------------------------------------------------+
+public class ClearRunnable implements Runnable
+{
+	PCIeStatusFrame m_frame;
+
+	public ClearRunnable( PCIeStatusFrame frame )
+	{
+		m_frame = frame;
+	}
+
+	public void run()
+	{
+		if ( m_frame != null )
+		{
+			CameraAPI.ClearDeviceStatus();
+			m_frame.updateStatus();
+		}
+		else
+		{
+			throw new Exception(
+			"( ClearRunnable ): Invalid PCIe frame pointer ( NULL )!" );
+		}
+	}
+}
+
+// +-------------------------------------------------------------------+
+// |  PCIeStatusFrame Class                                            |
+// +-------------------------------------------------------------------+
+// |  The frame class for the PCIe status window.                      |
+// +-------------------------------------------------------------------+
+public class PCIeStatusFrame extends CCScriptFrame
+{
+	final String READ_ACTION		= "READ";
+	final String CLEAR_ACTION		= "CLEAR";
+	final String LIVE_ACTION		= "LIVE";
+	final String STOP_LIVE_ACTION	= "STOP";
+	final String STOP_ACTION		= "STOP";
+
+	JToolBar		m_toolbar;
+	JLabel			m_statusLabel;
+	JButton			m_clearButton;
+	OwlBoldButton	m_updateButton;
+	OwlBoldButton	m_liveButton;
+	OwlToggleLabel	m_foAStateLabel;
+	OwlToggleLabel	m_foBStateLabel;
+	OwlToggleLabel	m_fo2xStateLabel;
+	OwlToggleLabel	m_ctlrResetStateLabel;
+	OwlToggleLabel	m_ROUTStateLabel;
+	OwlToggleLabel	m_HERRStateLabel;
+	OwlToggleLabel	m_readoutStateLabel;
+	OwlToggleLabel	m_idleStateLabel;
+	OwlToggleLabel	m_cmdSentStateLabel;
+	OwlToggleLabel	m_cmdReplyStateLabel;
+	UpdateRunnable	m_updateRunnable;
+	ClearRunnable	m_clearRunnable;
+	Timer			m_timer;
+
+
+	// +-------------------------------------------------------------------+
+	// |  Constructor                                                      |
+	// +-------------------------------------------------------------------+
+	// |  Creates the window                                               |
+	// +-------------------------------------------------------------------+
+	public PCIeStatusFrame()
+	{
+		super( "PCIe Status" );
+		super.setIconImage( ( new ImageIcon( MainApp.getBitmapPath() + "PCI.gif" ) ).getImage() );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_updateButton = super.createBoldToolbarButton( READ_ACTION, Color.red );
+		m_toolbar.add( m_updateButton );
+
+		m_clearButton = super.createNewToolbarButton( CLEAR_ACTION );
+		m_toolbar.add( m_clearButton );
+
+		m_liveButton = super.createBoldToolbarButton( LIVE_ACTION, Color.red );
+		m_toolbar.add( m_liveButton );
+
+		super.appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		m_timer = new Timer( 750, new TimerUpdater( this ) );
+
+		m_updateRunnable = null;
+		m_clearRunnable  = null;
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  createComponents                                                 |
+	// +-------------------------------------------------------------------+
+	// |  Create the components                                            |
+	// +-------------------------------------------------------------------+
+	private JPanel createComponents()
+	{
+		ImageIcon ON_ICON  = new ImageIcon( MainApp.getBitmapPath() + "LED_On2.gif" );
+		ImageIcon OFF_ICON = new ImageIcon( MainApp.getBitmapPath() + "LED_Off2.gif" );
+
+		JPanel valuePanel = new JPanel();
+		valuePanel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createLineBorder( Color.gray ), "Current Status" ) );
+
+		m_statusLabel = new JLabel( "0x0" );
+		valuePanel.add( m_statusLabel );
+
+		m_foAStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		foAPicLabel = new JLabel( "Fiber A", new ImageIcon( MainApp.getBitmapPath() + "FiberOptic.gif" ), JLabel.LEFT );
+
+		m_foBStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		foBPicLabel = new JLabel( "Fiber B", new ImageIcon( MainApp.getBitmapPath() + "FiberOptic.gif" ), JLabel.LEFT );
+
+		m_fo2xStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		fo2xPicLabel = new JLabel( "2x Fiber Receive", new ImageIcon( MainApp.getBitmapPath() + "FiberOptic.gif" ), JLabel.LEFT );
+
+		m_ctlrResetStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		ctlrResetPicLabel = new JLabel( "Controller Reset", new ImageIcon( MainApp.getBitmapPath() + "TinyResetCtlr.gif" ), JLabel.LEFT );
+
+		m_ROUTStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		ROUTPicLabel = new JLabel( "Image Read Timeout", new ImageIcon( MainApp.getBitmapPath() + "PCIeTimeout.gif" ), JLabel.LEFT );
+
+		m_HERRStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		HERRPicLabel = new JLabel( "Header Error", new ImageIcon( MainApp.getBitmapPath() + "HeaderError.gif" ), JLabel.LEFT );
+
+		m_readoutStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		readoutPicLabel = new JLabel( "Image Readout", new ImageIcon( MainApp.getBitmapPath() + "Readout.gif" ), JLabel.LEFT );
+
+		m_idleStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		idlePicLabel = new JLabel( new ImageIcon( MainApp.getBitmapPath() + "PCIeIdle.gif" ) );
+
+		m_cmdSentStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		cmdSentPicLabel = new JLabel( new ImageIcon( MainApp.getBitmapPath() + "PCIeCmdSent.gif" ) );
+
+		m_cmdReplyStateLabel = new OwlToggleLabel( OFF_ICON, ON_ICON );
+		cmdReplyPicLabel = new JLabel( new ImageIcon( MainApp.getBitmapPath() + "PCIeCmdReply.gif" ) );
+
+		JPanel picPanel = new JPanel();
+		picPanel.setLayout( gbl );
+
+		addComponent( picPanel, m_foAStateLabel,       9,  9, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 0, 1, 1 );
+		addComponent( picPanel, foAPicLabel,         9, 12, 0, 9, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 1, 1, 1 );
+		addComponent( picPanel, m_foBStateLabel,       5,  9, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 1, 0, 1, 1 );
+		addComponent( picPanel, foBPicLabel,         5, 12, 0, 9, GridBagConstraints.NONE, GridBagConstraints.WEST, 1, 1, 1, 1 );
+		addComponent( picPanel, m_fo2xStateLabel,      5,  9, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 2, 0, 1, 1 );
+		addComponent( picPanel, fo2xPicLabel,        5, 12, 0, 9, GridBagConstraints.NONE, GridBagConstraints.WEST, 2, 1, 1, 1 );
+		addComponent( picPanel, m_ctlrResetStateLabel, 5,  9, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 3, 0, 1, 1 );
+		addComponent( picPanel, ctlrResetPicLabel,   5, 12, 0, 9, GridBagConstraints.NONE, GridBagConstraints.WEST, 3, 1, 1, 1 );
+		addComponent( picPanel, m_ROUTStateLabel,      5,  9, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 4, 0, 1, 1 );
+		addComponent( picPanel, ROUTPicLabel,        5, 12, 0, 9, GridBagConstraints.NONE, GridBagConstraints.WEST, 4, 1, 1, 1 );
+		addComponent( picPanel, m_HERRStateLabel,      5,  9, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 5, 0, 1, 1 );
+		addComponent( picPanel, HERRPicLabel,        5, 12, 0, 9, GridBagConstraints.NONE, GridBagConstraints.WEST, 5, 1, 1, 1 );
+		addComponent( picPanel, m_readoutStateLabel,   5,  9, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 6, 0, 1, 1 );
+		addComponent( picPanel, readoutPicLabel,     5, 12, 0, 9, GridBagConstraints.NONE, GridBagConstraints.WEST, 6, 1, 1, 1 );
+		addComponent( picPanel, m_idleStateLabel,      5,  9, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 7, 0, 1, 1 );
+		addComponent( picPanel, idlePicLabel,        5, 12, 0, 9, GridBagConstraints.NONE, GridBagConstraints.WEST, 7, 1, 1, 1 );
+		addComponent( picPanel, m_cmdSentStateLabel,   5,  9, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 8, 0, 1, 1 );
+		addComponent( picPanel, cmdSentPicLabel,     5, 12, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 8, 1, 1, 1 );
+		addComponent( picPanel, m_cmdReplyStateLabel,  5,  9, 9, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 9, 0, 1, 1 );
+		addComponent( picPanel, cmdReplyPicLabel,    5, 12, 9, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 9, 1, 1, 1 );
+
+		JPanel panel = new JPanel();
+		panel.setPreferredSize( new Dimension( 200, 310 ) );
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+		panel.add( picPanel );
+		panel.add( valuePanel );
+
+		return panel;
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  destroy                                                          |
+	// +-------------------------------------------------------------------+
+	// |  Kill window                                                      |
+	// +-------------------------------------------------------------------+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  actionPerformed                                                  |
+	// +-------------------------------------------------------------------+
+	// |  ToolBar button event handler                                     |
+	// +-------------------------------------------------------------------+
+	public void actionPerformed( ActionEvent ae )
+	{
+		if ( ae.getActionCommand().equals( READ_ACTION ) )
+		{
+			if ( m_updateRunnable == null )
+			{
+				m_updateRunnable = new UpdateRunnable( this );
+			}
+
+			( new Thread( m_updateRunnable ) ).start();
+		}
+
+		else if ( ae.getActionCommand().equals( CLEAR_ACTION ) )
+		{
+			if ( m_clearRunnable == null )
+			{
+				m_clearRunnable = new ClearRunnable( this );
+			}
+
+			( new Thread( m_clearRunnable ) ).start();
+		}
+
+		else if ( ae.getActionCommand().equals( LIVE_ACTION ) )
+		{
+			m_liveButton.setColored( STOP_LIVE_ACTION );
+
+			m_timer.start();
+		}
+
+		else if ( ae.getActionCommand().equals( STOP_LIVE_ACTION ) )
+		{
+			m_liveButton.setColored( LIVE_ACTION );
+
+			m_timer.stop();
+
+			m_liveButton.setBlack( LIVE_ACTION );
+		}
+
+		else if ( ae.getActionCommand().equals( STOP_ACTION ) )
+		{
+			stop = true;
+		}
+
+		else
+		{
+			super.actionPerformed( ae );
+		}
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  updateStatus                                                     |
+	// +-------------------------------------------------------------------+
+	// |  Reads status and updates components                              |
+	// +-------------------------------------------------------------------+
+	public void updateStatus()
+	{
+		m_updateButton.setColored( STOP_ACTION );
+
+		try
+		{
+			dStatus = CameraAPI.GetDeviceStatus();
+
+			m_statusLabel.setText( "0x" + Integer.toHexString( dStatus ) );
+
+			//  CONTROLLER RESET
+			// +-------------------------------------------------------------------+
+			if ( STATUS_CONTROLLER_RESET( dStatus ) != m_ctlrResetStateLabel.isSelected() )
+			{
+				m_ctlrResetStateLabel.toggle();
+			}
+
+			//  IMAGE READ TIMEOUT
+			// +-------------------------------------------------------------------+
+			if ( STATUS_IMG_READ_TIMEOUT( dStatus ) != m_ROUTStateLabel.isSelected() )
+			{
+				m_ROUTStateLabel.toggle();
+			}
+
+			//  IMAGE READOUT
+			// +-------------------------------------------------------------------+
+			if ( STATUS_READOUT( dStatus ) != m_readoutStateLabel.isSelected() )
+			{
+				m_readoutStateLabel.toggle();
+			}
+
+			//  DEVICE IDLE
+			// +-------------------------------------------------------------------+
+			if ( STATUS_IDLE( dStatus ) != m_idleStateLabel.isSelected() )
+			{
+				m_idleStateLabel.toggle();
+			}
+
+			if ( STATUS_CMD_SENT( dStatus ) != m_cmdSentStateLabel.isSelected() )
+			{
+				m_cmdSentStateLabel.toggle();
+			}
+
+			if ( STATUS_CMD_REPLY( dStatus ) != m_cmdReplyStateLabel.isSelected() )
+			{
+				m_cmdReplyStateLabel.toggle();
+			}
+
+			//  HEADER ERROR
+			// +-------------------------------------------------------------------+
+			if ( STATUS_HDR_ERROR( dStatus ) != m_HERRStateLabel.isSelected() )
+			{
+				m_HERRStateLabel.toggle();
+			}
+
+			//  2X FO RECEIVER
+			// +-------------------------------------------------------------------+
+			if ( STATUS_2XFO_RECEIVER( dStatus ) != m_fo2xStateLabel.isSelected() )
+			{
+				m_fo2xStateLabel.toggle();
+			}
+
+			//  FIBER A CONNECTED
+			// +-------------------------------------------------------------------+
+			if ( STATUS_FIBER_A_CONNECTED( dStatus ) != m_foAStateLabel.isSelected() )
+			{
+				m_foAStateLabel.toggle();
+			}
+
+			//  FIBER B CONNECTED
+			// +-------------------------------------------------------------------+
+			if ( STATUS_FIBER_B_CONNECTED( dStatus ) != m_foBStateLabel.isSelected() )
+			{
+				m_foBStateLabel.toggle();
+			}
+		}
+		catch ( Exception e ) {}
+
+		m_updateButton.setBlack( READ_ACTION );
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  Status Bit Macro ( functions )                                   |
+	// +-------------------------------------------------------------------+
+	private boolean STATUS_IMG_READ_TIMEOUT( dStatus )
+	{
+		return ( ( dStatus & 0x20 ) > 0 ? true : false );
+	}
+
+	private boolean STATUS_CONTROLLER_RESET( dStatus )
+	{
+		return ( ( dStatus & 0x08 ) > 0 ? true : false );
+	}
+
+	private boolean STATUS_READOUT( dStatus )
+	{
+		return ( ( dStatus & 0x04 ) > 0 ? true : false );
+	}
+
+	private boolean STATUS_IDLE( dStatus )
+	{
+		return ( ( dStatus & 0x03 ) == 0 ? true : false );
+	}
+
+	private boolean STATUS_CMD_SENT( dStatus )
+	{
+		return ( ( dStatus & 0x03 ) == 1 ? true : false );
+	}
+
+	private boolean STATUS_CMD_REPLY( dStatus )
+	{
+		return ( ( dStatus & 0x03 ) == 2 ? true : false );
+	}
+
+	private boolean STATUS_HDR_ERROR( dStatus )
+	{
+		return ( ( dStatus & 0x10 ) > 0 ? true : false );
+	}
+
+	private boolean STATUS_2XFO_RECEIVER( dStatus )
+	{
+		return ( ( dStatus & 0x000200 ) > 0 ? true : false );
+	}
+
+	private boolean STATUS_FIBER_A_CONNECTED( dStatus )
+	{
+		return ( ( dStatus & 0x80 ) > 0 ? true : false );
+	}
+
+	private boolean STATUS_FIBER_B_CONNECTED( dStatus )
+	{
+		return ( ( dStatus & 0x100 ) > 0 ? true : false );
+	}
+}
+
+
+
+PCIeStatus()
+{
+	CCScriptFrame frame = null;
+
+	frame = ( CCScriptFrame )( new PCIeStatusFrame() );
+	( ( PCIeStatusFrame )frame ).updateStatus();
+	frame.setVisible( true );
+
+	return frame;
+}

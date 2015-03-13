@@ -1,0 +1,112 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">ARC42VideoOffsetCC</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+ARC42VideoOffsetCC( useGUI );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">boolean useGUI</span></td>
+<td valign="top">True to launch the ARC-42 video offset controller 
+configuration parameter window; false to run without using a windowed 
+interface.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+owl.CCParams.CCScriptFrame (useGUI=true) or 
+ARC42VideoOffsetCC Object (useGUI=false)
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void setBoardId( int id )</td>
+<td>Sets the board number. Range 0 to 15.</td>
+</tr>
+
+<tr>
+<td valign="top">void setOffsets( int aOffset, int bOffset )</td>
+<td>Sets the video board offsets. These values can increase or
+decrease the ADU values of the image. Range 0 to 4095.</td>
+</tr>
+
+<tr>
+<td valign="top">void run()</td>
+<td>Starts sending the command to the controller. For use with
+[useGUI = false] only.</td>
+</tr>
+
+<tr>
+<td valign="top">void show()</td>
+<td>Call to show the graphical user interface. For use with
+[useGUI = true ] only.</td>
+</tr>
+
+<tr>
+<td valign="top">void destroy()</td>
+<td>Closes and disposes of the graphical user interface. Call
+to exit. For use with [useGUI = true] only.</td> 
+</tr>
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Allows ARC-42 video offset parameters to be set on the controller. 
+Can be run with or without a graphical user interface. The 
+controller must support ARC-42 video offsets for this class to 
+function.
+
+<br><br>
+To run with a graphical user interface:
+<pre>
+	ARC42VideoOffsetCC( true ).show();
+
+	<span style="text-decoration: underline">or</span>
+
+	s = ARC42VideoOffsetCC( true );
+	s.show();
+</pre>
+
+<br>
+To run without a user interface:
+<pre>
+	s = ARC42VideoOffsetCC( false );
+	s.setBoardId( 0 );
+	s.setOffsets( 200, 309 );
+	s.run();
+</pre>
+
+</div>
+
+</body>
+
+</html>

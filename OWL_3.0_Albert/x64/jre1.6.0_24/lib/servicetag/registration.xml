@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<registration_data version="1.0">
+   <environment>
+      <hostname>localhost.localdomain</hostname>
+      <hostId>007f0100</hostId>
+      <osName>Linux</osName>
+      <osVersion>2.6.18-194.17.4.el5</osVersion>
+      <osArchitecture>amd64</osArchitecture>
+      <systemModel>x86_64</systemModel>
+      <systemManufacturer/>
+      <cpuManufacturer>GenuineIntel</cpuManufacturer>
+      <serialNumber/>
+   </environment>
+   <registry urn="urn:st:aec5317e-502a-4bde-b779-137d13394134" version="1.0">
+      <service_tag>
+         <instance_urn>urn:st:6c297ea7-5560-4de3-b1ae-3970e333d7ad</instance_urn>
+         <product_name>Java SE 6 Runtime Environment</product_name>
+         <product_version>1.6.0_24</product_version>
+         <product_urn>urn:uuid:92d1de8c-1e59-42c6-a280-1c379526bcbc</product_urn>
+         <product_parent_urn>urn:uuid:fdc90b21-018d-4cab-b866-612c7c119ed3</product_parent_urn>
+         <product_parent>Java Platform Standard Edition 6 (Java SE 6)</product_parent>
+         <product_defined_inst_id>id=1.6.0_24-b07 amd64,dir=/home/streit/JAVA/Owl/3.0/x64/jre1.6.0_24</product_defined_inst_id>
+         <product_vendor>Sun Microsystems</product_vendor>
+         <platform_arch>amd64</platform_arch>
+         <timestamp>2011-03-03 18:21:58 GMT</timestamp>
+         <container>global</container>
+         <source>jre-6u24-fcs-bin-b07-linux-amd64-02_feb_2011.bin</source>
+         <installer_uid>-1</installer_uid>
+      </service_tag>
+   </registry>
+</registration_data>

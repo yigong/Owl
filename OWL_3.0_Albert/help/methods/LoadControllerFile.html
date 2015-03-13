@@ -1,0 +1,53 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">LoadControllerFile</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.LoadControllerFile( filename, validate );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">String filename</span></td>
+<td valign="top">The filename of the tim.lod or util.lod file to load into
+the timing or utility board.
+</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int validate</span></td>
+<td valign="top">Set to 1 to verify data value written to the board; 0
+to not verify the data. Each write to the board is read back and compared.
+</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Uploads the specified tim.lod or util.lod file to the timing or
+utility board. Throws java.lang.Exception if an error occurs.
+All exceptions can be caught using a 
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

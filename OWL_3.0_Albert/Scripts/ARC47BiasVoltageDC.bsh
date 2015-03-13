@@ -1,0 +1,614 @@
+// +----------------------------------------------------------------------------+
+// |  ARC47BiasVoltageDC                                                        |
+// +----------------------------------------------------------------------------+
+// |  A class to create and control the ARC-47 DC bias voltages via the         |
+// |  developer configuration parameters.                                       |
+// +----------------------------------------------------------------------------+
+import javax.swing.border.*;
+import javax.swing.BoxLayout;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlTextField;
+import owl.gui.utils.OwlUtilities;
+
+
+public class ARC47VideoOffsetFrame extends CCScriptFrame implements Runnable, ItemListener
+{
+	final static String BOARD_NAME	=	"ARC-47";
+
+	final String APPLY_ACTION		=	"APPLY";
+	final String STOP_ACTION		=	"ABORT";
+	final String CLEAR_ACTION		=	"CLEAR";
+	final String SAVE_ACTION		=	"SAVE";
+	final String LOAD_ACTION		=	"LOAD";
+
+	final String VOD_RANGE			=	"Vod  (   0 <= V <=  30 )";
+	final String VRD_RANGE			=	"Vrd  (   0 <= V <=  20 )";
+	final String VOG_RANGE			=	"Vog  ( -10 <= V <= +10 )";
+	final String VRSV_RANGE			=	"Vrsv ( -10 <= V <= +10 )";
+
+	final String[] PINS				= { "pin #52",
+										"pin #13",
+										"pin #29",
+										"pin #05",
+										"pin #32",
+										"pin #55",
+										"pin #08",
+										"pin #47",
+										"pin #11",
+										"pin #35",
+										"pin #50",
+										"pin #27",
+										"pin #53",
+										"pin #14",
+										"pin #30",
+										"pin #06",
+										"pin #33",
+										"pin #56",
+										"pin #09",
+										"pin #48" };
+
+	final float  INVALID_DATA		=	999.f;
+	final int    MAX_BOARD_ID		=  	16;
+	final int    CHANNEL_COUNT		=	5;
+	final int    DACS_PER_CHANNEL	=	4;
+	final int    DAC_COUNT			=	20;
+
+	JToolBar			m_toolbar;
+	JComboBox			m_boardComboBox;
+	OwlBoldButton		m_applyButton;
+	OwlNumberField[]	m_dacTxtfld;
+	JLabel[]			m_dacTextLabel;
+	JLabel[]			m_dacRangeLabel;
+	float[][]			m_dacVoltages;
+	boolean				m_stop;
+	int					m_boardID;
+
+
+	public ARC47VideoOffsetFrame()
+	{
+		super( ARC47VideoOffsetFrame.BOARD_NAME + " DC Bias Voltage DC" );
+
+		m_boardID     = 0;
+		m_dacVoltages = new float[ MAX_BOARD_ID ][ DAC_COUNT ];
+
+		for ( brd=0; brd<MAX_BOARD_ID; brd++ )
+		{
+			for ( dac=0; dac<DAC_COUNT; dac++ )
+			{
+				m_dacVoltages[ brd ][ dac ] = INVALID_DATA;
+			}
+		}
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_applyButton = super.createBoldToolbarButton( APPLY_ACTION, Color.RED );
+		m_toolbar.add( m_applyButton);
+
+		clearButton = super.createNewToolbarButton( CLEAR_ACTION );
+		m_toolbar.add( clearButton );
+
+		saveButton = super.createNewToolbarButton( SAVE_ACTION );
+		m_toolbar.add( saveButton );
+
+		loadButton = super.createNewToolbarButton( LOAD_ACTION );
+		m_toolbar.add( loadButton );
+
+		super.appendToolbar( m_toolbar );
+
+		panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+		panel.setBackground( java.awt.Color.WHITE );
+		panel.add( createTitlePanel() );
+		panel.add( createBoardPanel() );
+		panel.add( createValuePanel() );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( panel,   BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+	}
+
+	private JPanel createTitlePanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+		spaces = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+				 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+
+ 		label = new JLabel( "<html><b><font size=4 color=#FFFFFF>" +
+					    spaces +
+					    BOARD_NAME + " DC BIAS VOLTAGES" +
+					    spaces +
+					    "</font></b></html>" );
+
+		label.setBorder( BorderFactory.createLineBorder( new Color( 0x800000 ) ) );
+		label.setOpaque( true );
+		label.setBackground( new Color( 0xC89191 ) );
+
+		panel.add( label );
+
+		return panel;
+	}
+
+	private JPanel createBoardPanel()
+	{	
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+		String[] boardList = { "0", "1", "2", "3", "4", "5", "6",
+							   "7", "8", "9", "10", "11", "12",
+							   "13", "14", "15" };
+
+		m_boardComboBox = new JComboBox( boardList );
+		m_boardComboBox.setBackground( java.awt.Color.WHITE );
+		m_boardComboBox.setSelectedIndex( 0 );
+		m_boardComboBox.setActionCommand( "Board Id" );
+		m_boardComboBox.addItemListener( this );
+
+		JLabel rangeLabel = new JLabel ( "( 0 =< N <= 15 )" );
+		JLabel boardLabel = new JLabel( "Board Number: " );
+
+		panel.add( boardLabel );
+		panel.add( m_boardComboBox );
+		panel.add( rangeLabel );
+
+		return panel;
+	}
+
+	private JPanel createValuePanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new GridLayout( 3, 2 ) );
+
+		m_dacTextLabel = new JLabel[ DAC_COUNT ];
+		m_dacRangeLabel = new JLabel[ DAC_COUNT ];
+
+		if ( PINS.length != m_dacTextLabel.length )
+		{
+			throw new Exception( "PIN and DAC label counts do not match!" );
+		}
+
+		for ( i=0; i<DAC_COUNT; i+=4 )
+		{
+			m_dacTextLabel[ i + 0 ] = new JLabel( "( DAC " + ( i + 0 ) + " ) " + PINS[ i + 0 ] );
+			m_dacTextLabel[ i + 1 ] = new JLabel( "( DAC " + ( i + 1 ) + " ) " + PINS[ i + 1 ] );
+			m_dacTextLabel[ i + 2 ] = new JLabel( "( DAC " + ( i + 2 ) + " ) " + PINS[ i + 2 ] );
+			m_dacTextLabel[ i + 3 ] = new JLabel( "( DAC " + ( i + 3 ) + " ) " + PINS[ i + 3 ] );
+
+			m_dacRangeLabel[ i + 0 ] = new JLabel( VOD_RANGE );
+			m_dacRangeLabel[ i + 1 ] = new JLabel( VRD_RANGE );
+			m_dacRangeLabel[ i + 2 ] = new JLabel( VOG_RANGE );
+			m_dacRangeLabel[ i + 3 ] = new JLabel( VRSV_RANGE );
+		}
+
+
+		// Create the textfield arrays
+		m_dacTxtfld = new OwlNumberField[ DAC_COUNT ];
+
+		for ( i=0; i<CHANNEL_COUNT; i++ )
+		{
+			channelPanel = new JPanel();
+			channelPanel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createLineBorder( new Color( 0x893BFF ) ),
+																	  "Channel " + i,
+																	  TitledBorder.LEFT,
+																	  TitledBorder.DEFAULT_POSITION,
+																	  null,
+																	  new Color( 0x810541 ) ) );
+			channelPanel.setLayout( gbl );
+
+			for ( j=0; j<DACS_PER_CHANNEL; j++ )
+			{
+				addComponent( channelPanel,
+							  m_dacTextLabel[ j + ( i * 4 ) ],
+							  0, 5, 0, 5,
+							  GridBagConstraints.NONE,
+							  GridBagConstraints.WEST,
+							  j, 0, 1, 1 );
+
+				m_dacTxtfld[ j + ( i * 4 ) ] = new OwlNumberField( "", 6 );
+				m_dacTxtfld[ j + ( i * 4 ) ].setInvalidValue( ( double )INVALID_DATA );
+
+				addComponent( channelPanel,
+							  m_dacTxtfld[ j + ( i * 4 ) ],
+							  0, 0, 0, 0,
+							  GridBagConstraints.NONE,
+							  GridBagConstraints.WEST,
+							  j, 1, 1, 1 );
+
+				addComponent( channelPanel,
+							  m_dacRangeLabel[ j + ( i * 4 ) ],
+							  0, 5, ( j == ( DACS_PER_CHANNEL - 1 ) ? 5 : 0 ), 5,
+							  GridBagConstraints.NONE,
+							  GridBagConstraints.WEST,
+							  j, 2, 1, 1 );
+			}
+
+			panel.add( channelPanel );
+		}
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( APPLY_ACTION ) )
+		{
+			m_stop = false;
+
+			new Thread( this ).start();
+		}
+
+		else if ( event.getActionCommand().equals( STOP_ACTION ) )
+		{
+			m_stop = true;
+		}
+
+		else if ( event.getActionCommand().equals( CLEAR_ACTION ) )
+		{
+			brdId = m_boardComboBox.getSelectedIndex();
+
+			for ( dac=0; dac<DAC_COUNT; dac++ )
+			{
+				m_dacTxtfld[ dac ].setText( "" );
+				m_dacVoltages[ brdId ][ dac ] = INVALID_DATA;
+			}
+		}
+
+		else if ( event.getActionCommand().equals( SAVE_ACTION ) )
+		{
+			JFileChooser fc = new JFileChooser( System.getProperty( "user.dir" ) );
+
+			fc.addChoosableFileFilter(
+						new owl.main.owltypes.OwlFileFilter(
+								"dcp", "Developer Configuration Parameter [ .dcp ]" ) );
+
+			if ( fc.showSaveDialog( null ) == JFileChooser.APPROVE_OPTION )
+			{
+				try
+				{
+					writeParameters( fc.getSelectedFile().getPath() );
+				}
+				catch ( Exception e )
+				{
+					if ( !e.getMessage().equals( "" ) )
+					{
+						logger.error( e.getMessage() );
+					}
+				}
+			}
+		}
+
+		else if ( event.getActionCommand().equals( LOAD_ACTION ) )
+		{
+			JFileChooser fc = new JFileChooser( System.getProperty( "user.dir" ) );
+
+			fc.addChoosableFileFilter(
+						new owl.main.owltypes.OwlFileFilter(
+								"dcp", "Developer Configuration Parameter [ .dcp ]" ) );
+
+			if ( fc.showOpenDialog( null ) == JFileChooser.APPROVE_OPTION )
+			{
+				try
+				{
+					readParameters( fc.getSelectedFile().getPath() );
+				}
+				catch ( Exception e )
+				{
+					if ( !e.getMessage().equals( "" ) )
+					{
+						logger.error( e.getMessage() );
+					}
+				}
+			}
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void itemStateChanged( ItemEvent ie )
+	{
+		if ( ie.getSource() instanceof javax.swing.JComboBox )
+		{
+			JComboBox src = ( JComboBox )ie.getSource();
+	
+			if ( src.getActionCommand().equals( "Board Id" ) )
+			{
+				for ( i=0; i<DAC_COUNT; i++ )
+				{
+					//
+					// Save the DAC voltages
+					//
+					if ( !m_dacTxtfld[ i ].isEmpty() )
+					{
+						m_dacVoltages[ m_boardID ][ i ] = m_dacTxtfld[ i ].getFloat();
+					}
+					else
+					{
+						m_dacVoltages[ m_boardID ][ i ] = INVALID_DATA;
+					}
+				}
+
+				//
+				// Get the new board ID
+				//
+				m_boardID = src.getSelectedIndex();
+
+				//
+				// Set the DAC text fields with saved ones
+				//
+				for ( i=0; i<DAC_COUNT; i++ )
+				{
+					if ( m_dacVoltages[ m_boardID ][ i ] != INVALID_DATA )
+					{
+						m_dacTxtfld[ i ].setValue( m_dacVoltages[ m_boardID ][ i ] );
+					}
+					else
+					{
+						m_dacTxtfld[ i ].setText( "" );
+					}
+				}
+			}
+		}
+	}
+
+	public void writeParameters( filename ) throws Exception
+	{
+		FileWriter  fw = null;
+		PrintWriter pw = null;
+
+		try
+		{
+			//  Force the current dac values to be arrayed before saving
+			// +---------------------------------------------------------+
+			itemStateChanged( new ItemEvent( m_boardComboBox,
+											 ItemEvent.ITEM_STATE_CHANGED,
+											 null,
+											 0 ) );
+
+			fw = new FileWriter( filename, false );
+			pw = new PrintWriter( fw, true );
+
+			for ( brd=0; brd<MAX_BOARD_ID; brd++ )
+			{
+				for ( dac=0; dac<DAC_COUNT; dac++ )
+				{
+					if ( m_dacVoltages[ brd ][ dac ] != INVALID_DATA )
+					{
+						pw.println( "BRD: " + brd + "\tDAC: " + dac +
+									"\t" + m_dacVoltages[ brd ][ dac ] );
+					}
+				}
+			}
+
+			fw.close();
+			pw.close();
+		}
+		catch ( Exception e )
+		{
+			if ( fw != null ) { fw.close(); }
+			if ( pw != null ) { pw.close(); }
+			throw e;
+		}
+	}
+
+	public void readParameters( String filename ) throws Exception
+	{
+		FileReader fileReader = null;
+		BufferedReader bufferedReader = null;
+
+		try
+		{
+			fileReader = new FileReader( filename );
+			bufferedReader = new BufferedReader( fileReader );
+
+			while ( ( line = bufferedReader.readLine() ) != null )
+			{
+				if ( line.equals( "" ) ) continue;
+
+				String[] tokens = line.split( "[ \t]" );
+
+				if ( tokens.length != 5 )
+				{
+					continue;
+				}
+
+				brd = Integer.parseInt( tokens[ 1 ].trim() );
+				dac = Integer.parseInt( tokens[ 3 ].trim() );
+				vlt = Float.parseFloat( tokens[ 4 ].trim() );
+
+				m_dacVoltages[ brd ][ dac ] = vlt;
+
+				if ( m_boardComboBox.getSelectedIndex() == brd )
+				{
+					for ( dac=0; dac<DAC_COUNT; dac++ )
+					{
+						if ( m_dacVoltages[ brd ][ dac ] != INVALID_DATA )
+						{
+							m_dacTxtfld[ dac ].setValue( m_dacVoltages[ brd ][ dac ] );
+						}
+					}
+				}
+			}
+
+			bufferedReader.close();
+			fileReader.close();
+		}
+		catch ( Exception e )
+		{
+			if ( bufferedReader != null )
+			{
+				bufferedReader.close();
+			}
+
+			if ( fileReader != null )
+			{
+				fileReader.close();
+			}
+
+			throw e;
+		}
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	public void setBoardId( id )
+	{
+		m_boardID = id;
+	}
+
+	public void setBiasVoltage( dacNumber, value )
+	{
+		m_dacVoltages[ m_boardID ][ dacNumber ] = value;
+	}
+
+	public void run()
+	{
+		int N = 0;
+
+		m_applyButton.setText( STOP_ACTION );
+		m_applyButton.setColored();
+		m_boardID = m_boardComboBox.getSelectedIndex();
+
+		try
+		{
+			if ( m_boardID < 0 )
+			{
+				throw new Exception( "Invalid board id: " + m_boardID );
+			}
+
+			for ( i=0; i<DAC_COUNT; i++ )
+			{
+				if ( !m_dacTxtfld[ i ].isEmpty() )
+				{
+					m_dacVoltages[ m_boardID ][ i ] = m_dacTxtfld[ i ].getFloat();
+				}
+				else
+				{
+					m_dacVoltages[ m_boardID ][ i ] = INVALID_DATA;
+				}
+			}
+
+			if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+			for ( dac=0; dac<DAC_COUNT; dac++ )
+			{
+				if ( m_dacVoltages[ m_boardID ][ dac ] == INVALID_DATA )
+				{
+					continue; 
+				}
+
+				if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+				//  VOD voltage check
+				// +---------------------------------------------------+
+				if ( dac == 0 || dac == 4 || dac == 8 || dac == 12 || dac == 16 )
+				{
+					if ( ( m_dacVoltages[ m_boardID ][ dac ] < 0.f ) || ( m_dacVoltages[ m_boardID ][ dac ] > 30.f ) )
+					{
+						throw new Exception( "DAC " + Integer.toString( dac ) + " out of range ( 0 to 30 volts )" );
+					}
+
+					N = ( int )( ( ( m_dacVoltages[ m_boardID ][ dac ] - 0.0 ) / 30.0 ) * 16383 );
+				}
+
+				//  VRD voltage check
+				// +---------------------------------------------------+
+				else if ( dac == 1 || dac == 5 || dac == 9 || dac == 13 || dac == 17 )
+				{
+					if ( ( m_dacVoltages[ m_boardID ][ dac ] < 0.f ) || ( m_dacVoltages[ m_boardID ][ dac ] > 20.f ) )
+					{
+						throw new Exception( "DAC " + Integer.toString( dac ) + " out of range ( 0 to 20 volts )" );
+					}
+
+					N = ( int )( ( ( m_dacVoltages[ m_boardID ][ dac ] - 0.0 ) / 20.0 ) * 16383 );
+				}
+
+				//  VOG or VRSV voltage check
+				// +---------------------------------------------------+
+				else
+				{
+					if ( ( m_dacVoltages[ m_boardID ][ dac ] < -10.f ) || ( m_dacVoltages[ m_boardID ][ dac ] > 10.f ) )
+					{
+						throw new Exception( "DAC " + Integer.toString( dac ) + " out of range ( -10 to +10 volts )" );
+					}
+
+					N = ( int )( ( ( m_dacVoltages[ m_boardID ][ dac ] + 10.0 ) / 20.0 ) * 16383 );
+				}
+
+				logger.infoStart( "Setting DC bias voltage offset for DAC #" + dac );
+				CameraAPI.Cmd( CameraAPI.TIM_ID,
+							   CameraAPI.SBN,
+							   m_boardID,
+							   dac,
+							   CameraAPI.VID,
+							   N,
+							   CameraAPI.DON );
+				logger.infoEnd();
+				
+				if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+			}			
+
+			if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+			frame.fireScriptApplied();
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+
+			logger.error( "( " + BOARD_NAME +
+						  " DCBiasVoltageDC script ): SBN reply error. Expected: " +
+						   re.getExpectedHexString() + " Received: " +
+						   re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+
+			if ( !e.getMessage().equals( STOP_ACTION ) )
+			{
+				logger.error( "( " + BOARD_NAME +
+							  " DCBiasVoltageDC script ): " +
+							   e.toString() );
+			}
+		}
+		finally
+		{
+			m_applyButton.setBlack( APPLY_ACTION );
+		}
+	}
+}
+
+
+
+ARC47VideoOffsetCC()
+{
+	CCScriptFrame frame = null;
+
+	if ( CameraAPI.IsCCParamSupported( CameraAPI.ARC47 ) )
+	{
+		frame = ( CCScriptFrame )( new ARC47VideoOffsetFrame() );
+		frame.setVisible( true );
+	}
+	else
+	{
+		logger.warn(
+				"Additional ARC47 video board options not available! CC Param Value: 0x" +
+				 Integer.toHexString( CameraAPI.GetCCParams() ) );
+	}
+
+	return frame;
+}

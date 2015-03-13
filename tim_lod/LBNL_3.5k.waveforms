@@ -1,0 +1,553 @@
+; Waveform tables and definitions for the LBNL 3.5k x 3.5k 4-readout CCD,  
+;   written for the ARC-22, ARC-32, ARC-48 and LBNL bias boards, Rev. 7.
+; 
+; CCD clock voltage definitions
+VIDEO           EQU     $000000 ; Video processor board select = 0 (SAME)
+VID0		EQU	$000000 ; Address of the DACs on the ARC-48 video board (DIFF)
+;BIAS	EQU	$002000	; Bias Generator board select = 3 (LBNL)
+;HVBIAS	EQU	$003000	; Bias Generator board select = 3 (LBNL)
+CLK2            EQU     $002000 ; Clock driver board select = 2  (SAME)
+CLK3            EQU     $003000 ; Clock driver board select = 3  (SAME) 
+CLKV		EQU	$200000	; Clock driver board DAC voltage selection address  (NEW)
+NSCLR		EQU	1800	; Horizontal clocks to clear (NEW)
+NPCLR		EQU	1800	; Parallel clocks to clear (SAME)
+SH_DEL		EQU	50	; Shutter delay (SAME)
+;I_DELAY 	EQU     $8A0000 ; Integration period (OLD)
+;I_DELAY		EQU	$990000 ; Integration period 25*160+80 = 4080 ns (LBNL)
+I_DELAY		EQU	$8C0000	; Integration period 12*320 + 80 = 3920 ns (ARC22)
+
+; Delay number for parallel clocking
+P_DELAY 	EQU	$BC0000	; Parallel Clock Delay 60*320 + 80 = 19280 ns (ARC22)
+;R_DELAY		EQU	$600000	; Serial register transfer delay (LBNL)
+
+; Clocking wavefors (Using 98 KHz clocking wavefors)
+;S_DELAY 	EQU	$0B0000	; Serial register skipping delay (SAME) 300ns
+S_DELAY 	EQU	$050000	; Serial register skipping delay 5*40 + 80 = 280ns (ARC22)
+;SW_DELAY 	EQU	$150000	; Sum_well  clock delay = 96*20+80 = 2000 ns (SAME)
+SW_DELAY 	EQU	$0A0000	; Sum_well  clock delay = 10*40+80 = 480 ns (ARC22)
+;PRE_SET_DLY 	EQU	$040000	; settling time  clock delay = 64*20+80 = 1360 ns (SAME)
+;POST_SET_DLY 	EQU	$040000	; settling time  clock delay = 64*20+80 = 1360 ns (SAME)
+;DCRST_DELAY 	EQU	$040000	; settling time  clock delay = 64*20+80 = 1360 ns (SAME)
+PRE_SET_DLY 	EQU	$020000	; settling time  clock delay = 64*20+80 = 160 ns (ARC22)
+POST_SET_DLY 	EQU	$020000	; settling time  clock delay = 64*20+80 = 160 ns (ARC22)
+DCRST_DELAY 	EQU	$020000	; settling time  clock delay = 64*20+80 = 160 ns (ARC22)
+
+;PS_DELAY EQU	$2C0000	; 2x SERIAL  clock delay = 2 microsec (LBNL ADD)
+
+; ARC-48 video processor board definitions for writing to its DACs
+DAC_ADDR	EQU	$0E0000 ; DAC Channel Address (NEW)
+DAC_RegM	EQU	$0F4000 ; DAC m Register (NEW)
+DAC_RegC	EQU	$0F8000 ; DAC c Register (NEW)
+DAC_RegD	EQU	$0FC000 ; DAC X1 Register (NEW)
+
+; Macros to help getting from volts to bits.
+
+VDEF    MACRO   NAME,BRDTYP,BRDNUM,DAC,ALO,AHI
+
+LO_\NAME        EQU     ALO
+HI_\NAME        EQU     AHI
+DAC_\NAME       EQU     DAC
+BRDNUM_\NAME    EQU     BRDNUM
+        IF      @SCP("BRDTYP",'VID')
+BRDTYP_\NAME    EQU     3
+        ELSE
+BRDTYP_\NAME    EQU     0
+        ENDIF
+
+        MSG     'Defining voltage ',"NAME",' type ',"BRDTYP",' board ',"BRDNUM",' dac ',"DAC",' with limits ',"ALO",' ',"AHI"
+        ENDM
+
+VOLTS   MACRO   NAME,F
+
+DUMMY   SET     @CVI(@MIN(4095,@MAX(0,(F-LO_\NAME)/(HI_\NAME-LO_\NAME)*4096.)))
+DUMMY2  SET     @CVI((BRDNUM_\NAME<<20)|(BRDTYP_\NAME<<18)|(DAC_\NAME<<14)|DUMMY)
+        DC      DUMMY2
+        MSG     'Setting voltage ',"NAME ","F",'V ',DUMMY
+        ENDM
+
+;*********************************************************************
+	; define video board voltage symbols
+	VDEF	OFFA0,VID,0,1,-10.0,10.0
+	VDEF	OFFA1,VID,1,1,-10.0,10.0
+	VDEF	OFFB0,VID,0,3,-10.0,10.0
+	VDEF	OFFB1,VID,1,3,-10.0,10.0
+
+	; define bias board voltage symbols
+	VDEF	VDD1,VID,2,0,0.0,-25.0
+	VDEF	VDD2,VID,2,1,0.0,-25.0
+	VDEF	VDD3,VID,2,2,0.0,-25.0
+	VDEF	VDD4,VID,2,3,0.0,-25.0
+	VDEF	VR1,VID,2,4,0.0,-25.0
+	VDEF	VR2,VID,2,5,0.0,-25.0
+	VDEF	VR3,VID,2,6,0.0,-25.0
+	VDEF	VR4,VID,2,7,0.0,-25.0
+	VDEF	VOG1,VID,2,8,0.0,5
+	VDEF	VOG2,VID,2,9,0.0,5
+	VDEF	VOG3,VID,2,10,0.0,5
+	VDEF	VOG4,VID,2,11,0.0,5
+	VDEF	VSUB,VID,2,12,0.0,200.8
+	VDEF	RAMP,VID,2,13,0.0,10.0  	;  for ramping p.s.
+
+	; define clock board (ARC22 is +/-13V) symbols bank0
+
+	VDEF	V1_HI,CLK,2,0,-13.0,+13.0	; Vertical High
+	VDEF	V1_LO,CLK,2,1,-13.0,+13.0	; Vertical Low
+	VDEF	V2_HI,CLK,2,2,-13.0,+13.0	; Vertical High
+	VDEF	V2_LO,CLK,2,3,-13.0,+13.0	; Vertical Low
+	VDEF	V3_HI,CLK,2,4,-13.0,+13.0	; Vertical High
+	VDEF	V3_LO,CLK,2,5,-13.0,+13.0	; Vertical Low
+
+	VDEF	FS1_HI,CLK,2,6,-13.0,+13.0 	; Frame Stores
+	VDEF	FS1_LO,CLK,2,7,-13.0,+13.0 	;
+	VDEF	FS2_HI,CLK,2,8,-13.0,+13.0 	;
+	VDEF	FS2_LO,CLK,2,9,-13.0,+13.0 	;
+	VDEF	FS3_HI,CLK,2,10,-13.0,+13.0 	;
+	VDEF	FS3_LO,CLK,2,11,-13.0,+13.0 	;
+
+	VDEF	T1_HI,CLK,2,12,-13.0,+13.0	; Transfer gate High
+	VDEF	T1_LO,CLK,2,13,-13.0,+13.0	; Transfer gate Low
+	VDEF	T2_HI,CLK,2,14,-13.0,+13.0	; Transfer gate High
+	VDEF	T2_LO,CLK,2,15,-13.0,+13.0	; Transfer gate Low
+
+	; define clock board symbols bank1
+	VDEF	H1U_HI,CLK,2,24,-13.0,+13.0 	; Upper Horizontals
+	VDEF	H1U_LO,CLK,2,25,-13.0,+13.0 	;
+	VDEF	H2U_HI,CLK,2,26,-13.0,+13.0 	;
+	VDEF	H2U_LO,CLK,2,27,-13.0,+13.0 	;
+	VDEF	H3U_HI,CLK,2,28,-13.0,+13.0 	;
+	VDEF	H3U_LO,CLK,2,29,-13.0,+13.0 	;
+	VDEF	H1L_HI,CLK,2,30,-13.0,+13.0	; Lower Horizontal High
+	VDEF	H1L_LO,CLK,2,31,-13.0,+13.0	; Lower Horizontal Low
+	VDEF	H2L_HI,CLK,2,32,-13.0,+13.0	; Lower Horizontal High
+	VDEF	H2L_LO,CLK,2,33,-13.0,+13.0	; Lower Horizontal Low
+	VDEF	H3L_HI,CLK,2,34,-13.0,+13.0	; Lower Horizontal High
+	VDEF	H3L_LO,CLK,2,35,-13.0,+13.0	; Lower Horizontal Low
+	VDEF	SWU_HI,CLK,2,36,-13.0,+13.0 	; Upper Summing Well
+	VDEF	SWU_LO,CLK,2,37,-13.0,+13.0 	;
+	VDEF	SWL_HI,CLK,2,38,-13.0,+13.0	; Output transfer gate High
+	VDEF	SWL_LO,CLK,2,39,-13.0,+13.0	; Output transfer gate Low
+	VDEF	RU_HI,CLK,2,40,-13.0,+13.0 	; Reset High wrong polarity....
+	VDEF	RU_LO,CLK,2,41,-13.0,+13.0 	; upper reset
+	VDEF	RL_HI,CLK,2,42,-13.0,+13.0	; Reset High wrong polarity....
+	VDEF	RL_LO,CLK,2,43,-13.0,+13.0	; lower reset
+
+; Video offsets - 0 to $3fff video offset value,Rang=0~4.3V
+OFFSET		EQU	$2280
+OFFSET_Q1_2	EQU	$800
+
+OFFSET0	EQU	OFFSET
+OFFSET1	EQU	OFFSET_Q1_2
+OFFSET2	EQU	OFFSET_Q1_2
+OFFSET3	EQU	OFFSET
+OFFSET4	EQU	OFFSET
+OFFSET5	EQU	OFFSET
+OFFSET6	EQU	OFFSET
+OFFSET7	EQU	OFFSET
+
+; Define switch state bits for the lower CCD clock driver bank CLK3
+RGL	EQU	1		; Reset Gate Left Pin 1
+H1L	EQU	2		; Horizontal #1 Left Pin 2
+H2L	EQU	4		; Horizontal #2 Left Pin 3
+H3L	EQU	8		; Horizontal #3 Left Pin 4
+SWL	EQU	$10		; Summing Well Left Pin 5
+RGR	EQU	$20		; Reset Gate Right Pin 6
+H1R	EQU	$40		; Horizontal #1 Right Pin 7
+H2R	EQU	$80		; Horizontal #2 Right Pin 8
+H3R	EQU	$100		; Horizontal #3 Right Pin 9
+SWR	EQU	$200		; Summing Well Lower Pin 10
+RG	EQU	RGL+RGR		; Left and Right are always clocked the same
+SW	EQU	SWL+SWR
+H1	EQU	H1L+H1R
+H2	EQU	H2L+H2R
+H3	EQU	H3L+H3R
+; Pins 11-12 are not used
+
+; Define switch state bits for the CCD clocks of the LBNL CCD
+;Bank 0
+V1L	EQU	0
+V1H	EQU	$1
+V2L	EQU	0	; VERTICAL register, phase #2
+V2H	EQU	$2	
+V3L	EQU	0	; VERTICAL register, phase #3
+V3H	EQU	$4
+FS1L	EQU	0
+FS1H	EQU	$8
+FS2L	EQU	0
+FS2H	EQU	$10
+FS3L	EQU	0
+FS3H	EQU	$20
+
+TL	EQU	0	; Transfer gate
+TH	EQU	$c0	; both transfer gates concurrently
+
+;Bank 1
+HU1L	EQU	0
+HU1H	EQU	$1
+HU2L	EQU	0
+HU2H	EQU	$2
+HU3L	EQU	0
+HU3H	EQU	$4
+HL1L	EQU	0	; Serial shift register, phase #1
+HL1H	EQU	$8	
+HL2L	EQU	0	; Serial shift register, phase #2
+HL2H	EQU	$10
+HL3L	EQU	0	; Serial shift register, phase #3
+HL3H	EQU	$20
+WL	EQU	0	; Both summing wells clocked together
+WH	EQU	$0c0
+RL	EQU	0	; Reset both output nodes
+RH	EQU	$300
+
+; Define switch state bits for the upper CCD clock driver bank CLK2
+TGL	EQU	8		; Transfer Gate Left, Pin 16
+V1R	EQU	$10		; Image, phase #1 Right, Pin 17
+V2R	EQU	$20		; Image, phase #2 Right, Pin 18
+V3R	EQU	$40		; Image, phase #3 Right, Pin 19
+TGR	EQU	$800		; Transfer Gate Right, Pin 37
+V1	EQU	V1L+V1R
+V2	EQU	V2L+V2R
+V3	EQU	V3L+V3R
+TG	EQU	TGL+TGR
+;  ***  Definitions for Y: memory waveform tables  *****
+PARALLEL_UP ;this is the parallel split waveform since hardware is restrictive
+        DC      END_PARALLEL_UP-PARALLEL_UP-1
+	DC	CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+	DC	CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
+	DC	CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TL
+	DC	CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
+	DC	CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
+	DC	CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
+	DC	CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH 	; shut TG 
+END_PARALLEL_UP
+        
+PARALLEL_DOWN ;this is the parallel split waveform since hardware is restrictive
+        DC      END_PARALLEL_DOWN-PARALLEL_DOWN-1
+	DC	CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+	DC	CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
+	DC	CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TL
+	DC	CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
+	DC	CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
+	DC	CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
+	DC	CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TH 	; shut TG 
+END_PARALLEL_DOWN
+
+PARALLEL_SPLIT 
+        DC      END_PARALLEL_SPLIT-PARALLEL_SPLIT-1
+	DC	CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+	DC	CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
+	DC	CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TL
+	DC	CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
+	DC	CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
+	DC	CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
+	DC	CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH 	; shut TG 
+END_PARALLEL_SPLIT
+
+PARALLEL_CLEAR_SPLIT ;just another copy of parallel split
+        DC      END_PARALLEL_CLEAR_SPLIT-PARALLEL_CLEAR_SPLIT-1
+	DC	CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+	DC	CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
+	DC	CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TL
+	DC	CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
+	DC	CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
+	DC	CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
+	DC	CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH 	; shut TG 
+END_PARALLEL_CLEAR_SPLIT
+
+PARALLELS_DURING_EXPOSURE ; this is redundant since clocks are already in proper state
+	DC	END_PARALLELS_DURING_EXPOSURE-PARALLELS_DURING_EXPOSURE-1
+	DC	CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH 	; shut TG 
+END_PARALLELS_DURING_EXPOSURE		
+
+PARALLELS_DURING_READOUT ; redundant, clocks should be O.K.
+	DC	END_PARALLELS_DURING_READOUT-PARALLELS_DURING_READOUT-1
+	DC	CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TH
+END_PARALLELS_DURING_READOUT		
+
+; Video processor bit definition
+; ARC48	     xfer, A/D, integ, polarity, not used, not used, rst (1 => switch open)
+
+SERIAL_IDLE     ; Clock serial charge from both L and R ends
+        DC      END_SERIAL_IDLE-SERIAL_IDLE-1
+        DC      VIDEO+$000000+%1110100
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
+	DC	CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1H+HL2L+HL3L+WL ;h2->hi
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1H+HL2H+HL3L+WL ;h1->lo
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+	DC	CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1L+HL2H+HL3H+WL ;h2->lo
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1L+HL2L+HL3H+WL ;h1->hi
+	DC	CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay*/
+        DC	CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;dummy for transmit delay
+        DC      VIDEO+$000000+%1110111 
+        DC      VIDEO+I_DELAY+%0000111
+        DC      VIDEO+$000000+%0011011
+	DC	CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi 
+	DC	CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+        DC      VIDEO+I_DELAY+%0001011
+        DC      VIDEO+$000000+%0011011
+        DC      VIDEO+DCRST_DELAY+%1110111
+END_SERIAL_IDLE
+
+; These are the three skipping tables
+SERIAL_SKIP_LEFT           ; Serial clocking waveform for skipping left
+        DC	END_SERIAL_SKIP_LEFT-SERIAL_SKIP_LEFT-1
+        DC      VIDEO+$000000+%1110100
+	DC	CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h2->hi
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h1->lo
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+	DC	CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h2->lo
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h1->hi
+	DC	CLK3+S_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+	DC	CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi 
+END_SERIAL_SKIP_LEFT
+
+SERIAL_SKIP_RIGHT           ; Serial clocking waveform for skipping right
+        DC	END_SERIAL_SKIP_RIGHT-SERIAL_SKIP_RIGHT-1
+        DC      VIDEO+$000000+%1110100
+	DC	CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h2->hi
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h1->lo
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+	DC	CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h2->lo
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h1->hi
+	DC	CLK3+S_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+	DC	CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi 
+END_SERIAL_SKIP_RIGHT
+
+SERIAL_SKIP_SPLIT           ; Serial clocking waveform for skipping split
+        DC	END_SERIAL_SKIP_SPLIT-SERIAL_SKIP_SPLIT-1
+        DC      VIDEO+$000000+%1110100
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1L+HL2L+HL3H+WL ;h2->hi
+	DC	CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1L+HL2H+HL3H+WL ;h1->lo
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1H+HL2H+HL3L+WL ;h2->lo
+	DC	CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1H+HL2L+HL3L+WL ;h1->hi
+	DC	CLK3+S_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+	DC	CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi 
+END_SERIAL_SKIP_SPLIT
+
+SERIAL_READ_LEFT	; Berkeley calls this the LOWER readout of the CCD
+        DC      END_SERIAL_READ_LEFT-SERIAL_READ_LEFT-1
+        DC      VIDEO+$000000+%1110100
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
+	DC	CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h2->hi
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h1->lo
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+	DC	CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h2->lo
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h1->hi
+	DC	CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+SXL	DC      $00F000
+        DC      VIDEO+$000000+%1110111 
+        DC      VIDEO+I_DELAY+%0000111
+        DC      VIDEO+$000000+%0011011 
+	DC	CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi 
+	DC	CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+        DC      VIDEO+I_DELAY+%0001011 
+        DC      VIDEO+$000000+%0011011
+        DC      VIDEO+DCRST_DELAY+%1110111
+END_SERIAL_READ_LEFT
+
+SERIAL_READ_RIGHT	; Berkeley calls this the UPPER readout of the CCD
+        DC      END_SERIAL_READ_RIGHT-SERIAL_READ_RIGHT-1
+        DC      VIDEO+$000000+%1110100
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h2->hi
+	DC	CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h1->lo
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h2->lo
+	DC	CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h1->hi
+	DC	CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+SXR	DC      $00F0C2
+        DC      VIDEO+$000000+%1110111 
+        DC      VIDEO+I_DELAY+%0000111
+        DC      VIDEO+$000000+%0011011 
+	DC	CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi 
+	DC	CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+        DC      VIDEO+I_DELAY+%0001011 
+        DC      VIDEO+$000000+%0011011
+        DC      VIDEO+DCRST_DELAY+%1110111
+END_SERIAL_READ_RIGHT
+
+SERIAL_READ_SPLIT
+        DC      END_SERIAL_READ_SPLIT-SERIAL_READ_SPLIT-1
+        DC      VIDEO+$000000+%1110100
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
+	DC	CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1H+HL2L+HL3L+WL ;h2->hi  
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1H+HL2H+HL3L+WL ;h1->lo
+	DC	CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+	DC	CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1L+HL2H+HL3H+WL ;h2->lo
+	DC	CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1L+HL2L+HL3H+WL ;h1->hi
+	DC	CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+SXRL	DC      $00F0C0
+        DC      VIDEO+$000000+%1110111 
+        DC      VIDEO+I_DELAY+%0000111
+        DC      VIDEO+$000000+%0011011 
+	DC	CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi 
+	DC	CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+        DC      VIDEO+I_DELAY+%0001011 
+        DC      VIDEO+$000000+%0011011
+        DC      VIDEO+DCRST_DELAY+%1110111
+END_SERIAL_READ_SPLIT
+
+VSUBN
+	VOLTS	VSUB,130		; Vsub  0.0 140 V, pin #
+ERHI	DC EREND-ERHI-1
+	VOLTS	VSUB,130		; Vsub  0.0 140 V, pin #
+	VOLTS	V1_HI,9		; Vertical High 
+	VOLTS	V1_LO,9		; Vertical Low  
+	VOLTS	V2_HI,9		; Vertical High 
+	VOLTS	V2_LO,9		; Vertical Low  
+	VOLTS	V3_HI,9		; Vertical High 
+	VOLTS	V3_LO,9		; Vertical Low  
+	VOLTS	FS1_HI,9		; Vertical High 
+	VOLTS	FS1_LO,9		; Vertical Low  
+	VOLTS	FS2_HI,9		; Vertical High 
+	VOLTS	FS2_LO,9		; Vertical Low  
+	VOLTS	FS3_HI,9		; Vertical High 
+	VOLTS	FS3_LO,9		; Vertical Low  
+EREND	DC EREND2-EREND-1
+	VOLTS	V1_HI,5.0	; Vertical High 
+	VOLTS	V1_LO,-3.0	; Vertical Low  
+	VOLTS	V2_HI,5.0	; Vertical High 
+	VOLTS	V2_LO,-3.0	; Vertical Low  
+	VOLTS	V3_HI,5.0	; Vertical High 
+	VOLTS	V3_LO,-3.0	; Vertical Low  
+	VOLTS	FS1_HI,5.0	; Vertical High 
+	VOLTS	FS1_LO,-3.0	; Vertical Low  
+	VOLTS	FS2_HI,5.0	; Vertical High 
+	VOLTS	FS2_LO,-3.0	; Vertical Low  
+	VOLTS	FS3_HI,5.0	; Vertical High 
+	VOLTS	FS3_LO,-3.0	; Vertical Low  
+EREND2
+
+; Initialization of clock driver and video processor DACs and switches
+DACS	DC	END_DACS-DACS-1
+	VOLTS	V1_HI,5.0	; Vertical High 
+	VOLTS	V1_LO,-3.0	; Vertical Low  
+	VOLTS	V2_HI,5.0	; Vertical High 
+	VOLTS	V2_LO,-3.0	; Vertical Low  
+	VOLTS	V3_HI,5.0	; Vertical High 
+	VOLTS	V3_LO,-3.0	; Vertical Low  
+	VOLTS	FS1_HI,5.0	; frame store High 
+	VOLTS	FS1_LO,-3.0	; frame store Low  
+	VOLTS	FS2_HI,5.0	; frame store High 
+	VOLTS	FS2_LO,-3.0	; frame store Low  
+	VOLTS	FS3_HI,5.0	; frame store High 
+	VOLTS	FS3_LO,-3.0	; frame store Low  
+	VOLTS	T1_HI,5.0	; Transfer gate High 
+	VOLTS	T1_LO,-3.0	; Transfer gate Low  
+	VOLTS	T2_HI,5.0	; Transfer gate High 
+	VOLTS	T2_LO,-3.0	; Transfer gate Low  
+
+	VOLTS	H1U_HI,+6.0	; Horizontal High 
+	VOLTS	H1U_LO,-4.0	; Horizontal Low 
+	VOLTS	H2U_HI,+6.0	; HoVR2rizontal High 
+	VOLTS	H2U_LO,-4.0	; Horizontal Low 
+	VOLTS	H3U_HI,+6.0	; Horizontal High 
+	VOLTS	H3U_LO,-4.0	; Horizontal Low 
+	VOLTS	H1L_HI,+6.0	; Horizontal High 
+	VOLTS	H1L_LO,-4.0	; Horizontal Low 
+	VOLTS	H2L_HI,+6.0	; Horizontal High 
+	VOLTS	H2L_LO,-4.0	; Horizontal Low 
+	VOLTS	H3L_HI,+6.0	; Horizontal High 
+	VOLTS	H3L_LO,-4.0	; Horizontal Low 
+	VOLTS	SWU_HI,5.0	; Output transfer gate High
+	VOLTS	SWU_LO,-5.0	; Output transfer gate Low 
+	VOLTS	SWL_HI,5.0	
+	VOLTS	SWL_LO,-5.0	 
+	VOLTS	RU_HI,-6.0	; Reset ACTIVE wrong polarity....
+	VOLTS	RU_LO,0.0	; Reset INACTIVE 
+	VOLTS	RL_HI,-6.0	 
+	VOLTS	RL_LO,0.0	 
+
+; Set the ARC-48 video gain, one of 16 possible values
+	DC	VID0+$0C0140	; integrator time constant: $0C01t0, t is the time constant from 0 to F; larger values -> more gain	
+	DC	VID0+$0D000C			; Gain from 0 to $F
+
+; Initialize the DAC gain and offset registers for the ARC-48 video board
+	DC	VID0+DAC_ADDR+$0000F8	; Select all #8 channels of the DAC.
+	DC	VID0+DAC_RegC+$003FFF	; Set c(Offset register)=0x3FFF (at max)
+	DC	VID0+DAC_ADDR+$0000F9	; Select all #9 channels of the DAC.
+	DC	VID0+DAC_RegC+$003FFF	; Set c=0x3FFF
+
+	DC	VID0+DAC_ADDR+$0000F8	; Select all channels #8 of the DAC.
+	DC	VID0+DAC_RegM+$000FFF	; Set m(Gain register)=0x0FFF,Rang=0--4.3V
+	DC	VID0+DAC_ADDR+$0000F9	; Select all channels #9 of the DAC.
+	DC	VID0+DAC_RegM+$000FFF	; Set m=0x0FFF,Rang=0--4.3V
+	
+	DC	VID0+DAC_ADDR+$0000F8	; Output register of 9th, 10th channels so output
+	DC	VID0+DAC_RegD+$002500	;  is 2.5 volts
+	DC	VID0+DAC_ADDR+$0000F9
+	DC	VID0+DAC_RegD+$002500
+	
+	DC	VID0+DAC_ADDR+$000030	; Gain register of channels #0 to 7 at max.
+	DC	VID0+DAC_RegM+$001FFF	;  This is for the groups A&B
+	DC	VID0+DAC_ADDR+$000031
+	DC	VID0+DAC_RegM+$001FFF
+	DC	VID0+DAC_ADDR+$000032
+	DC	VID0+DAC_RegM+$001FFF
+	DC	VID0+DAC_ADDR+$000033
+	DC	VID0+DAC_RegM+$001FFF
+	DC	VID0+DAC_ADDR+$000034
+	DC	VID0+DAC_RegM+$001FFF
+	DC	VID0+DAC_ADDR+$000035
+	DC	VID0+DAC_RegM+$001FFF
+	DC	VID0+DAC_ADDR+$000036
+	DC	VID0+DAC_RegM+$001FFF
+	DC	VID0+DAC_ADDR+$000037
+	DC	VID0+DAC_RegM+$001FFF
+
+	DC	VID0+DAC_ADDR+$000030	; Offset register of channels #0 to 7 at max.
+	DC	VID0+DAC_RegC+$003FFF	;  This is for the groups A&B
+	DC	VID0+DAC_ADDR+$000031
+	DC	VID0+DAC_RegC+$003FFF
+	DC	VID0+DAC_ADDR+$000032
+	DC	VID0+DAC_RegC+$003FFF
+	DC	VID0+DAC_ADDR+$000033
+	DC	VID0+DAC_RegC+$003FFF
+	DC	VID0+DAC_ADDR+$000034
+	DC	VID0+DAC_RegC+$003FFF
+	DC	VID0+DAC_ADDR+$000035
+	DC	VID0+DAC_RegC+$003FFF
+	DC	VID0+DAC_ADDR+$000036
+	DC	VID0+DAC_RegC+$003FFF
+	DC	VID0+DAC_ADDR+$000037
+	DC	VID0+DAC_RegC+$003FFF
+
+; ARC-48 video Offsets
+	DC	VID0+$0E0000+$000018
+	DC	VID0+$0FC000+OFFSET0
+	DC	VID0+$0E0000+$000019
+	DC	VID0+$0FC000+OFFSET1
+	DC	VID0+$0E0000+$000028
+	DC	VID0+$0FC000+OFFSET2
+	DC	VID0+$0E0000+$000029
+	DC	VID0+$0FC000+OFFSET3
+	DC	VID0+$0E0000+$000048
+	DC	VID0+$0FC000+OFFSET4
+	DC	VID0+$0E0000+$000049
+	DC	VID0+$0FC000+OFFSET5
+	DC	VID0+$0E0000+$000088
+	DC	VID0+$0FC000+OFFSET6
+	DC	VID0+$0E0000+$000089
+	DC	VID0+$0FC000+OFFSET7
+
+; LBNL high voltage bias board
+	VOLTS	VSUB,130			; Vsub  0.0 140 V
+	VOLTS	RAMP,5.0		; Vsub  AVG RAMP RATE
+	VOLTS	VDD1,-22.0		; Vdd  -5.1 -25V
+	VOLTS	VDD2,-22.0		; Vdd  -5.1 -25V
+	VOLTS	VDD3,-22.0		; Vdd  -5.1 -25V
+	VOLTS	VDD4,-22.0		; Vdd  -5.1 -25V
+	VOLTS	VR1,-12.5 		; Vr   -5.1 -25V
+	VOLTS	VR2,-12.5 		; Vr   -5.1 -25V
+	VOLTS	VR3,-12.5 		; Vr   -5.1 -25V
+	VOLTS	VR4,-12.5 		; Vr   -5.1 -25V
+	VOLTS	VOG1,2.16		; Vopg  -10  10 V
+	VOLTS	VOG2,2.16		; Vopg  -10  10 V
+	VOLTS	VOG3,2.16		; Vopg  -10  10 V
+	VOLTS	VOG4,2.16		; Vopg  -10  10 V
+
+END_DACS
+
+BIAS_ON	VOLTS	VSUB,130			; Vsub  0.0 140 V
+							
+BIAS_OFF VOLTS	VSUB,130			; Vsub  0.0 140 V

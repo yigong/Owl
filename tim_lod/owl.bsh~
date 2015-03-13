@@ -1,0 +1,10 @@
+setup = StandardSetup();
+setup.enableResetController( true );
+setup.enablePCITests( true, 1234 );
+setup.enableTIMTests( true, 1234 );
+setup.enableUTLTests( false, 0 );
+setup.enableTIMDownload( true, "/home/bearing/Documents/OWL/tim/tim.lod" );
+setup.enableUTLDownload( true, "" );
+setup.enablePowerOn( true );
+setup.enableImageSize( true, 1454, 726 );
+setup.run();

@@ -1,0 +1,44 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">GetDeviceList</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.GetDeviceList( list );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<span class="code">String[] list - </span>(optional) Used to override the list
+of available devices (drivers) as read from the operating system. Can be used
+to allow Owl 2.0 to operate with a version 1.7 driver by setting list to
+{astropci0, etc}.
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">String[] - </span>The list of available devices (drivers)
+or null if no pci boards (drivers) exist. If a board is in the system and null
+is returned, then the correct driver may not be installed or the board may
+require servicing.
+</div>
+
+<div id="header">Remarks</div>
+Retrieves the list of available pci devices (drivers). Throws a java.lang.Exception
+if an error occurs, which can be caught using a
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

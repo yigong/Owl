@@ -1,0 +1,111 @@
+Clock Driver Jumper Setting:	1
+Clock Driver Max Volts:	+10.0
+Clock Driver Min Volts:	-10.0
+
+Clock Driver 0 Name:	V1
+Clock Driver 0 Low Volts:	-3.0
+Clock Driver 0 High Volts:	5.0
+Clock Driver 0 Mux1 Selected:	false
+Clock Driver 0 Mux2 Selected:	false
+
+Clock Driver 1 Name:	V2
+Clock Driver 1 Low Volts:	-3.0
+Clock Driver 1 High Volts:	5.0
+Clock Driver 1 Mux1 Selected:	false
+Clock Driver 1 Mux2 Selected:	false
+
+Clock Driver 2 Name:	V3
+Clock Driver 2 Low Volts:	-3.0
+Clock Driver 2 High Volts:	5.0
+Clock Driver 2 Mux1 Selected:	false
+Clock Driver 2 Mux2 Selected:	false
+
+Clock Driver 3 Name:	FS1
+Clock Driver 3 Low Volts:	-3.0
+Clock Driver 3 High Volts:	5.0
+Clock Driver 3 Mux1 Selected:	false
+Clock Driver 3 Mux2 Selected:	false
+
+Clock Driver 4 Name:	FS2
+Clock Driver 4 Low Volts:	-3.0
+Clock Driver 4 High Volts:	5.0
+Clock Driver 4 Mux1 Selected:	false
+Clock Driver 4 Mux2 Selected:	false
+
+Clock Driver 5 Name:	FS3
+Clock Driver 5 Low Volts:	-3.0
+Clock Driver 5 High Volts:	5.0
+Clock Driver 5 Mux1 Selected:	false
+Clock Driver 5 Mux2 Selected:	false
+
+Clock Driver 6 Name:	T1
+Clock Driver 6 Low Volts:	-3.0
+Clock Driver 6 High Volts:	5.0
+Clock Driver 6 Mux1 Selected:	false
+Clock Driver 6 Mux2 Selected:	false
+
+Clock Driver 7 Name:	T2
+Clock Driver 7 Low Volts:	-3.0
+Clock Driver 7 High Volts:	5.0
+Clock Driver 7 Mux1 Selected:	false
+Clock Driver 7 Mux2 Selected:	false
+
+Clock Driver 12 Name:	H1U
+Clock Driver 12 Low Volts:	-4.0
+Clock Driver 12 High Volts:	6.0
+Clock Driver 12 Mux1 Selected:	false
+Clock Driver 12 Mux2 Selected:	false
+
+Clock Driver 13 Name:	H2U
+Clock Driver 13 Low Volts:	-4.0
+Clock Driver 13 High Volts:	6.0
+Clock Driver 13 Mux1 Selected:	false
+Clock Driver 13 Mux2 Selected:	false
+
+Clock Driver 14 Name:	H3U
+Clock Driver 14 Low Volts:	-4.0
+Clock Driver 14 High Volts:	6.0
+Clock Driver 14 Mux1 Selected:	false
+Clock Driver 14 Mux2 Selected:	false
+
+Clock Driver 15 Name:	H1L
+Clock Driver 15 Low Volts:	-4.0
+Clock Driver 15 High Volts:	6.0
+Clock Driver 15 Mux1 Selected:	false
+Clock Driver 15 Mux2 Selected:	false
+
+Clock Driver 16 Name:	H2L
+Clock Driver 16 Low Volts:	-4.0
+Clock Driver 16 High Volts:	6.0
+Clock Driver 16 Mux1 Selected:	false
+Clock Driver 16 Mux2 Selected:	false
+
+Clock Driver 17 Name:	H3L
+Clock Driver 17 Low Volts:	-4.0
+Clock Driver 17 High Volts:	6.0
+Clock Driver 17 Mux1 Selected:	false
+Clock Driver 17 Mux2 Selected:	false
+
+Clock Driver 18 Name:	SWU
+Clock Driver 18 Low Volts:	-5.0
+Clock Driver 18 High Volts:	5.0
+Clock Driver 18 Mux1 Selected:	false
+Clock Driver 18 Mux2 Selected:	false
+
+Clock Driver 19 Name:	SWL
+Clock Driver 19 Low Volts:	-5.0
+Clock Driver 19 High Volts:	5.0
+Clock Driver 19 Mux1 Selected:	false
+Clock Driver 19 Mux2 Selected:	false
+
+Clock Driver 20 Name:	RU
+Clock Driver 20 Low Volts:	0.0
+Clock Driver 20 High Volts:	-6.0
+Clock Driver 20 Mux1 Selected:	false
+Clock Driver 20 Mux2 Selected:	false
+
+Clock Driver 21 Name:	RL
+Clock Driver 21 Low Volts:	0.0
+Clock Driver 21 High Volts:	-6.0
+Clock Driver 21 Mux1 Selected:	false
+Clock Driver 21 Mux2 Selected:	false

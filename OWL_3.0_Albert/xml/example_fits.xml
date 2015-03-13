@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+
+<header>
+
+	<card>
+		<key>DATE-OBS</key>
+		<value>YYYY-MM-DD</value>
+		<comment>Date and time of observation</comment>
+	</card>
+
+	<card>
+		<key>TIMESYS</key>
+		<value>UTC</value>
+		<comment>Default time system</comment>
+	</card>
+
+	<card>
+		<key>IRAFNAME</key>
+		<value></value>
+		<comment>IRAF filename</comment>
+	</card>
+
+	<card>
+		<key>OBSERVAT</key>
+		<value>Mt. Laguna</value>
+		<comment>Observatory</comment>
+	</card>
+
+	<card>
+		<key>SIDETIME</key>
+		<value>hh:mm:ss.ss</value>
+		<comment>Local sidereal time</comment>
+	</card>
+
+	<card>
+		<key>OBJEPOCH</key>
+		<value>2000</value>
+		<comment>Epoch of object coordinates</comment>
+	</card>
+
+	<card>
+		<key>AIRMASS</key>
+		<value>99.99</value>
+		<comment>Airmass</comment>
+	</card>
+
+	<card>
+		<key>EXPTIME</key>
+		<value>0.0</value>
+		<comment>Exposure time</comment>
+	</card>
+
+	<card>
+		<key>HA</key>
+		<value>hh:mm:ss.ss</value>
+		<comment>Hour angle</comment>
+	</card>
+
+	<card>
+		<key>TELESCOP</key>
+		<value>Mmmmm, telescope!</value>
+		<comment>Telescope</comment>
+	</card>
+
+	<card>
+		<key>INSTRUME</key>
+		<value></value>
+		<comment>Instrument</comment>
+	</card>
+
+	<card>
+		<key>FILTER1</key>
+		<value></value>
+		<comment>Filter 1</comment>
+	</card>
+
+	<card>
+		<key>FILTER2</key>
+		<value></value>
+		<comment>Filter 2</comment>
+	</card>
+
+	<card>
+		<key>OBJECT</key>
+		<value>Thingy in the sky!</value>
+		<comment>Observation title</comment>
+	</card>
+
+	<card>
+		<key>TELRA</key>
+		<value>hh:mm:ss.ss</value>
+		<comment>Telescope right ascension</comment>
+	</card>
+
+	<card>
+		<key>TELDEC</key>
+		<value>hh:mm:ss.ss</value>
+		<comment>Telescope declination</comment>
+	</card>
+
+	<card>
+		<key>OBSERVER</key>
+		<value>Homer Simpson</value>
+		<comment></comment>
+	</card>
+
+</header>
+

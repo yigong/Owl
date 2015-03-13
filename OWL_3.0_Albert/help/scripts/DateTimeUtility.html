@@ -1,0 +1,72 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">DateTimeUtility</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+DateTimeUtility();
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+DateTimeUtility Object
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">String getDateString()</td>
+<td>Returns the date in the following format: month/day/year. 
+Example: 4/6/2009.</td>
+</tr>
+
+<tr>
+<td valign="top">String getTimeString()</td>
+<td>Returns the time in the following format: 
+hour:minute:second:millisecond. Example: 17:6:41:654</td>
+</tr>
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+A utility for getting the current date and time.
+
+<br><br>
+Example:
+<pre>
+	dateTime = DateTimeUtility();
+	System.out.println( "Date: " + dateTime.getDateString() );
+	System.out.println( "Time: " + dateTime.getTimeString() );
+</pre>
+
+</div>
+
+</body>
+
+</html>

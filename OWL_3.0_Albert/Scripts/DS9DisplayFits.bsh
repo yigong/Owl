@@ -1,0 +1,6 @@
+ds9a = DS9Accessor();
+
+if ( ds9a.isDS9Ready( true ) )
+{
+	ds9a.showFits( fitsFilename );
+}

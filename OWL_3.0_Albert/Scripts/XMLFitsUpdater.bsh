@@ -1,0 +1,70 @@
+import org.apache.commons.digester.Digester;
+import org.apache.commons.digester.xmlrules.DigesterLoader;
+
+
+//
+//  This function will read an XML fits file and return an array
+//  list of FitsHeaderElement objects. DO NOT EDIT.
+//
+//  The FitsHeaderElement object has the following public methods:
+//  	void clear()
+//	boolean hasKey( String aKey )
+//	boolean hasAKey()
+//	String getKey()
+//	String getValue()
+//	String getComment()
+//
+ArrayList readXml( File xmlFile )
+{
+	ArrayList list = null;
+
+	try
+	{
+		java.net.URL rules = ( new File( MainApp.getXMLPath() + "fits-rules.xml" ) ).toURI().toURL();
+		Digester digester = DigesterLoader.createDigester( rules );
+		digester.setValidating( false );
+
+		org.apache.log4j.Logger xmlLogger = org.apache.log4j.Logger.getRootLogger();
+		xmlLogger.setLevel( org.apache.log4j.Level.INFO );
+		org.apache.commons.logging.impl.Log4JLogger newLogger = new org.apache.commons.logging.impl.Log4JLogger( xmlLogger );
+		digester.setLogger( newLogger );
+		digester.setSAXLogger( newLogger );
+
+		InputStream input = new FileInputStream( xmlFile );
+		list = ( ArrayList ) digester.parse( input );
+	}
+	catch ( Exception e )
+	{
+		logger.error( e );
+	}
+
+	return list;
+}
+
+//
+// Read and parse the Telinfo.xml file
+//
+aList = readXml( new File( "C:\\Users\\streit\\Documents\\Telinfo.xml" ) );
+
+//
+// Print out the number of elements in the array list
+//
+logger.info( "aList size: " + aList.size() );
+
+//
+// Print out and update the fits keys, values, and comments read
+// from the Telinfo.xml file
+//
+for ( i=0; i<aList.size(); i++ )
+{
+	fitsHeaderElement = aList.get( i );
+
+	logger.info( "aList[ " + i + " ]: " + fitsHeaderElement.getKey() +
+			   " -> " + fitsHeaderElement.getValue() + " -> " +
+			   fitsHeaderElement.getComment() );
+
+	fits.setField( fitsHeaderElement.getKey(),
+			     fitsHeaderElement.getValue(),
+				fitsHeaderElement.getComment() );
+}
+

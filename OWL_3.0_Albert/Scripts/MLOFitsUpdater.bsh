@@ -1,0 +1,166 @@
+// +-------------------------------------------------------------------------+
+// | This method returns the current date in a string with the               |
+// | format YYYY-MM-DD.                                                      |
+// +-------------------------------------------------------------------------+
+public String getCurrentDate( GregorianCalendar calendar )
+{
+	String sMonth;
+	String sDay;
+	String sYear;
+	int    dMonth;
+	int    dDay;
+	int    dYear;
+
+	//  Get the dMonth, note that a 1 must be added because the
+	//  range of dMonths returned by calender is 0-11.
+	// +------------------------------------------------------+
+	if ( ( dMonth = calendar.get( Calendar.MONTH ) + 1 ) < 10 )
+	{
+		sMonth = "0" + Integer.toString( dMonth );
+	}
+	else
+	{
+		sMonth = Integer.toString( dMonth );
+	}
+     			
+	// Get the dDay.
+	// +------------------------------------------------------+
+	if ( ( dDay = calendar.get( Calendar.DATE ) ) < 10 )
+	{
+		sDay = "0" + Integer.toString( dDay );
+	}
+	else
+	{
+		sDay = Integer.toString( dDay );
+	}
+
+	// Get the dYear.
+	// +------------------------------------------------------+
+	if ( ( dYear = calendar.get( Calendar.YEAR ) ) < 10 )
+	{
+		sYear = "0" + Integer.toString( dYear );
+	}
+	else
+	{
+		sYear = Integer.toString( dYear );
+	}
+
+	// Set the current date.
+	// +------------------------------------------------------+
+	String date = sYear + "-" + sMonth + "-" + sDay;
+
+	return date;
+}
+
+// +-------------------------------------------------------------------------+
+// | This method returns the current time in a string with the               |
+// | format HH:MM:SS.SS                                                      |
+// +-------------------------------------------------------------------------+
+public String getCurrentTime( GregorianCalendar calendar )
+{
+	String sHour = "";
+	String sMin  = "";
+	String sSec  = "";
+	String sMSec = "";
+
+	int dHour = calendar.get( Calendar.HOUR_OF_DAY );
+	int dMin  = calendar.get( Calendar.MINUTE );
+	int dSec  = calendar.get( Calendar.SECOND );
+	int dMSec = calendar.get( Calendar.MILLISECOND );
+
+	//  Get the hour
+	//  range of dMonths returned by calender is 0-24.
+	// +-----------------------------------------------+
+	if ( dHour < 10 )
+	{
+		sHour = "0" + String.valueOf( dHour );
+	}
+	else
+	{
+		sHour = String.valueOf( dHour );
+	}
+	     			
+	//  Get the minute
+	// +-----------------------------------------------+
+	if ( dMin < 10 )
+	{
+		sMin = "0" + String.valueOf( dMin );
+	}
+	else
+	{
+		sMin = String.valueOf( dMin );
+	}
+
+	//  Get the seconds
+	// +-----------------------------------------------+
+	if ( dSec < 10 )
+	{
+		sSec = "0" + String.valueOf( dSec );
+	}
+	else
+	{
+		sSec = String.valueOf( dSec );
+	}
+
+	//  Get the milliseconds
+	// +-----------------------------------------------+
+	if ( dMSec < 10 )
+	{
+		sMSec = "0" + String.valueOf( dMSec );
+	}
+	else
+	{
+		sMSec = String.valueOf( dMSec );
+	}
+
+	//  Set the current time
+	// +-----------------------------------------------+
+	String sTime = sHour + ":" +
+				   sMin + ":" +
+				   sSec + "." +
+				   sMSec;
+
+	return sTime;
+}
+
+
+if ( fields != null )
+{
+	GregorianCalendar calendar =
+				new GregorianCalendar( TimeZone.getTimeZone( "UT" ) );
+
+	//  Set the exposure time
+	// +------------------------------------------------+
+	fits.setField( "EXPTIME", String.valueOf( expose.getExposeTime() ) );
+
+	//  Set the IRAF filename
+	// +------------------------------------------------+
+	fullIrafname = expose.getFilename();
+	dirPathEndIndex = fullIrafname.lastIndexOf( System.getProperty( "file.separator" ) );
+	fileExtIndex = fullIrafname.lastIndexOf( "." );
+
+	if ( dirPathEndIndex < 0 && fileExtIndex > 0 )
+	{
+		irafname = fullIrafname.substring( 0, fileExtIndex );
+	}
+
+	else if ( dirPathEndIndex > 0 && fileExtIndex > 0 )
+	{
+		irafname = fullIrafname.substring( dirPathEndIndex + 1, fileExtIndex );
+	}
+
+	else
+	{
+		irafname = "";
+	}
+
+	if ( !irafname.equals( "" ) ) { fits.setField( "IRAFNAME", irafname ); }
+	else { logger.error( "Failed to parse iraf filename!" ); }
+
+	//  Set the current date and time
+	// +------------------------------------------------+
+	fits.setField( "DATE-OBS",
+					getCurrentDate( calendar ) +
+					"T" +
+					getCurrentTime( calendar ) );
+}

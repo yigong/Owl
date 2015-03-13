@@ -1,0 +1,129 @@
+import owl.cameraAPI.ImageAPI;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+
+LogFrameCount( pciFrameCount, numberOfFrames )
+{
+	logger.warn( "Image readout ABORTED\nRead " +
+				 Integer.toString( pciFrameCount ) + "/" +
+				 Integer.toString( numberOfFrames ) + " frames" );
+}
+
+//CRWriteToDiskExpose( numberOfFrames, framesPerBuffer, boundedImageSize, decimalExpTime, deinterlaceAlgorithm )
+CRWriteToDiskExposeXL( numberOfFrames, decimalExpTime )
+{
+	private final int MAX_BUFFER_SIZE = 4096 * 4096;
+
+	pixRead = null;
+
+	stop = false;
+	new Thread( this ).start();
+//	this.deinterlaceAlgorithm = deinterlaceAlgorithm;
+	filename = "C:\\Documents and Settings\\streit\\Desktop\\Image.fit";
+
+	abort()
+	{
+		if ( pixRead != null ) pixRead.abort();
+		stop = true;
+		logger.warn( "Aborting CRDebugExpose!" );
+	}
+
+	public void run()
+	{
+		try
+		{
+			expTime = ( int )( decimalExpTime * 1000.0 );
+			logger.info( "EXP TIME: " + expTime );
+
+			if( stop ) return;
+
+			// Get the image size
+			// --------------------------------------------------------------
+			rows = CameraAPI.GetImageRows();
+			cols = CameraAPI.GetImageCols();
+			pixelCount = rows * cols;
+
+			bufferResetCount = ( rows * cols ) / ( 2048 * 2048 );
+			if ( ( rows * cols ) % ( 2048 * 2048 ) != 0 ) bufferResetCount++;
+
+			if( stop ) return;
+
+			CameraAPI.CreateLargeBufferList( rows, cols );
+//			fitsFile3D = CameraAPI.Create3DFitsFile( filename, rows, cols, 16 );
+
+			progressWin = ProgressWindow( 0, numberOfFrames );
+			progressWin.setCustomLabel( "Frame #", true );
+			progressWin.show();
+
+			if( stop ) return;
+
+			// Set the exposure time
+			// --------------------------------------------------------------
+			logger.infoStart( "Setting exposure time" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SET, expTime, CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( stop ) return;
+
+			// IMPORTANT: This step is critical! It ensures that the
+			// continuous readout pixel counter is cleared. Otherwise, a
+			// non-zero value will be read initially.
+			// --------------------------------------------------------------
+			logger.infoStart( "Clearing PCI pixel counters" );
+			CameraAPI.Cmd( CameraAPI.PCI_ID, CameraAPI.WRM, ( CameraAPI.X_MEM | 0x1D ), 0, CameraAPI.DON );
+			CameraAPI.Cmd( CameraAPI.PCI_ID, CameraAPI.WRM, ( CameraAPI.X_MEM | 0x1E ), 0, CameraAPI.DON );
+			CameraAPI.Cmd( CameraAPI.PCI_ID, CameraAPI.WRM, ( CameraAPI.X_MEM | 0x1F ), 0, CameraAPI.DON );
+			CameraAPI.Cmd( CameraAPI.PCI_ID, CameraAPI.WRM, ( CameraAPI.X_MEM | 0x20 ), 0, CameraAPI.DON );
+			logger.infoEnd();
+
+			// Start the exposure
+			// --------------------------------------------------------------
+			logger.infoStart( "Starting exposure " );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SEX, CameraAPI.DON );
+			logger.infoEnd();
+
+			if( stop ) return;
+
+			frameCount = 0;
+			pciFrameCount = 0;
+			imageCount = 0;
+			currentPixelCount = 0;
+			totalPixelCount = 0;
+			lastPixelCount = 0;
+			bufferCount = 1;
+
+			lastTotalPixelCount = 0;
+			count = 0;
+
+			if( stop ) return;
+
+			logger.debug( "Calling ReadContinuousImages ... " );
+			CameraAPI.ReadContinuousImages( numberOfFrames, ( float )0.1, IMG_FILE );
+			logger.debug( "DONE with ReadContinuousImages!" );
+
+			CameraAPI.FreeLargeBufferList();
+
+			// Close the FITS file
+			// --------------------------------------------------------------
+//			CameraAPI.CloseFitsFile( fitsFile3D );
+
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+			logger.error( "Reply expected: " + re.getExpectedHexString() +
+				 	  " actual: " + re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			progressWin.close();
+		}
+	}
+
+	return this;
+}

@@ -1,0 +1,620 @@
+// +----------------------------------------------------------------------------+
+// |  ARC42BiasVoltageDC                                                        |
+// +----------------------------------------------------------------------------+
+// |  A class to create and control the ARC-42 DC bias voltages via the         |
+// |  developer configuration parameters.                                       |
+// +----------------------------------------------------------------------------+
+import javax.swing.border.*;
+import javax.swing.BoxLayout;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlTextField;
+import owl.gui.utils.OwlUtilities;
+
+
+public class ARC42BiasVoltageFrame extends CCScriptFrame implements Runnable, ItemListener
+{
+	final static String BOARD_NAME	=	"ARC-42";
+
+	final String APPLY_ACTION	=	"APPLY";
+	final String STOP_ACTION	=	"ABORT";
+	final String CLEAR_ACTION	=	"CLEAR";
+	final String SAVE_ACTION	=	"SAVE";
+	final String LOAD_ACTION	=	"LOAD";
+	final String NO_LABEL		=	"NoLabel";
+	final float  INVALID_DATA	=	999.f;
+	final int    MAX_BOARD_ID	=  	16;
+	final int    DAC_COUNT		=	6;
+	final int    DAC_OFFSET		=	2;
+	final int    DAC2			=	0;
+	final int    DAC3			=	1;
+	final int    DAC4			=	2;
+	final int    DAC5			=	3;
+	final int    DAC6			=	4;
+	final int    DAC7			=	5;
+
+	JToolBar			m_toolbar;
+	JComboBox			m_boardComboBox;
+	OwlBoldButton		m_applyButton;
+	OwlTextField[]		m_labelTxtfld;
+	OwlNumberField[]	m_dacTxtfld;
+	JLabel[]			m_dacLabel;
+	JLabel[]			m_dacRangeLabel;
+	String[][]			m_dacLabels;
+	float[][]			m_dacVoltages;
+	boolean				m_stop;
+	int					m_boardID;
+
+	public ARC42BiasVoltageFrame()
+	{
+		super( ARC42BiasVoltageFrame.BOARD_NAME + " DC Bias Voltage DC" );
+
+		m_boardID     = 0;
+		m_dacLabels   = new String[ MAX_BOARD_ID ][ DAC_COUNT ];
+		m_dacVoltages = new float[ MAX_BOARD_ID ][ DAC_COUNT ];
+
+		for ( i=0; i<MAX_BOARD_ID; i++ )
+		{
+			for ( j=0; j<DAC_COUNT; j++ )
+			{
+				m_dacVoltages[ i ][ j ] = INVALID_DATA;
+				m_dacLabels[ i ][ j ] = "";
+			}
+		}
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_applyButton = super.createBoldToolbarButton( APPLY_ACTION, Color.RED );
+		m_toolbar.add( m_applyButton);
+
+		clearButton = super.createNewToolbarButton( CLEAR_ACTION );
+		m_toolbar.add( clearButton );
+
+		saveButton = super.createNewToolbarButton( SAVE_ACTION );
+		m_toolbar.add( saveButton );
+
+		loadButton = super.createNewToolbarButton( LOAD_ACTION );
+		m_toolbar.add( loadButton );
+
+		super.appendToolbar( m_toolbar );
+
+		panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+		panel.setBackground( java.awt.Color.WHITE );
+		panel.add( createTitlePanel() );
+		panel.add( createBoardPanel() );
+		panel.add( createValuePanel() );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( panel,   BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+	}
+
+	private JPanel createTitlePanel()
+	{
+		panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+ 		label = new JLabel( "<html><b><font size=4 color=#FFFFFF>" +
+					    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+					    BOARD_NAME + " DC BIAS VOLTAGES" +
+					    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+					    "</font></b></html>" );
+
+		label.setBorder( BorderFactory.createLineBorder( new Color( 0x800000 ) ) );
+		label.setOpaque( true );
+		label.setBackground( new Color( 0xC89191 ) );
+
+		panel.add( label );
+
+		return panel;
+	}
+
+	private JPanel createBoardPanel()
+	{	
+		panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+		String[] boardList = { "0", "1", "2", "3", "4", "5", "6",
+							   "7", "8", "9", "10", "11", "12",
+							   "13", "14", "15" };
+
+		m_boardComboBox      = new JComboBox( boardList );
+		m_boardComboBox.setBackground( java.awt.Color.WHITE );
+		m_boardComboBox.setSelectedIndex( 0 );
+		m_boardComboBox.setActionCommand( "Board Id" );
+		m_boardComboBox.addItemListener( this );
+
+		rangeLabel         = new JLabel ( "( 0 =< N <= 15 )" );
+		boardLabel         = new JLabel( "Board Number: " );
+
+		panel.add( boardLabel );
+		panel.add( m_boardComboBox );
+		panel.add( rangeLabel );
+
+		return panel;
+	}
+
+	private JPanel createValuePanel()
+	{
+		panel = new JPanel();
+		panel.setLayout( gbl );
+
+		// Create the label array
+		m_dacLabel = new JLabel[ DAC_COUNT ];
+		m_dacRangeLabel = new JLabel[ DAC_COUNT ];
+
+		// Create the textfield arrays
+		m_labelTxtfld = new OwlTextField[ DAC_COUNT ];
+		m_dacTxtfld = new OwlNumberField[ DAC_COUNT ];
+
+		for ( m=DAC2, n=1; m<DAC_COUNT; m++, n++ )
+		{
+			m_dacLabel[ m ] = new JLabel( "Pin " +
+										( n < 10 ? " " : "" ) +
+								  		Integer.toString( n ) +
+								  		" ( DAC " +
+								  		( ( m + DAC_OFFSET ) < 10 ? " " : "" ) +
+								  		Integer.toString( m + DAC_OFFSET ) +
+								  		" ): " );
+
+			m_dacRangeLabel[ m ] = new JLabel( "( 0 <= V <= 5 )" );
+
+			// Create the textfields
+			m_labelTxtfld[ m ] = new OwlTextField( "", 10 );
+			m_dacTxtfld[ m ] = new OwlNumberField( "", 4 );
+	
+			m_labelTxtfld[ m ].setName( "Label" );
+			m_dacTxtfld[ m ].setName( "DAC" );
+	
+			// Add the components
+			addComponent( panel,
+						  new JLabel( "Label: " ),
+						  0, 8, 4, 0,
+						  GridBagConstraints.NONE,
+						  GridBagConstraints.WEST,
+						  n, 0, 1, 1 );
+
+			addComponent( panel,
+						  m_labelTxtfld[ m ],
+						  0, 8, 4, 10,
+						  GridBagConstraints.NONE,
+						  GridBagConstraints.WEST,
+						  n, 1, 1, 1 );
+
+			addComponent( panel,
+						  m_dacLabel[ m ],
+						  0, 0, 4, 0,
+						  GridBagConstraints.NONE,
+						  GridBagConstraints.EAST,
+						  n, 2, 1, 1 );
+
+     		addComponent( panel,
+						  m_dacTxtfld[ m ],
+						  0, 8, 4, 0,
+						  GridBagConstraints.NONE,
+						  GridBagConstraints.WEST,
+						  n, 3, 1, 1 );
+
+			addComponent( panel,
+						  m_dacRangeLabel[ m ],
+						  0, 8, 4, 8,
+						  GridBagConstraints.NONE,
+						  GridBagConstraints.WEST,
+						  n, 4, 1, 1 );
+		}
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( APPLY_ACTION ) )
+		{
+			m_stop = false;
+
+			new Thread( this ).start();
+		}
+
+		else if ( event.getActionCommand().equals( STOP_ACTION ) )
+		{
+			m_stop = true;
+		}
+
+		else if ( event.getActionCommand().equals( CLEAR_ACTION ) )
+		{
+			int brdId = m_boardComboBox.getSelectedIndex();
+
+			for ( i=0; i<DAC_COUNT; i++ )
+			{
+				m_labelTxtfld[ i ].setText( "" );
+				m_dacTxtfld[ i ].setText( "" );
+
+				m_dacLabels[ brdId ][ i ]   = "";
+				m_dacVoltages[ brdId ][ i ] = INVALID_DATA;
+			}
+		}
+
+		else if ( event.getActionCommand().equals( SAVE_ACTION ) )
+		{
+			JFileChooser fc = new JFileChooser( System.getProperty( "user.dir" ) );
+
+			fc.addChoosableFileFilter(
+						new owl.main.owltypes.OwlFileFilter(
+								"dcp", "Developer Configuration Parameter [ .dcp ]" ) );
+
+			if ( fc.showSaveDialog( null ) == JFileChooser.APPROVE_OPTION )
+			{
+				try
+				{
+					writeParameters( fc.getSelectedFile().getPath() );
+				}
+				catch ( Exception e )
+				{
+					if ( !e.getMessage().equals( "" ) )
+					{
+						logger.error( e.getMessage() );
+					}
+				}
+			}
+		}
+
+		else if ( event.getActionCommand().equals( LOAD_ACTION ) )
+		{
+			JFileChooser fc = new JFileChooser( System.getProperty( "user.dir" ) );
+
+			fc.addChoosableFileFilter(
+						new owl.main.owltypes.OwlFileFilter(
+								"dcp", "Developer Configuration Parameter [ .dcp ]" ) );
+
+			if ( fc.showOpenDialog( null ) == JFileChooser.APPROVE_OPTION )
+			{
+				try
+				{
+					readParameters( fc.getSelectedFile().getPath() );
+				}
+				catch ( Exception e )
+				{
+					if ( !e.getMessage().equals( "" ) )
+					{
+						logger.error( e.getMessage() );
+					}
+				}
+			}
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void itemStateChanged( ItemEvent ie )
+	{
+		if ( ie.getSource() instanceof javax.swing.JComboBox )
+		{
+			JComboBox src = ( JComboBox )ie.getSource();
+	
+			if ( src.getActionCommand().equals( "Board Id" ) )
+			{
+				for ( i=0; i<DAC_COUNT; i++ )
+				{
+					//
+					// Save the DAC voltages
+					//
+					if ( !m_dacTxtfld[ i ].isEmpty() )
+					{
+						m_dacVoltages[ m_boardID ][ i ] = m_dacTxtfld[ i ].getFloat();
+					}
+					else
+					{
+						m_dacVoltages[ m_boardID ][ i ] = INVALID_DATA;
+					}
+
+					//
+					// Save the DAC labels
+					//
+					if ( !m_labelTxtfld[ i ].getText().isEmpty() )
+					{
+						m_dacLabels[ m_boardID ][ i ] = m_labelTxtfld[ i ].getText();
+					}
+					else
+					{
+						m_dacLabels[ m_boardID ][ i ] = "";
+					}
+				}
+
+				//
+				// Get the new board ID
+				//
+				m_boardID = src.getSelectedIndex();
+
+				//
+				// Set the DAC text fields with saved ones
+				//
+				for ( i=0; i<DAC_COUNT; i++ )
+				{
+					if ( m_dacVoltages[ m_boardID ][ i ] != INVALID_DATA )
+					{
+						m_dacTxtfld[ i ].setValue( m_dacVoltages[ m_boardID ][ i ] );
+					}
+					else
+					{
+						m_dacTxtfld[ i ].setText( "" );
+					}
+
+					if ( !m_dacLabels[ m_boardID ][ i ].isEmpty() )
+					{
+						m_labelTxtfld[ i ].setText( m_dacLabels[ m_boardID ][ i ] );
+					}
+					else
+					{
+						m_labelTxtfld[ i ].setText( "" );
+					}
+				}
+			}
+		}
+	}
+
+	public void writeParameters( filename ) throws Exception
+	{
+		FileWriter  fw = null;
+		PrintWriter pw = null;
+
+		try
+		{
+			//  Force the current dac values to be arrayed before saving
+			// +---------------------------------------------------------+
+			itemStateChanged( new ItemEvent( m_boardComboBox,
+											 ItemEvent.ITEM_STATE_CHANGED,
+											 null,
+											 0 ) );
+
+			fw = new FileWriter( filename, false );
+			pw = new PrintWriter( fw, true );
+
+			for ( brd=0; brd<MAX_BOARD_ID; brd++ )
+			{
+				if ( m_dacVoltages[ brd ][ DAC2 ] != INVALID_DATA )
+				{
+					pw.println( "BRD: " + brd + "\tLABEL: " +
+								( m_dacLabels[ brd ][ DAC2 ].isEmpty() ? NO_LABEL : m_dacLabels[ brd ][ DAC2 ] ) +
+								"\tDAC: " + DAC2 + "\t" + m_dacVoltages[ brd ][ DAC2 ] );
+				}
+
+				if ( m_dacVoltages[ brd ][ DAC3 ] != INVALID_DATA )
+				{
+					pw.println( "BRD: " + brd + "\tLABEL: " +
+								( m_dacLabels[ brd ][ DAC3 ].isEmpty() ? NO_LABEL : m_dacLabels[ brd ][ DAC3 ] ) +
+								"\tDAC: " + DAC3 + "\t" + m_dacVoltages[ brd ][ DAC3 ] );
+				}
+
+				if ( m_dacVoltages[ brd ][ DAC4 ] != INVALID_DATA )
+				{
+					pw.println( "BRD: " + brd + "\tLABEL: " +
+								( m_dacLabels[ brd ][ DAC4 ].isEmpty() ? NO_LABEL : m_dacLabels[ brd ][ DAC4 ] ) +
+								"\tDAC: " + DAC4 + "\t" + m_dacVoltages[ brd ][ DAC4 ] );
+				}
+
+				if ( m_dacVoltages[ brd ][ DAC5 ] != INVALID_DATA )
+				{
+					pw.println( "BRD: " + brd + "\tLABEL: " +
+								( m_dacLabels[ brd ][ DAC5 ].isEmpty() ? NO_LABEL : m_dacLabels[ brd ][ DAC5 ] ) +
+								"\tDAC: " + DAC5 + "\t" + m_dacVoltages[ brd ][ DAC5 ] );
+				}
+
+				if ( m_dacVoltages[ brd ][ DAC6 ] != INVALID_DATA )
+				{
+					pw.println( "BRD: " + brd + "\tLABEL: " +
+								( m_dacLabels[ brd ][ DAC6 ].isEmpty() ? NO_LABEL : m_dacLabels[ brd ][ DAC6 ] ) +
+								"\tDAC: " + DAC6 + "\t" + m_dacVoltages[ brd ][ DAC6 ] );
+				}
+
+				if ( m_dacVoltages[ brd ][ DAC7 ] != INVALID_DATA )
+				{
+					pw.println( "BRD: " + brd + "\tLABEL: " +
+								( m_dacLabels[ brd ][ DAC7 ].isEmpty() ? NO_LABEL : m_dacLabels[ brd ][ DAC7 ] ) +
+								"\tDAC: " + DAC7 + "\t" + m_dacVoltages[ brd ][ DAC7 ] );
+				}
+			}
+
+			fw.close();
+			pw.close();
+		}
+		catch ( Exception e )
+		{
+			if ( fw != null ) { fw.close(); }
+			if ( pw != null ) { pw.close(); }
+			throw e;
+		}
+	}
+
+	public void readParameters( String filename ) throws Exception
+	{
+		FileReader fileReader = null;
+		BufferedReader bufferedReader = null;
+
+		try
+		{
+			fileReader = new FileReader( filename );
+			bufferedReader = new BufferedReader( fileReader );
+
+			while ( ( line = bufferedReader.readLine() ) != null )
+			{
+				if ( line.equals( "" ) ) continue;
+
+				String[] tokens = line.split( "[ \t]" );
+
+				if ( tokens.length != 7 )
+				{
+					continue;
+				}
+
+				brd = Integer.parseInt( tokens[ 1 ].trim() );
+				lbl = ( !tokens[ 3 ].equals( NO_LABEL ) ? tokens[ 3 ] : "" );
+				dac = Integer.parseInt( tokens[ 5 ].trim() );
+				vlt = Float.parseFloat( tokens[ 6 ].trim() );
+
+				m_dacLabels[ brd ][ dac ] = lbl;
+				m_dacVoltages[ brd ][ dac ] = vlt;
+
+				if ( m_boardComboBox.getSelectedIndex() == brd )
+				{
+					for ( dac=0; dac<DAC_COUNT; dac++ )
+					{
+						if ( m_dacVoltages[ brd ][ dac ] != INVALID_DATA )
+						{
+							m_labelTxtfld[ dac ].setText( m_dacLabels[ brd ][ dac ] );
+							m_dacTxtfld[ dac ].setValue( m_dacVoltages[ brd ][ dac ] );
+						}
+					}
+				}
+			}
+
+			bufferedReader.close();
+			fileReader.close();
+		}
+		catch ( Exception e )
+		{
+			if ( bufferedReader != null )
+			{
+				bufferedReader.close();
+			}
+
+			if ( fileReader != null )
+			{
+				fileReader.close();
+			}
+
+			throw e;
+		}
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	public void setBoardId( id )
+	{
+		m_boardID = id;
+	}
+
+	public void setBiasVoltage( dacNumber, value )
+	{
+		m_dacVoltages[ m_boardID ][ dacNumber ] = value;
+	}
+
+	public void run()
+	{
+		int N = 0;
+
+		m_applyButton.setText( STOP_ACTION );
+		m_applyButton.setColored();
+		m_boardID = m_boardComboBox.getSelectedIndex();
+
+		try
+		{
+			if ( m_boardID < 0 )
+			{
+				throw new Exception( "Invalid board id: " + m_boardID );
+			}
+
+			for ( i=0; i<DAC_COUNT; i++ )
+			{
+				if ( !m_dacTxtfld[ i ].isEmpty() )
+				{
+					m_dacVoltages[ m_boardID ][ i ] = m_dacTxtfld[ i ].getFloat();
+	
+					if ( ( m_dacVoltages[ m_boardID ][ i ] < 0.f ) || ( m_dacVoltages[ m_boardID ][ i ] > 5.f ) )
+					{
+						throw new Exception( "DC bias voltage offset out of range ( 0 to 5 volts )" );
+					}
+				}
+				else
+				{
+					m_dacVoltages[ m_boardID ][ i ] = INVALID_DATA;
+				}
+			}
+
+			if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+
+			for ( j=DAC2; j<DAC_COUNT; j++ )
+			{
+				if ( m_dacVoltages[ m_boardID ][ j ] == INVALID_DATA )
+				{
+					continue; 
+				}
+
+				N = ( int )( ( ( m_dacVoltages[ m_boardID ][ j ] - 0.0 ) / 5.0 ) * 4095 );
+
+				if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+				logger.infoStart( "Setting DC bias voltage offset for DAC #" + ( j + DAC_OFFSET ) );
+				CameraAPI.Cmd( CameraAPI.TIM_ID,
+							   CameraAPI.SBN,
+							   m_boardID,
+							   ( j + DAC_OFFSET ),
+							   CameraAPI.VID,
+							   N,
+							   CameraAPI.DON );
+				logger.infoEnd();
+			}			
+
+			if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+			fireScriptApplied();
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+
+			logger.error( "( " + BOARD_NAME +
+						  " DCBiasVoltageDC script ): SBN reply error. Expected: " +
+						   re.getExpectedHexString() + " Received: " +
+						   re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+
+			if ( !e.getMessage().equals( STOP_ACTION ) )
+			{
+				logger.error( "( " + BOARD_NAME +
+							  " DCBiasVoltageDC script ): " +
+							   e.toString() );
+			}
+		}
+		finally
+		{
+			m_applyButton.setBlack( APPLY_ACTION );
+		}
+	}
+}
+
+
+//ARC42BiasVoltageDC()
+//{
+	CCScriptFrame frame = null;
+
+//	if ( CameraAPI.IsCCParamSupported( CameraAPI.ARC42 ) )
+//	{
+		frame = ( CCScriptFrame )( new ARC42BiasVoltageFrame() );
+		frame.setVisible( true );
+//	}
+//	else
+//	{
+//		logger.warn(
+//				"Additional ARC42 options not available! CC Param Value: 0x" +
+//				 Integer.toHexString( CameraAPI.GetCCParams() ) );
+//	}
+
+//	return frame;
+//}

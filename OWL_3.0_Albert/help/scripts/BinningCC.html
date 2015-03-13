@@ -1,0 +1,103 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">BinningCC</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+BinningCC( useGUI );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">boolean useGUI</span></td>
+<td valign="top">True to launch the binning controller configuration
+parameter window; false to run without using a windowed interface.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+owl.CCParams.CCScriptFrame (useGUI=true) or BinningCC Object (useGUI=false)
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void setFactors( int rowFactor, int colFactor )</td>
+<td>Sets the row and column binning factors. Example: setFactors( 2, 2 )
+sets the binning to 2x2.</td>
+</tr>
+
+<tr>
+<td valign="top">void run()</td>
+<td>Starts sending the command to the controller. For use with
+[useGUI = false] only.</td>
+</tr>
+
+<tr>
+<td valign="top">void show()</td>
+<td>Call to show the graphical user interface. For use with
+[useGUI = true ] only.</td>
+</tr>
+
+<tr>
+<td valign="top">void destroy()</td>
+<td>Closes and disposes of the graphical user interface. Call
+to exit. For use with [useGUI = true] only.</td> 
+</tr>
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Allows binning parameters to be set on the controller. Can 
+be run with or without a graphical user interface. The 
+controller must support binning for this class to function.
+
+<br><br>
+To run with a graphical user interface:
+<pre>
+	BinningCC( true ).show();
+
+	<span style="text-decoration: underline">or</span>
+
+	s = BinningCC( true );
+	s.show();
+</pre>
+
+<br>
+To run without a user interface:
+<pre>
+	s = BinningCC( false );
+	s.setFactors( 2, 3 );	// Set binning to 2x3
+	s.run();
+</pre>
+
+</div>
+
+</body>
+
+</html>

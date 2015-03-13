@@ -1,0 +1,8 @@
+logger.info( "Hello Print Test!" );
+
+for ( i=0; i<50; i++ )
+{
+	if ( stop ) break;
+	logger.info( "Hello From LOOPED Print Test!" );
+	Thread.sleep( 250 );
+}

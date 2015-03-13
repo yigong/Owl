@@ -1,0 +1,754 @@
+/**
+********************************************************************************
+*	A class to create and control the CCD clock driver parameters via the
+*	controller configuration parameters.
+*
+*	@author Scott Streit
+********************************************************************************
+*/
+import java.io.*;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
+import javax.swing.border.TitledBorder;
+import javax.swing.ButtonModel;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.gui.utils.OwlUtilities;
+import owl.main.owltypes.OwlBoldButton;
+
+
+
+public class BoardInfo
+{
+	public static final int CLOCK_COUNT = 24;
+
+	private String		m_sMinVoltage;
+	private String		m_sMaxVoltage;
+
+	private String[]	m_sName;
+	private String[]	m_sLoVoltage;
+	private String[]	m_sHiVoltage;
+
+	private ButtonModel	m_jMux1;
+	private ButtonModel m_jMux2;
+
+	public BoardInfo()
+	{
+		m_sMinVoltage	= "-12.8";
+		m_sMaxVoltage	= "+13.0";
+
+		m_sName			= new String[ CLOCK_COUNT ];
+		m_sLoVoltage	= new String[ CLOCK_COUNT ];
+		m_sHiVoltage	= new String[ CLOCK_COUNT ];
+
+		m_jMux1			= null;
+		m_jMux2			= null;
+
+		for ( int i=0; i<CLOCK_COUNT; i++ )
+		{
+			m_sName[ i ]		= "";
+			m_sLoVoltage[ i ]	= "";
+			m_sHiVoltage[ i ]	= "";
+		}
+	}
+
+	public void setMinVoltage( String sMinVoltage ) { m_sMinVoltage = sMinVoltage; }
+	public void setMaxVoltage( String sMaxVoltage ) { m_sMaxVoltage = sMaxVoltage; }
+
+	public void setName( int dClk, String sName ) { m_sName[ dClk ] = sName; }
+	public void setLoVoltage( int dClk, String sLoVoltage ) { m_sLoVoltage[ dClk ] = sLoVoltage; }
+	public void setHiVoltage( int dClk, String sHiVoltage ) { m_sHiVoltage[ dClk ] = sHiVoltage; }
+
+	public void setMux1( ButtonModel jMux1 ) { m_jMux1 = jMux1; }
+	public void setMux2( ButtonModel jMux2 ) { m_jMux2 = jMux2; }
+
+	public String  getMinVoltage() { return m_sMinVoltage; }
+	public String  getMaxVoltage() { return m_sMaxVoltage; }
+
+	public String  getName( int dClk ) { return m_sName[ dClk ]; }
+	public String  getLoVoltage( int dClk ) { return m_sLoVoltage[ dClk ]; }
+	public String  getHiVoltage( int dClk ) { return m_sHiVoltage[ dClk ]; }
+
+	public ButtonModel getMux1() { return m_jMux1; }
+	public ButtonModel getMux2() { return m_jMux2; }
+}
+
+
+
+public class ClockDriverFrame extends CCScriptFrame implements Runnable, ItemListener
+{
+	// Define constants.
+	private final String RUN_ACTION		=	"RUN";
+	private final String STOP_ACTION	=	"ABORT";
+	private final String LOAD_ACTION	=	"LOAD";
+	private final String SAVE_ACTION	=	"SAVE";
+
+	private final int BOARD_COUNT		= 8;
+
+	private final String JUMPER_SETTING	= "Clock Driver Jumper Setting";
+	private final String MAX_VOLTS		= "Clock Driver Max Volts";
+	private final String MIN_VOLTS		= "Clock Driver Min Volts";
+	private final String CLOCK_DRIVER	= "Clock Driver";
+	private final String NAME			= "Name";
+	private final String LOW_VOLTAGE	= "Low Volts";
+	private final String HIGH_VOLTAGE	= "High Volts";
+	private final String MUX1			= "Mux1 Selected";
+	private final String MUX2			= "Mux2 Selected";
+
+	JToolBar		toolbar;
+	OwlBoldButton	runButton;
+	boolean			stop;
+	JComboBox		brdJmprComboBox;
+	JTextField[]	clockTxtflds;
+	JTextField[]	loVoltageTxtflds;
+	JTextField[]	hiVoltageTxtflds;
+	JRadioButton[]	mux1RadioButtons;
+	JRadioButton[]	mux2RadioButtons;
+	ButtonGroup		mux1ButtonGroup;
+	ButtonGroup		mux2ButtonGroup;
+	JTextField		maxVoltageTxtfld;
+	JTextField		minVoltageTxtfld;
+	BoardInfo[]		boardInfo;
+
+
+	public ClockDriverFrame()
+	{
+		super( "Clock Driver DC" );
+
+		boardInfo = new BoardInfo[ BOARD_COUNT ];
+
+		for ( int i=0; i<BOARD_COUNT; i++ )
+		{
+			boardInfo[ i ] = new BoardInfo();
+		}
+
+		toolbar = new JToolBar();
+		toolbar.setFloatable( false );
+
+		runButton = super.createBoldToolbarButton( RUN_ACTION, Color.RED );
+		toolbar.add( runButton );
+
+		saveButton = super.createNewToolbarButton( SAVE_ACTION );
+		toolbar.add( saveButton );
+
+		loadButton = super.createNewToolbarButton( LOAD_ACTION );
+		toolbar.add( loadButton );
+
+		super.appendToolbar( toolbar );
+
+		getContentPane().add( toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+	}
+
+	public void itemStateChanged( ItemEvent ie )
+	{
+		// +---------------------------------------------------------------------+
+		// | Handle DESELECTION Event                                            |
+		// +---------------------------------------------------------------------+
+		if ( ie.getStateChange() == ItemEvent.DESELECTED && clockTxtflds != null )
+		{
+			int dBoard = -1;
+
+			for ( int i=0; i<brdJmprComboBox.getItemCount(); i++ )
+			{
+				if ( brdJmprComboBox.getItemAt( i ).equals( ie.getItem() ) )
+				{
+					dBoard = i;
+					break;
+				}
+			}
+
+			if ( dBoard >= 0 )
+			{
+				boardInfo[ dBoard ].setMinVoltage( minVoltageTxtfld.getText() );
+				boardInfo[ dBoard ].setMaxVoltage( maxVoltageTxtfld.getText() );
+
+				minVoltageTxtfld.setText( "" );
+				maxVoltageTxtfld.setText( "" );
+
+				boardInfo[ dBoard ].setMux1( mux1ButtonGroup.getSelection() );
+				boardInfo[ dBoard ].setMux2( mux2ButtonGroup.getSelection() );
+
+				mux1ButtonGroup.clearSelection();
+				mux2ButtonGroup.clearSelection();
+
+				for ( int j=0; j<BoardInfo.CLOCK_COUNT; j++ )
+				{
+					boardInfo[ dBoard ].setName( j, clockTxtflds[ j ].getText() );
+					boardInfo[ dBoard ].setLoVoltage( j, loVoltageTxtflds[ j ].getText() );
+					boardInfo[ dBoard ].setHiVoltage( j, hiVoltageTxtflds[ j ].getText() );
+
+					clockTxtflds[ j ].setText( "" );
+					loVoltageTxtflds[ j ].setText( "" );
+					hiVoltageTxtflds[ j ].setText( "" );
+				}
+			}
+		}
+
+		// +---------------------------------------------------------------------+
+		// | Handle SELECTION Event                                              |
+		// +---------------------------------------------------------------------+
+		else if ( ie.getStateChange() == ItemEvent.SELECTED && clockTxtflds != null )
+		{
+			int dBoard = -1;
+
+			for ( int i=0; i<brdJmprComboBox.getItemCount(); i++ )
+			{
+				if ( brdJmprComboBox.getItemAt( i ).equals( ie.getItem() ) )
+				{
+					dBoard = i;
+					break;
+				}
+			}
+
+			if ( dBoard >= 0 )
+			{
+				minVoltageTxtfld.setText( boardInfo[ dBoard ].getMinVoltage() );
+				maxVoltageTxtfld.setText( boardInfo[ dBoard ].getMaxVoltage() );
+
+				if ( boardInfo[ dBoard ].getMux1() != null )
+				{
+					mux1ButtonGroup.setSelected( boardInfo[ dBoard ].getMux1(), true );
+				}
+
+				if ( boardInfo[ dBoard ].getMux2() != null )
+				{
+					mux2ButtonGroup.setSelected( boardInfo[ dBoard ].getMux2(), true );
+				}
+
+				for ( int j=0; j<BoardInfo.CLOCK_COUNT; j++ )
+				{
+					clockTxtflds[ j ].setText( boardInfo[ dBoard ].getName( j ) );
+					loVoltageTxtflds[ j ].setText( boardInfo[ dBoard ].getLoVoltage( j ) );
+					hiVoltageTxtflds[ j ].setText( boardInfo[ dBoard ].getHiVoltage( j ) );
+				}
+			}
+		}
+	}
+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setBorder( BorderFactory.createEmptyBorder( 8, 8, 8, 8 ) );
+		panel.setLayout( gbl );
+
+		addComponent( panel, createComponentSet1(), 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 0, 1, 1);
+		addComponent( panel, createComponentSet2(), 5, 0, 5, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 1, 0, 1, 1);
+		addComponent( panel, createComponentSet3(), 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 2, 0, 1, 1);
+
+		return panel;
+	}
+
+	private JPanel createComponentSet1()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		jumperSettingLabel = new JLabel( "Jumper Setting of Board (N):" );
+		jumperSettingRangeLabel = new JLabel( "(0<=N<=14, even #'s)" );
+
+		// Create string texts for the jumper settting comboBox.
+		String[] jumperSettingValues = { "0", "2", "4", "6", "8", "10", "12", "14" };
+
+		// Create a JComboBox for the jumper setting of board.
+		brdJmprComboBox = new JComboBox( jumperSettingValues );
+		brdJmprComboBox.addItemListener( this );
+		brdJmprComboBox.setEditable( false );
+		brdJmprComboBox.setPreferredSize( new Dimension( 48, 18 ) );
+		brdJmprComboBox.setSelectedItem( "2" );
+
+		// Add the components to the panel.
+		addComponent( panel, jumperSettingLabel,      0, 10, 0, 10,  GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 0, 1, 1 );
+		addComponent( panel, brdJmprComboBox,   0, 10, 0, 10,  GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 1, 1, 1 );
+
+		return panel;
+	}
+
+	private JPanel createComponentSet2()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		maxVoltageLabel  = new JLabel( "Max Volt:" );
+		minVoltageLabel  = new JLabel( " Min Volt: " );
+		multiplexerLabel = new JLabel( "(M1, M2 = Multiplexer1, 2)" );
+
+		// Create max and min voltage textfields.
+		maxVoltageTxtfld = new JTextField( "+13.0", 4 );
+		minVoltageTxtfld = new JTextField( "-12.8", 4 );
+
+		// Add the components to the panel.
+		addComponent( panel, minVoltageLabel,  0, 10, 0,  0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 0, 1, 1);
+		addComponent( panel, minVoltageTxtfld, 0,  0, 0,  5, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 1, 1, 1);
+		addComponent( panel, maxVoltageLabel,  0,  0, 0,  0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 2, 1, 1);
+		addComponent( panel, maxVoltageTxtfld, 0,  0, 0,  5, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 3, 1, 1);
+		addComponent( panel, multiplexerLabel, 0,  5, 0, 10, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 4, 1, 1);
+
+		return panel;
+	}
+
+	private JPanel createComponentSet3()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		JLabel[] titleLabels = { new JLabel( " #" ), new JLabel( "Clock" ),
+								 new JLabel( "Lo" ), new JLabel( "Hi" ),
+								 new JLabel( "M1" ), new JLabel( "M2" ),
+								 new JLabel( " #" ), new JLabel( "Clock" ),
+								 new JLabel( "Lo" ), new JLabel( "Hi" ),
+								 new JLabel( "M1" ), new JLabel( "M2" ) };
+
+		for ( i=0; i<titleLabels.length; i++ )
+		{
+			addComponent( panel,
+						  titleLabels[ i ],
+						  0, 0, 0, 0,
+						  GridBagConstraints.NONE,
+						  GridBagConstraints.WEST,
+						  0, i, 1, 1);
+		}
+
+		clockTxtflds     = new JTextField[ BoardInfo.CLOCK_COUNT ];
+		loVoltageTxtflds = new JTextField[ BoardInfo.CLOCK_COUNT ];
+		hiVoltageTxtflds = new JTextField[ BoardInfo.CLOCK_COUNT ];
+		mux1RadioButtons = new JRadioButton[ BoardInfo.CLOCK_COUNT ];
+		mux2RadioButtons = new JRadioButton[ BoardInfo.CLOCK_COUNT ];
+		mux1ButtonGroup  = new ButtonGroup();
+		mux2ButtonGroup  = new ButtonGroup();
+
+		for ( i=0; i<clockTxtflds.length; i++ )
+		{
+			numLabel = new JLabel( i + ":" );
+			numLabel.setHorizontalAlignment( SwingConstants.RIGHT );
+
+			clockTxtflds[ i ] = new JTextField( "", 6 );
+			loVoltageTxtflds[ i ] = new JTextField( "", 4 );
+			hiVoltageTxtflds[ i ] = new JTextField( "", 4 );
+
+			mux1RadioButtons[ i ] = new JRadioButton( "" );
+			mux1RadioButtons[ i ].setActionCommand( Integer.toString( i ) );
+			mux1RadioButtons[ i ].addActionListener( this );
+			mux1ButtonGroup.add( mux1RadioButtons[ i ] );
+
+			mux2RadioButtons[ i ] = new JRadioButton( "" );
+			mux2RadioButtons[ i ].setActionCommand( Integer.toString( i ) );
+			mux2RadioButtons[ i ].addActionListener( this );
+			mux2ButtonGroup.add( mux2RadioButtons[ i ] );
+
+			if ( i < 12 )
+			{
+				addComponent( panel, numLabel,              0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i + 1 ), 0, 1, 1);
+				addComponent( panel, clockTxtflds[ i ],     0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i + 1 ), 1, 1, 1);
+				addComponent( panel, loVoltageTxtflds[ i ], 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i + 1 ), 2, 1, 1);
+				addComponent( panel, hiVoltageTxtflds[ i ], 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i + 1 ), 3, 1, 1);
+				addComponent( panel, mux1RadioButtons[ i ], 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i + 1 ), 4, 1, 1);
+				addComponent( panel, mux2RadioButtons[ i ], 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i + 1 ), 5, 1, 1);
+			}
+			else
+			{
+				addComponent( panel, numLabel,              0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i - 11 ), 6, 1, 1);
+				addComponent( panel, clockTxtflds[ i ],     0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i - 11 ), 7, 1, 1);
+				addComponent( panel, loVoltageTxtflds[ i ], 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i - 11 ), 8, 1, 1);
+				addComponent( panel, hiVoltageTxtflds[ i ], 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i - 11 ), 9, 1, 1);
+				addComponent( panel, mux1RadioButtons[ i ], 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i - 11 ), 10, 1, 1);
+				addComponent( panel, mux2RadioButtons[ i ], 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, ( i - 11 ), 11, 1, 1);
+			}
+		}
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		actionCmd = event.getActionCommand();
+
+		if ( actionCmd.equals( RUN_ACTION ) )
+		{
+			stop = false;
+
+			new Thread( this ).start();
+		}
+
+		else if ( actionCmd.equals( STOP_ACTION ) )
+		{
+			stop = true;
+		}
+
+		else if ( actionCmd.equals( LOAD_ACTION ) )
+		{
+			JFileChooser fc = new JFileChooser( System.getProperty( "user.dir" ) );
+
+			fc.addChoosableFileFilter(
+						new owl.main.owltypes.OwlFileFilter(
+								"dcp", "Developer Configuration Parameter [ .dcp ]" ) );
+			fc.setCurrentDirectory(new File("/home/bearing/Documents/OWL/"));								
+
+			if ( fc.showOpenDialog( null ) == JFileChooser.APPROVE_OPTION )
+			{
+				try
+				{
+					readParameters( fc.getSelectedFile().getPath() );
+				}
+				catch ( Exception e )
+				{
+					if ( !e.getMessage().equals( "" ) )
+					{
+						logger.error( e.getMessage() );
+					}
+				}
+			}
+		}
+
+		else if ( actionCmd.equals( SAVE_ACTION ) )
+		{
+			JFileChooser fc = new JFileChooser( System.getProperty( "user.dir" ) );
+
+			fc.addChoosableFileFilter(
+						new owl.main.owltypes.OwlFileFilter(
+								"dcp", "Developer Configuration Parameter [ .dcp ]" ) );
+
+			if ( fc.showSaveDialog( null ) == JFileChooser.APPROVE_OPTION )
+			{
+				try
+				{
+					writeParameters( fc.getSelectedFile().getPath() );
+				}
+				catch ( Exception e )
+				{
+					if ( !e.getMessage().equals( "" ) )
+					{
+						logger.error( e.getMessage() );
+					}
+				}
+			}
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void writeParameters( filename ) throws Exception
+	{
+		FileWriter fileWriter = null;
+
+		try
+		{
+			fileWriter = new FileWriter( filename );
+
+			// Jumper setting
+			fileWriter.append( JUMPER_SETTING + ":\t" + Integer.toString( brdJmprComboBox.getSelectedIndex() ) + "\n" );
+
+			// Max volts textfield.
+			fileWriter.append( MAX_VOLTS + ":\t" + maxVoltageTxtfld.getText() + "\n" );
+
+			// Min volts textfield.
+			fileWriter.append( MIN_VOLTS + ":\t" + minVoltageTxtfld.getText() + "\n" );
+
+			// Clock name, high and low voltage.
+			for ( i=0; i<24; i++ )
+			{
+				if ( !clockTxtflds[ i ].getText().equals( "" ) ||
+				 	 !loVoltageTxtflds[ i ].getText().equals( "" ) ||
+				 	 !hiVoltageTxtflds[ i ].getText().equals( "" ) ||
+				 	 mux1RadioButtons[ i ].isSelected() ||
+				 	 mux2RadioButtons[ i ].isSelected() )
+				{
+					fileWriter.append( "\n" );
+					fileWriter.append( CLOCK_DRIVER + " " + Integer.toString( i ) + " " + NAME + ":\t" + clockTxtflds[ i ].getText() + "\n" );
+					fileWriter.append( CLOCK_DRIVER + " " + Integer.toString( i ) + " " + LOW_VOLTAGE + ":\t" + loVoltageTxtflds[ i ].getText() + "\n" );
+					fileWriter.append( CLOCK_DRIVER + " " + Integer.toString( i ) + " " + HIGH_VOLTAGE + ":\t" + hiVoltageTxtflds[ i ].getText() + "\n" );
+					fileWriter.append( CLOCK_DRIVER + " " + Integer.toString( i ) + " " + MUX1 + ":\t" + String.valueOf( mux1RadioButtons[ i ].isSelected() ) + "\n" );
+					fileWriter.append( CLOCK_DRIVER + " " + Integer.toString( i ) + " " + MUX2 + ":\t" + String.valueOf( mux2RadioButtons[ i ].isSelected() ) + "\n" );
+				}
+			}
+
+			fileWriter.close();
+		}
+		catch ( Exception e )
+		{
+			if ( fileWriter != null )
+			{
+				fileWriter.close();
+			}
+
+			throw e;
+		}
+	}
+
+	public void readParameters( String filename ) throws Exception
+	{
+		FileReader fileReader = null;
+		BufferedReader bufferedReader = null;
+
+		try
+		{
+			fileReader = new FileReader( filename );
+			bufferedReader = new BufferedReader( fileReader );
+
+			while ( ( line = bufferedReader.readLine() ) != null )
+			{
+				if ( line.equals( "" ) || !line.contains( CLOCK_DRIVER ) || !line.contains( ":" ) )
+				{
+					continue;
+				}
+
+				String[] tokens = line.split( ":" );
+
+				if ( tokens == null || tokens.length <= 1 )
+				{
+					continue;
+				}
+
+				if ( tokens[ 0 ].equals( JUMPER_SETTING ) )
+				{
+					val = Integer.parseInt( tokens[ 1 ].trim() );
+					brdJmprComboBox.setSelectedIndex( val );
+				}
+
+				else if ( tokens[ 0 ].equals( MIN_VOLTS ) )
+				{
+					minVoltageTxtfld.setText( tokens[ 1 ].trim() );
+				}
+
+				else if ( tokens[ 0 ].equals( MAX_VOLTS ) )
+				{
+					maxVoltageTxtfld.setText( tokens[ 1 ].trim() );
+				}
+
+				else
+				{
+					tokens = line.split( " " );
+
+					if ( tokens[ 3 ].contains( NAME ) )
+					{
+						index = Integer.parseInt( tokens[ 2 ].trim() );
+						text  = tokens[ 3 ].substring( tokens[ 3 ].lastIndexOf( ":" ) + 1 ).trim();
+
+						if ( index >= 0 && !text.equals( "" ) )
+						{
+							clockTxtflds[ index ].setText( text );
+						}
+					}
+
+					else if ( ( tokens[ 3 ] + " " + tokens[ 4 ] ).contains( LOW_VOLTAGE ) )
+					{
+						index = Integer.parseInt( tokens[ 2 ].trim() );
+						text  = tokens[ 4 ].substring( tokens[ 4 ].lastIndexOf( ":" ) + 1 ).trim();
+
+						if ( index >= 0 && !text.equals( "" ) )
+						{
+							loVoltageTxtflds[ index ].setText( text );
+						}
+					}
+
+					else if ( ( tokens[ 3 ] + " " + tokens[ 4 ] ).contains( HIGH_VOLTAGE ) )
+					{
+						index = Integer.parseInt( tokens[ 2 ].trim() );
+						text  = tokens[ 4 ].substring( tokens[ 4 ].lastIndexOf( ":" ) + 1 ).trim();
+
+						if ( index >= 0 && !text.equals( "" ) )
+						{
+							hiVoltageTxtflds[ index ].setText( text );
+						}
+					}
+
+					else if ( ( tokens[ 3 ] + " " + tokens[ 4 ] ).contains( MUX1 ) )
+					{
+						String[] subTokens = tokens[ 4 ].split( ":" );
+						val = Boolean.parseBoolean( subTokens[ 1 ].trim() );
+						index = Integer.parseInt( tokens[ 2 ].trim() );
+						mux1RadioButtons[ index ].setSelected( val );
+					}
+
+					else if ( ( tokens[ 3 ] + " " + tokens[ 4 ] ).contains( MUX2 ) )
+					{
+						String[] subTokens = tokens[ 4 ].split( ":" );
+						val = Boolean.parseBoolean( subTokens[ 1 ].trim() );
+						index = Integer.parseInt( tokens[ 2 ].trim() );
+						mux2RadioButtons[ index ].setSelected( val );
+					}
+				}
+			}
+
+			bufferedReader.close();
+			fileReader.close();
+		}
+		catch ( Exception e )
+		{
+			if ( bufferedReader != null )
+			{
+				bufferedReader.close();
+			}
+
+			if ( fileReader != null )
+			{
+				fileReader.close();
+			}
+
+			throw e;
+		}
+	}
+
+	public void run()
+	{
+		double	maxClockVoltage = 0;
+		double	minClockVoltage = 0;
+		int		mux1Pos = -1;
+		int		mux2Pos = -1;
+
+		runButton.setColored( STOP_ACTION );
+
+		// Create the clock voltage arrays
+		double[] hiVoltages = new double[ BoardInfo.CLOCK_COUNT ];
+		double[] loVoltages = new double[ BoardInfo.CLOCK_COUNT ];
+	
+		// Clear the clock voltages
+		for ( i=0; i<hiVoltages.length; i++ )
+		{
+			hiVoltages[ i ] = 0;
+			loVoltages[ i ] = 0;
+		}
+
+		try
+		{
+			jumperSetting = Integer.parseInt( ( String )brdJmprComboBox.getSelectedItem() );
+
+			if ( stop ) { throw new Exception( STOP_ACTION ); }
+
+			mux1Pos = -1;
+			for ( i=0; i<mux1RadioButtons.length; i++ )
+			{
+				if ( mux1RadioButtons[ i ].isSelected() )
+				{
+       				mux1Pos = i;
+       				break;
+       			}
+    			}
+
+			if ( stop ) { throw new Exception( STOP_ACTION ); }
+
+			mux2Pos = -1;
+			for ( i=0; i<mux2RadioButtons.length; i++ )
+			{
+				if ( mux2RadioButtons[ i ].isSelected() )
+				{
+        				mux2Pos = i;
+        				break;
+        			}
+    			}
+
+			if ( stop ) { throw new Exception( STOP_ACTION ); }
+
+			if( mux1Pos >= 0 && mux2Pos >= 0 )
+			{
+				logger.infoStart( "Setting clock driver MUX" );
+				CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SMX, jumperSetting, mux1Pos, mux2Pos, CameraAPI.DON );
+				logger.infoEnd();
+			}
+
+			if ( stop ) { throw new Exception( STOP_ACTION ); }
+
+			if ( !maxVoltageTxtfld.getText().equals( "" ) && !minVoltageTxtfld.getText().equals( "" ) )
+			{
+				// Set the max and min clock driver voltages.
+				maxClockVoltage = Double.parseDouble( maxVoltageTxtfld.getText() );
+				minClockVoltage = Double.parseDouble( minVoltageTxtfld.getText() );
+
+				if ( stop ) { throw new Exception( STOP_ACTION ); }
+
+				// Check the min/max voltage is not equal or greater/less than the
+				// max/min voltage. If so, exit.
+				if ( ( maxClockVoltage <= minClockVoltage ) )
+				{
+					throw new Exception( "Max clock driver voltage less than min voltage!" );
+				}
+
+				if ( stop ) { throw new Exception( STOP_ACTION ); }
+
+				//  Set the high and low clock driver voltages
+				// +--------------------------------------------+
+				for ( i=0; i<hiVoltageTxtflds.length; i++ )
+				{
+					if ( stop ) { throw new Exception( STOP_ACTION ); }
+
+					if ( !hiVoltageTxtflds[ i ].getText().equals( "" ) && !loVoltageTxtflds[ i ].getText().equals( "" ) )
+					{
+						hiVoltages[ i ] = Double.parseDouble( hiVoltageTxtflds[ i ].getText() );
+						loVoltages[ i ] = Double.parseDouble( loVoltageTxtflds[ i ].getText() );
+					
+						if ( hiVoltages[ i ] > maxClockVoltage )
+						{
+							throw new Exception( "High voltage greater than max voltage!" );
+						}
+		
+						if ( hiVoltages[ i ] < minClockVoltage )
+						{
+							throw new Exception( "High voltage less than min voltage!" );
+						}
+					
+						if ( loVoltages[ i ] < minClockVoltage )
+						{
+							throw new Exception( "Low voltage less than min voltage!" );
+						}
+		
+						if ( loVoltages[ i ] > maxClockVoltage )
+						{
+							throw new Exception( "Low voltage greater than max voltage!" );
+						}
+
+						logger.infoStart( "Setting clock driver voltages" );
+						val = ( 0x00000FFF & ( ( int )( 4095 * ( ( hiVoltages[ i ] ) - ( minClockVoltage ) ) / ( ( maxClockVoltage ) - ( minClockVoltage ) ) ) ) );
+						CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SBN, jumperSetting, i*2, CameraAPI.CLK, val, CameraAPI.DON );
+
+						if ( stop ) throw new Exception( STOP_ACTION );
+
+						val = ( 0x00000FFF & ( ( int )( 4095 * ( ( loVoltages[ i ] ) - ( minClockVoltage ) ) / ( ( maxClockVoltage ) - ( minClockVoltage ) ) ) ) );
+						CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SBN, jumperSetting, i*2+1, CameraAPI.CLK, val, CameraAPI.DON );
+						logger.infoEnd();
+					}
+				}
+
+				if ( stop ) { throw new Exception( STOP_ACTION ); }
+			}
+		}
+		catch ( ReplyException  re )
+		{
+			logger.infoFail();
+			logger.error( "( ClockDriverDC script ): Expected reply: "    +
+					  re.getExpectedHexString() + " received reply: " +
+					  re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+
+			if ( !e.getMessage().equals( STOP_ACTION ) )
+			{
+				logger.error( "( ClockDriverDC script ): " + e.getMessage() );
+			}
+		}
+		finally
+		{
+			runButton.setBlack( RUN_ACTION );
+		}
+	}
+}
+
+
+
+ClockDriverDC()
+{
+	CCScriptFrame frame = null;
+
+	frame = ( CCScriptFrame )( new ClockDriverFrame() );
+	frame.setVisible( true );
+
+	return frame;
+}

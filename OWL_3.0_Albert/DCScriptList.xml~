@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+
+<params>
+  
+  <!-- =================================================== -->
+  <!--  CLOCK DRIVER                                       -->
+  <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+  <!--  Note: "bits" is set to zero so the clock driver    -->
+  <!--        option will always be displayed.             -->
+  <!-- =================================================== -->
+  <group>
+    <ccscript>
+      <script>ClockDriverDC();</script>
+      <text>Clock Driver</text>
+      <action>CLOCK_DRIVER_SCRIPT</action>
+      <bits>0x000000</bits>
+    </ccscript>
+  </group>
+  
+  <!-- =================================================== -->
+  <!--  VIDEO PROCESSOR                                    -->
+  <!-- =================================================== -->
+  <group>
+    
+    <ccscript>
+      <script>LBLHVDC();</script>
+      <text>LBL High Voltage Board</text>
+      <action>LBL_HV_DC_SCRIPT</action>
+      <bits>0x000006</bits>
+    </ccscript>
+    
+    <ccscript>
+      <script>ARC47BiasVoltageDC();</script>
+      <text>ARC-47 DC Bias Voltage</text>
+      <action>ARC47_SCRIPT</action>
+      <bits>0x000007</bits>
+    </ccscript>
+    
+    <!--    <ccscript>
+	    <script>ARC48BiasVoltageDC();</script>
+	    <text>ARC-48 DC Bias Voltage</text>
+	    <action>ARC48_SCRIPT</action>
+	    <bits>0x000006</bits>
+    </ccscript>
+    -->
+    
+    <ccscript>
+      <script>ARC46BiasVoltageDC();</script>
+      <text>ARC-46 DC Bias Voltage</text>
+      <action>ARC46_SCRIPT</action>
+      <bits>0x000005</bits>
+    </ccscript>
+    
+    <ccscript>
+      <script>ARC45BiasVoltageDC();</script>
+      <text>ARC-45 DC Bias Voltage</text>
+      <action>ARC45_SCRIPT</action>
+      <bits>0x000004</bits>
+    </ccscript>
+    
+    <ccscript>
+      <script>ARC42BiasVoltageDC();</script>
+      <text>ARC-42 DC Bias Voltage</text>
+      <action>ARC42_SCRIPT</action>
+      <bits>0x000002</bits>
+    </ccscript>
+    
+    <ccscript>
+      <script>ARC41BiasVoltageDC();</script>
+      <text>ARC-41 DC Bias Voltage</text>
+      <action>ARC41_SCRIPT</action>
+      <bits>0x000000</bits>
+    </ccscript>
+  </group>
+  
+  <!-- =================================================== -->
+  <!--  GAIN                                               -->
+  <!-- =================================================== -->
+  <group>
+
+    <ccscript>
+      <script>ARC48Gain();</script>
+      <text>ARC-48 Gain, Integration</text>
+      <action>ARC48_GAIN_SCRIPT</action>
+      <bits>0x000000</bits>
+    </ccscript>
+
+    <ccscript>
+      <script>GainDC();</script>
+      <text>Gain</text>
+      <action>ARC45_GAIN_SCRIPT</action>
+      <bits>0x000004</bits>
+    </ccscript>
+    
+    <ccscript>
+      <script>ARC4748GainDC();</script>
+      <text>Gain</text>
+      <action>ARC48_GAIN_SCRIPT</action>
+      <bits>0x000006</bits>
+    </ccscript>
+    
+    <ccscript>
+      <script>ARC4748GainDC();</script>
+      <text>Gain</text>
+      <action>ARC47_GAIN_SCRIPT</action>
+      <bits>0x000007</bits>
+    </ccscript>
+    
+    <ccscript>
+      <script>GainDC();</script>
+      <text>Gain</text>
+      <action>ARC41_GAIN_SCRIPT</action>
+      <bits>0x000005</bits>
+    </ccscript>
+  </group>
+  
+</params>

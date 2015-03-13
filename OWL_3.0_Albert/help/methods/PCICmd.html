@@ -1,0 +1,56 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">PCICmd</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.PCICmd( command, expected_reply );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">int command</span></td>
+<td valign="top">A valid PCI command: 
+<a href="../constants/PCICommands.html">CameraAPI.RESET_CONTROLLER</a>, 
+<a href="../constants/PCICommands.html">CameraAPI.RESET_PCI</a>, 
+<a href="../constants/PCICommands.html">CameraAPI.ABORT_READOUT</a>.
+</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code">int expected_reply</span></td>
+<td valign="top">The reply expected to recieve for the given
+command. For example, CameraAPI.RESET_CONTROLLER should return 
+CameraAPI.SYR.
+</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None<br>
+</div>
+
+<div id="header">Remarks</div>
+Sends a command to the PCI board and compares the reply against the <span class="code">
+expected_reply</span> variable.Throws a owl.cameraAPI.ReplyException if the reply values
+do not match. Throws java.lang.Exception if some other error occurs. All exceptions can
+be caught with a <a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

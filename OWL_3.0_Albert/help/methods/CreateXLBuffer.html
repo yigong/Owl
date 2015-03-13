@@ -1,0 +1,50 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">CreateXLBuffer</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.CreateXLBuffer( rows, cols );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">int rows</span></td>
+<td valign="top">The row size of the image buffer.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">int cols</span></td>
+<td valign="top">The column size of the image buffer.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Creates an extra-large image buffer that is made-up of a chain of
+smaller 2048x2048 buffers. Owl uses these methods when the image to
+readout exceeds 4200x4200 pixels. Throws java.lang.Exception if an
+error occurs. All exceptions can be caught using a
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+import owl.cameraAPI.CameraAPI;
+
+sMsg = "Hello from client";
+
+Calendar calendar = new GregorianCalendar();
+
+sTime = calendar.get( Calendar.HOUR ) + ":" + 
+        calendar.get( Calendar.MINUTE ) + ":" +
+        calendar.get( Calendar.SECOND ) + ":" +
+        calendar.get( Calendar.MILLISECOND ) + " " +
+        ( calendar.get( Calendar.AM_PM ) == Calendar.PM ? "PM" : "AM" );
+
+sMsg = sTime + " -> " + sMsg;
+
+try
+{
+	logger.infoStart( "Sending \"" + sMsg + "\" to server" );
+	CameraAPI.LogMsgOnServer( sMsg );
+	logger.infoEnd();
+}
+catch ( Exception e )
+{
+	logger.infoFail();
+	logger.error( e );
+}

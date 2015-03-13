@@ -1,0 +1,87 @@
+import java.lang.*;
+import java.io.*;
+import java.util.vector;
+
+DS9Accessor()
+{
+	Runtime runtime = Runtime.getRuntime();
+
+	isDS9Ready( showErrMsg ) throws IOException
+	{
+		retVals = doCmd( "xpaaccess ds9" );
+		isReady = false;
+
+		try
+		{
+			yesNo = ( String )retVals.firstElement();
+
+			if ( yesNo.indexOf( "yes" ) >= 0 )
+			{
+				isReady = true;
+			}
+		}
+		catch( NoSuchElementException nsee ) {}
+
+		if ( !isReady && showErrMsg )
+			System.err.println( "DS9 may not be running. Please start the program." );
+
+		return isReady;
+	}
+
+	clearAllFrames()
+	{
+		retVals = doCmd( "xpaset -p ds9 frame clear all" );
+		// printOutput( retVals );
+	}
+
+	showFits( file )
+	{
+		retVals = doCmd( "xpaset -p ds9 file \"{" + file.replace( '\\', '/' ) + "}\"" );
+		printOutput( retVals );
+	}
+
+	doCmd( String ds9cmd ) throws IOException
+	{
+		Process proc = runtime.exec( ds9cmd );
+   
+		// Put a BufferedReader on the proc output
+		InputStream inputstream = proc.getInputStream();
+		InputStreamReader inputstreamreader = new InputStreamReader( inputstream );
+		BufferedReader bufferedreader = new BufferedReader(inputstreamreader);
+    
+		// Read the proc output
+		Vector retVals = new Vector();
+		String line;
+
+		while ( ( line = bufferedreader.readLine() ) != null )
+		{
+			retVals.add( line );
+		}
+
+		// Check for proc failure
+		try
+		{
+			if ( proc.waitFor() != 0 )
+			{
+				retVals.add( "exit value = " + proc.exitValue() );
+			}
+		}
+		catch ( InterruptedException e )
+		{
+			System.err.println( e );
+		}
+
+		return retVals;
+	}
+
+	printOutput( outputVector )
+	{
+		if ( outputVector != null )
+		{
+			for ( i=0; i<outputVector.size(); i++ )
+				System.out.println( "vec[ " + i + " ]: " + outputVector.get( i ) );
+		}
+	}
+
+	return this;
+}

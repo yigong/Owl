@@ -1,0 +1,13 @@
+import owl.cameraAPI.*;
+
+try
+{
+	logger.infoStart( "Deinterlacing" );
+	CameraAPI.DeinterlaceImage( 500, 500, 8 );
+	logger.infoEnd();
+}
+catch ( Exception e )
+{
+	logger.infoFail();
+	System.err.println( e.getMessage() );
+}

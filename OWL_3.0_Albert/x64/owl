@@ -1,0 +1,8 @@
+export OWL_VER=3.0
+export OWL_SYS=x64
+export OWL_HOME=/home/streit/Documents/JAVA/Owl/$OWL_VER
+export LD_LIBRARY_PATH=$OWL_HOME/$OWL_SYS/API:
+export PATH=$OWL_HOME/$OWL_SYS/DS9:$OWL_HOME/$OWL_SYS/jre1.6.0_24/bin:$PATH
+
+
+java -classpath $OWL_HOME/Owl/bin:$OWL_HOME/logging-log4j-1.2.13/dist/lib/log4j-1.2.13.jar:$OWL_HOME/BeanShell/bsh-classgen-2.0b4.jar:$OWL_HOME/BeanShell/bsh-classpath-2.0b4.jar:$OWL_HOME/BeanShell/bsh-core-2.0b4.jar:$OWL_HOME/BeanShell/bsh-reflect-2.0b4.jar:$OWL_HOME/BeanShell/bsh-util-2.0b4.jar:$OWL_HOME/commons-beanutils-1.7.0/commons-beanutils-bean-collections.jar:$OWL_HOME/commons-beanutils-1.7.0/commons-beanutils-core.jar:$OWL_HOME/commons-beanutils-1.7.0/commons-beanutils.jar:$OWL_HOME/commons-collections-3.1/commons-collections-3.1.jar:$OWL_HOME/commons-digester-1.7/commons-digester-1.7.jar:$OWL_HOME/commons-logging-1.0.4/commons-logging-api.jar:$OWL_HOME/commons-logging-1.0.4/commons-logging.jar:$OWL_HOME/jfreechart-1.0.14/lib/jfreechart-1.0.14.jar:$OWL_HOME/jfreechart-1.0.14/lib/jcommon-1.0.17.jar  owl.main.MainApp $OWL_HOME

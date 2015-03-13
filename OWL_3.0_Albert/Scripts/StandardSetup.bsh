@@ -1,0 +1,171 @@
+// +-------------------------------------------------------------------------+
+// |  Standard Setup Script                                                  |
+// |                                                                         |
+// |  This script will allow the instantiation of the StandardSetup class,   |
+// |  which can then have its enableXXX methods called to set the parameters |
+// |  and then the run method to execute the setup for the controller.       |
+// |                                                                         |
+// |  Example script to use this script:                                     |
+// |                                                                         |
+// |  setup = StandardSetup();                                               |
+// |  setup.enableResetController( true );                                   |
+// |  setup.enablePCITests( true, 234 );                                     |
+// |  setup.enableTIMTests( true, 123 );                                     |
+// |  setup.enablePCIDownload( false, "" );                                  |
+// |  setup.enableTIMDownload( true, "C:\\tim.lod" );                        |
+// |  setup.enablePowerOn( true );                                           |
+// |  setup.enableImageSize( true, 1000, 1000 );                             |
+// |  setup .run();                                                          |
+// +-------------------------------------------------------------------------+
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;	// Leave this out to get/test an ERROR
+
+StandardSetup()
+{
+	doResetCtrl	= false;
+	doPCITest	= false;
+	doTIMTest	= false;
+	doUTLTest	= false;
+	doPCIFile	= false;
+	doTIMFile	= false;
+	doUTLFile	= false;
+	doPowerOn	= false;
+	doImageSize	= false;
+	pciTestCount = 0;
+	timTestCount = 0;
+	utlTestCount = 0;
+	pciFile	 = "";
+	timFile	 = "";
+	utlFile	 = "";
+	rows		 = 0;
+	cols		 = 0;
+	stop		 = false;
+	timFileLoaded = false;
+
+	public enableResetController( doIt ) { doResetCtrl = doIt; }
+	public enablePCITests( doIt, num ) { doPCITest = doIt; pciTestCount = num; }
+	public enableTIMTests( doIt, num ) { doTIMTest = doIt; timTestCount = num; }
+	public enableUTLTests( doIt, num ) { doUTLTest = doIt; utlTestCount = num; }
+	public enablePCIDownload( doIt, file ) { doPCIFile = doIt; pciFile = file; }
+	public enableTIMDownload( doIt, file ) { doTIMFile = doIt; timFile = file; }
+	public enableUTLDownload( doIt, file ) { doUTLFile = doIt; utlFile = file; }
+	public enablePowerOn( doIt ) { doPowerOn = doIt; }
+	public enableImageSize( doIt, r, c ) { doImageSize = doIt; rows = r; cols = c; }
+
+	public run()
+	{
+		try
+		{
+			if ( !CameraAPI.IsDeviceOpen() ) return;
+
+			if ( doPCIFile )
+			{
+				logger.infoStart( "Loading PCI file" );
+				CameraAPI.LoadDeviceFile( pciFile );
+				logger.infoEnd();
+			}
+
+			if ( stop ) return;
+
+			if ( doResetCtrl )
+			{
+				logger.infoStart( "Resetting controller" );
+				CameraAPI.ResetController();
+				logger.infoEnd();
+			}
+
+			if ( stop ) return;
+
+			if ( doPCITest )
+			{
+				logger.infoStart( "Testing PCI data link" );
+				for ( i=0; i<pciTestCount; i++ )
+				{
+					//CameraAPI.TestDataLink( i );
+					CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.TDL, i, i );
+					if ( stop ) break;
+				}
+				logger.infoEnd();
+			}
+
+			if ( stop ) return;
+
+			if ( doTIMTest )
+			{
+				logger.infoStart( "Testing TIM data link" );
+				for ( i=0; i<timTestCount; i++ )
+				{
+					CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.TDL, i, i );
+					if ( stop ) break;
+				}
+				logger.infoEnd();
+			}
+
+			if ( stop ) return;
+
+			if ( doUTLTest )
+			{
+				logger.infoStart( "Testing UTIL data link" );
+				for ( i=0; i<utlTestCount; i++ )
+				{
+					CameraAPI.Cmd( CameraAPI.UTIL_ID, CameraAPI.TDL, i, i );
+					if ( stop ) break;
+				}
+				logger.infoEnd();
+			}
+
+			if ( stop ) return;
+
+			if ( doTIMFile )
+			{
+				logger.infoStart( "Loading TIM file" );
+				CameraAPI.LoadControllerFile( timFile, 0 );
+				timFileLoaded = true;
+				logger.infoEnd();
+			}
+
+			if ( stop ) return;
+
+			if ( doUTLFile )
+			{
+				logger.infoStart( "Loading UTIL file" );
+				CameraAPI.LoadControllerFile( utlFile, 0 );
+				logger.infoEnd();
+			}
+
+			if ( stop ) return;
+
+			if ( doPowerOn )
+			{
+				logger.infoStart( "Powering on controller" );
+				CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.PON, CameraAPI.DON );
+				logger.infoEnd();
+			}
+
+			if ( stop ) return;
+
+			if ( doImageSize )
+			{
+				logger.infoStart( "Setting image dimensions" );
+				CameraAPI.SetImageSize( rows, cols );
+				logger.infoEnd();
+			}
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+			logger.error( "Reply expected: " +
+						   re.getExpectedHexString() +
+						   " actual: " +
+						   re.getActualHexString()
+						 );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+	}
+
+	return this;
+}

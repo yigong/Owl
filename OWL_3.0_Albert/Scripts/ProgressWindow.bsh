@@ -1,0 +1,116 @@
+// +-------------------------------------------------------------------------+
+// |  Readout Progress Window Script                                         |
+// |                                                                         |
+// |  This script will allow the instantiation of a readout progress window. |
+// |  To test this window independent of real data, call the "test" method.  |
+// |                                                                         |
+// |  Example script to use this script:                                     |
+// |                                                                         |
+// |  pw = ProgressWindow( 0, 10 );                                          |
+// |  pw.show();                                                             |
+// |  pw.setReadoutValue( 0 );                                               |
+// |  pw.setReadoutValue( 5 );                                               |
+// |  pw.setReadoutValue( 10 );                                              |
+// |  pw.close();                                                            |
+// |                                                                         |
+// |  Example script to test this script:                                    |
+// |                                                                         |
+// |  pw = ProgressWindow( 0, 10 );                                          |
+// |  pw.show();                                                             |
+// |  pw.test();                                                             |
+// |  pw.close();                                                            |
+// +-------------------------------------------------------------------------+
+
+ProgressWindow( min, max )
+{
+	frame = new JFrame( "Readout Progress" );
+	frame.setIconImage( owl.main.MainApp.getProgramIcon() );
+	panel = new JPanel();
+
+	elapsedTimeTextLabel = new JLabel( "Elapsed Time: " );
+	elapsedTimeLabel = new JLabel( "0" );
+	panel.add( elapsedTimeTextLabel );
+	panel.add( elapsedTimeLabel );
+
+	progressBar = new JProgressBar( min, max );
+	progressBar.setForeground( new Color( 110, 4, 9 ) );
+	panel.add( progressBar );
+
+	frame.getContentPane().add( panel );
+	frame.pack();
+
+	setNewMax( max )
+	{
+		progressBar.setMaximum( max );
+	}
+
+	setReadoutValue( value )
+	{
+		progressBar.setValue( value );
+	}
+
+	setElapsedTime( value )
+	{
+		elapsedTimeLabel.setText( Integer.toString( value ) );
+	}
+
+	showElapsedTime( yesNo )
+	{
+		elapsedTimeTextLabel.setVisible( yesNo );
+		elapsedTimeLabel.setVisible( yesNo );
+	}
+
+	setCustomLabel( text, showsValue )
+	{
+		if ( text != null )
+		{
+			elapsedTimeTextLabel.setText( text );
+			elapsedTimeTextLabel.setVisible( true );
+		}
+		if ( !showsValue ) elapsedTimeLabel.setVisible( false );
+
+		frame.pack();
+	}
+
+	setCustomTitle( text )
+	{
+		frame.setTitle( text );
+	}
+
+	setIcon( file )
+	{
+		frame.setIconImage( Toolkit.getDefaultToolkit().createImage( file ) );
+	}
+
+	show()
+	{
+		frame.setLocationRelativeTo( null );	// Center on the screen
+		frame.setVisible( true );
+	}
+
+	close()
+	{
+		we = new WindowEvent( frame, WindowEvent.WINDOW_CLOSING );
+		Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent( we );
+	}
+
+	test()
+	{
+		setReadoutValue( progressBar.getMinimum() );
+
+		for ( i=12; i>=0; i-- )
+		{
+			setElapsedTime( i );
+			Thread.sleep( 1000 );
+		}
+
+		for ( i=0; i<=progressBar.getMaximum(); i++ )
+		{
+			setReadoutValue( i );
+			Thread.sleep( 25 );
+		}
+	}
+
+	return this;
+}
+

@@ -1,0 +1,11 @@
+<server-rules>
+	<object-create-rule pattern="ServerList" classname="java.util.ArrayList"/>
+
+	<pattern value="ServerList/server">
+		<object-create-rule classname="owl.main.remote.ServerElement"/>
+    	<set-properties-rule />
+    	<bean-property-setter-rule pattern="ip"/>
+    	<bean-property-setter-rule pattern="description"/>
+    	<set-next-rule methodname="add"/>
+	</pattern>
+</server-rules>

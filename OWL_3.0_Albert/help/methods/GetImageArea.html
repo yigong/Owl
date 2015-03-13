@@ -1,0 +1,68 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">GetImageArea</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.GetImageArea( row1, row2, col1, col2, cols );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">long row1</span></td>
+<td valign="top">The start row. Range: 0 to image rows minus 1.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">long row2</span></td>
+<td valign="top">The end row. Range: 0 to image rows minus 1.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">long col1</span></td>
+<td valign="top">The start column. Range: 0 to image columns minus 1.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">long col2</span></td>
+<td valign="top">The end column. Range: 0 to image columns minus 1.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">long cols</span></td>
+<td valign="top">The total number of columns in the image.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">Point[] - </span>An array of java.awt.Point data
+that represents the average row data. Each point in the array contains
+an x value (Point.x) and a y value (Point.y). The x data represents
+the row number and the y data represents the average of the row
+pixels.
+</div>
+
+<div id="header">Remarks</div>
+Calculates the average row value for the specified column range,
+starting at col1 and ending at col2. Throws a java.lang.Exception
+if an error occurs, which can be caught using
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

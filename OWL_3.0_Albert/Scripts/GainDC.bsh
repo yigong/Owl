@@ -1,0 +1,346 @@
+// +----------------------------------------------------------------------------+
+// |  GainDC                                                                    |
+// +----------------------------------------------------------------------------+
+// |  Used to set the m_gain and integrator m_speed for the following boards:   |
+// |                                                                            |
+// |  ARC-41                                                                    |
+// |  ARC-45                                                                    |
+// |                                                                            |
+// +----------------------------------------------------------------------------+
+import javax.swing.border.TitledBorder;
+import javax.swing.BoxLayout;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.owltypes.OwlBoldButton;
+import owl.gui.utils.OwlUtilities;
+
+
+public class GainDCFrame extends CCScriptFrame implements Runnable, ItemListener
+{
+	//
+	// Define m_gain and m_speed constants
+	//
+	public static final int  ONE	=	1;
+	public static final int  TWO	=	2;
+	public static final int  FIVE	=	5;
+	public static final int  TEN	=	10;
+	public static final int  SLOW	=	0;
+	public static final int  FAST	=	1;
+
+	//
+	// Define Set Gain command as it's not in CameraAPI
+	//
+	final int SGN					=	0x53474E;
+
+	final String APPLY_ACTION		=	"APPLY";
+	final String STOP_ACTION		=	"ABORT";
+
+	JToolBar		m_toolbar;
+	OwlBoldButton	m_applyButton;
+	boolean			m_stop;
+	int				m_gain;
+	int				m_speed;
+
+
+	public GainDCFrame()
+	{
+		super( "Gain DC" );
+
+		m_gain	= ONE;
+		m_speed	= SLOW;
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_applyButton = super.createBoldToolbarButton( APPLY_ACTION, Color.red );
+		m_toolbar.add( m_applyButton);
+
+		super.appendToolbar( m_toolbar );
+
+		panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+		panel.setBackground( java.awt.Color.WHITE );
+		panel.add( createTitlePanel() );
+		panel.add( createGainPanel() );
+		panel.add( createSpeedPanel() );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( panel,   BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	public JPanel createTitlePanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
+
+ 		label = new JLabel( "<html><b><font size=4 color=#FFFFFF>" +
+					    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+					    "VIDEO GAIN SETTINGS" +
+					    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+					    "</font></b></html>" );
+
+		label.setBorder( BorderFactory.createLineBorder( new Color( 0x800000 ) ) );
+		label.setOpaque( true );
+		label.setBackground( new Color( 0xC89191 ) );
+
+		panel.add( label );
+
+		return panel;
+	}
+
+	public JPanel createGainPanel()
+	{	
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+		gain1RadioBtn = new JRadioButton( "1.0", true );
+		gain1RadioBtn.addItemListener( this );
+		gain1RadioBtn.setName( "Gain1" );
+
+		gain2RadioBtn = new JRadioButton( "2.0" );
+		gain2RadioBtn.addItemListener( this );
+		gain2RadioBtn.setName( "Gain2" );
+
+		gain4RadioBtn = new JRadioButton( "4.75" );
+		gain4RadioBtn.addItemListener( this );
+		gain4RadioBtn.setName( "Gain4" );
+
+		gain9RadioBtn = new JRadioButton( "9.5" );
+		gain9RadioBtn.addItemListener( this );
+		gain9RadioBtn.setName( "Gain9" );
+
+		ButtonGroup bg = new ButtonGroup();
+		bg.add( gain1RadioBtn );
+		bg.add( gain2RadioBtn );
+		bg.add( gain4RadioBtn );
+		bg.add( gain9RadioBtn );
+
+		panel.add( new JLabel( "Video Gain: " ) );
+		panel.add( gain1RadioBtn );
+		panel.add( gain2RadioBtn );
+		panel.add( gain4RadioBtn );
+		panel.add( gain9RadioBtn );
+
+		return panel;
+	}
+
+	private JPanel createSpeedPanel()
+	{	
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+		slowRadioBtn = new JRadioButton( "Slow", true );
+		slowRadioBtn.addItemListener( this );
+		slowRadioBtn.setName( "Slow" );
+
+		fastRadioBtn = new JRadioButton( "Fast" );
+		fastRadioBtn.addItemListener( this );
+		fastRadioBtn.setName( "Fast" );
+
+		ButtonGroup bg = new ButtonGroup();
+		bg.add( slowRadioBtn );
+		bg.add( fastRadioBtn );
+
+		panel.add( new JLabel( "Integrator Speed: " ) );
+		panel.add( slowRadioBtn );
+		panel.add( fastRadioBtn );
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( APPLY_ACTION ) )
+		{
+			m_stop = false;
+
+			new Thread( this ).start();
+		}
+
+		else if ( event.getActionCommand().equals( STOP_ACTION ) )
+		{
+			m_stop = true;
+		}
+
+		else if ( event.getActionCommand().equals( CLOSE_ACTION ) )
+		{
+			dispose();
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void itemStateChanged( ItemEvent ie )
+	{
+		if ( ie.getSource() instanceof javax.swing.JRadioButton )
+		{
+			JRadioButton src = ( JRadioButton )ie.getSource();
+
+			if ( ie.getStateChange() == ItemEvent.SELECTED )
+			{
+				if ( src.getText().equals( "1.0" ) )
+				{
+					m_gain = ONE;
+				}
+
+				else if ( src.getText().equals( "2.0" ) )
+				{
+					m_gain = TWO;
+				}
+
+				else if ( src.getText().equals( "4.75" ) )
+				{
+					m_gain = FIVE;
+				}
+
+				else if ( src.getText().equals( "9.5" ) )
+				{
+					m_gain = TEN;
+				}
+
+				else if ( src.getText().equals( "Slow" ) )
+				{
+					m_speed = SLOW;
+				}
+
+				else if ( src.getText().equals( "Fast" ) )
+				{
+					m_speed = FAST;
+				}
+			}
+		}
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	public void setGain( fGain )
+	{
+		if ( fGain == 1.0 )
+		{
+			m_gain = ONE;
+		}
+
+		else if ( fGain == 2.0 )
+		{
+			m_gain = TWO;
+		}
+
+		else if ( fGain == 4.75 )
+		{
+			m_gain = FIVE;
+		}
+
+		else if ( fGain == 9.5 )
+		{
+			m_gain = TEN;
+		}
+
+		else
+		{
+			throw new Exception( "( Gain DC script ): Invalid m_gain value: " +
+								  fGain +
+								 " Value must be one of 1.0, 2.0, 4.75 or 9.5!" );
+		}
+	}
+
+	public void setSpeed( sSpeed )
+	{
+		if ( sSpeed.toLowerCase().equals( "slow" ) )
+		{
+			m_speed = SLOW;
+		}
+
+		else if ( sSpeed.toLowerCase().equals( "fast" ) )
+		{
+			m_gain = FAST;
+		}
+
+		else
+		{
+			throw new Exception( "( Gain DC script ): Invalid m_speed value: " +
+								  sSpeed +
+								 " Value must be one of \"SLOW\" or \"FAST\"!" );
+		}
+	}
+
+	public void run()
+	{
+		m_applyButton.setText( STOP_ACTION );
+		m_applyButton.setColored();
+
+		try
+		{
+			if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+			// -------------------------------------
+			// Send the channel B offset
+			// -------------------------------------
+			logger.infoStart( "Setting m_gain and m_speed parameters" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID,
+					       SGN,
+					       m_gain,
+					       m_speed,
+					       CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+			fireScriptApplied();
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+
+			logger.error( "( GainDC script ): SGN reply error. Expected: " +
+						   re.getExpectedHexString() + " Received: " +
+						   re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+
+			if ( !e.getMessage().equals( STOP_ACTION ) )
+			{
+				logger.error( "( GainDC script ): " + e.toString() );
+			}
+		}
+		finally
+		{
+			m_applyButton.setBlack( APPLY_ACTION );
+		}
+	}
+}
+
+
+
+GainDC()
+{
+	CCScriptFrame frame = null;
+
+	if ( CameraAPI.IsCCParamSupported( CameraAPI.ARC41 ) || CameraAPI.IsCCParamSupported( CameraAPI.ARC45 ) )
+	{
+		frame = ( CCScriptFrame )( new GainDCFrame() );
+		frame.setVisible( true );
+	}
+	else
+	{
+		logger.warn(
+				"Additional ARC-41/45 m_gain options options not available! CC Param Value: 0x" +
+				 Integer.toHexString( CameraAPI.GetCCParams() ) );
+	}
+
+	return frame;
+}

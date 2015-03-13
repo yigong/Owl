@@ -1,0 +1,61 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">ReadTemperature</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+ReadTemperature( demoMode );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top">boolean demoMode</td>
+<td valign="top">True to run in demo mode; false otherwise. Demo
+mode allows testing of the ARC_API CController temperature code
+by using a valid adu value (internal). Setting to false will read
+the temperature value from the controller</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None; runs in graphical user interface mode only.
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+None
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Reads the camera temperature using a graphical user interface (GUI).
+This script cannot be run without a GUI. It can be run in demo mode
+for purposes of testing the underlying API code.
+
+<br><br>
+<span style="text-decoration: underline">Example</span>:
+<pre>
+	ReadTemperature( false );	// read controller temperature (non-demo mode)
+
+	ReadTemperature( true );	// read controller temperature (demo mode)
+</pre>
+
+</div>
+
+</body>
+
+</html>

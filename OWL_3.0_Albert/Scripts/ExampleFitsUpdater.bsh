@@ -1,0 +1,15 @@
+import owl.main.fits.FitsHeaderFrame;
+
+//
+// Update an existing header value. NOTE: the keyword
+// OBSERVER must already exist in the fits header window.
+//
+MainApp.mainFrame.exposePanel.fitsHeaderFrame.setField( "OBSERVER", "me!" );
+
+
+//
+// This will create a new header value that will be
+// written to the FITS file, but will not show up
+// in the fits header window.
+//
+MainApp.mainFrame.exposePanel.fitsHeaderFrame.addField( "OBSERVER", "me too!" );

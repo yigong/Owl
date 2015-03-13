@@ -1,0 +1,51 @@
+import arc.mlo.MloGpsAPI;
+
+
+try
+{
+	if ( fields != null )
+	{
+		//  Set the exposure time
+		// +------------------------------------------------+
+		fits.setField( "EXPTIME", String.valueOf( expose.getExposeTime() ) );
+
+		//  Set the IRAF filename
+		// +------------------------------------------------+
+		fullIrafname = expose.getFilename();
+		dirPathEndIndex = fullIrafname.lastIndexOf( System.getProperty( "file.separator" ) );
+		fileExtIndex = fullIrafname.lastIndexOf( "." );
+
+		if ( dirPathEndIndex < 0 && fileExtIndex > 0 )
+		{
+			irafname = fullIrafname.substring( 0, fileExtIndex );
+		}
+
+		else if ( dirPathEndIndex > 0 && fileExtIndex > 0 )
+		{
+			irafname = fullIrafname.substring( dirPathEndIndex + 1, fileExtIndex );
+		}
+
+		else
+		{
+			irafname = "";
+		}
+
+		if ( !irafname.equals( "" ) ) { fits.setField( "IRAFNAME", irafname ); }
+		else { logger.error( "Failed to parse iraf filename!" ); }
+
+		MloGpsAPI.Open();
+		MloGpsAPI.GetTime( true );
+
+		//  Set the current date and time
+		// +------------------------------------------------+
+		fits.setField( "DATE-OBS",
+						MloGpsAPI.GetDateString()  +
+						"T" +
+						MloGpsAPI.GetTimeString()  );
+	}
+}
+catch ( Exception e )
+{
+	logger.error( e.getMessage() );
+}
+

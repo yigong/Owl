@@ -1,0 +1,78 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">PrintUtilities</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+PrintUtilities();
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+PrintUtilities Object
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void printComponent( Component comp )</td>
+<td>The component to be printed.</td>
+</tr>
+</table>
+All other methods, despite being public, are for internal use 
+only and should not be accessed directly by user code.
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Allows any component to be sent to a printer. If multiple
+printers are available or if the printer supports an options
+window, then that will be displayed before printing. Some
+java components, such as javax.swing.JFrame and 
+javax.swing.JPanel allow direct printing of the component.
+Refer to a java manual for more details.
+
+<br><br>
+Example: To print a panel ...
+<pre>
+	panel = new JPanel();
+
+	// Add some components to the panel ...
+	panel.add( new JLabel( "Hello" ) );
+	panel.add( new JButton( "World" ) );
+
+	// Print the label to paper ...
+	pu = PrintUtilities();
+	pu.printComponent( panel );
+</pre>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,823 @@
+import javax.swing.border.TitledBorder;
+import javax.swing.BorderFactory;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.owltypes.OwlPanel;
+import owl.gui.utils.OwlUtilities;
+import owl.main.setup.SetupEvent;
+import owl.main.setup.SetupListener;
+import owl.main.setup.SetupFrame;
+
+
+// +---------------------------------------------------------------------------------------+
+// |  BasePanel Class                                                                      |
+// +---------------------------------------------------------------------------------------+
+// |  This is the base class for all other component panels in the window                  |
+// +---------------------------------------------------------------------------------------+
+public class BasePanel extends OwlPanel implements MouseListener, Runnable, SetupListener
+{
+	public BasePanel( String title )
+	{
+		super( title );
+
+		SetupFrame.addSetupListener( this );
+	}
+
+	public void setupChanged( SetupEvent event )
+	{
+		readControllerState();
+	}
+
+	public void readControllerState();
+
+	public void mouseClicked( MouseEvent e ) {}
+	public void mouseEntered( MouseEvent e ) {}
+	public void mouseExited( MouseEvent e ) {}
+	public void mousePressed( MouseEvent e ) {}
+	public void mouseReleased( MouseEvent e ) {}
+
+	public void run();
+}
+
+// +---------------------------------------------------------------------------------------+
+// |  BinPanel Class                                                                       |
+// +---------------------------------------------------------------------------------------+
+// |  This class that handles all BINNING parameters                                       |
+// +---------------------------------------------------------------------------------------+
+public class BinPanel extends BasePanel
+{
+	final String ACTION_1x1		= "1x1";
+	final String ACTION_1x2		= "1x2";
+	final String ACTION_2x1		= "2x1";
+	final String ACTION_2x2		= "2x2";
+
+	ButtonGroup			m_btnGroup;
+	JRadioButton		m_1x1RBtn;
+	JRadioButton		m_1x2RBtn;
+	JRadioButton		m_2x1RBtn;
+	JRadioButton		m_2x2RBtn;
+	int					m_XBin;
+	int					m_YBin;
+
+	public BinPanel()
+	{
+		super( "Binning ( cols x rows )" );
+
+		m_XBin = 0;
+		m_YBin = 0;
+
+		m_1x1RBtn = new JRadioButton( ACTION_1x1 );
+		m_1x1RBtn.addMouseListener( this );
+
+		m_1x2RBtn = new JRadioButton( ACTION_1x2 );
+		m_1x2RBtn.addMouseListener( this );
+
+		m_2x1RBtn = new JRadioButton( ACTION_2x1 );
+		m_2x1RBtn.addMouseListener( this );
+
+		m_2x2RBtn = new JRadioButton( ACTION_2x2 );
+		m_2x2RBtn.addMouseListener( this );
+
+		m_btnGroup = new ButtonGroup();
+		m_btnGroup.add( m_1x1RBtn );
+		m_btnGroup.add( m_1x2RBtn );
+		m_btnGroup.add( m_2x1RBtn );
+		m_btnGroup.add( m_2x2RBtn );
+
+		addComponent( m_1x1RBtn, 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 0, 1, 1 );
+		addComponent( m_1x2RBtn, 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 1, 1, 1 );
+		addComponent( m_2x1RBtn, 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 2, 1, 1 );
+		addComponent( m_2x2RBtn, 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 3, 1, 1 );
+
+		readControllerState();
+	}
+
+	public void readControllerState()
+	{
+		if ( !CameraAPI.IsControllerConnected() )
+		{
+			logger.error( "No controller connected or initialized!" );
+			m_btnGroup.clearSelection();
+			return;
+		}
+
+		try
+		{
+			logger.infoStart( "Reading binning parameters from controller" );
+
+			m_XBin = CameraAPI.Cmd2( CameraAPI.TIM_ID, CameraAPI.RDM, ( CameraAPI.Y_MEM | 5 ) );
+
+			if ( m_XBin == CameraAPI.TOUT || m_XBin == CameraAPI.ERR ||
+			     m_XBin == CameraAPI.SYR  || m_XBin == CameraAPI.READOUT )
+			{
+				throw Exception( "Timeout while reading COL binning factor!" );
+			}
+
+			m_YBin = CameraAPI.Cmd2( CameraAPI.TIM_ID, CameraAPI.RDM, ( CameraAPI.Y_MEM | 6 ) );
+
+			if ( m_YBin == CameraAPI.TOUT || m_YBin == CameraAPI.ERR ||
+			     m_YBin == CameraAPI.SYR  || m_YBin == CameraAPI.READOUT )
+			{
+				throw Exception( "Timeout while reading ROW binning factor!" );
+			}
+
+			logger.infoEnd();
+
+			m_1x1RBtn.setSelected( ( ( m_XBin == 1 && m_YBin == 1 ) ? true : false ) );
+			m_1x2RBtn.setSelected( ( ( m_XBin == 1 && m_YBin == 2 ) ? true : false ) );
+			m_2x1RBtn.setSelected( ( ( m_XBin == 2 && m_YBin == 1 ) ? true : false ) );
+			m_2x2RBtn.setSelected( ( ( m_XBin == 2 && m_YBin == 2 ) ? true : false ) );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( "Failed to read binning parameters from controller!" );
+			logger.error( e.getMessage() );
+
+			m_btnGroup.clearSelection();
+		}
+	}
+
+	public void mouseClicked( MouseEvent e )
+	{
+		JRadioButton jRBtn = ( JRadioButton )e.getSource();
+
+		if ( jRBtn != null )
+		{
+			if ( jRBtn.getText().equals( ACTION_1x1 ) )
+			{
+				m_XBin = 1;
+				m_YBin = 1;
+			}
+
+			else if ( jRBtn.getText().equals( ACTION_1x2 ) )
+			{
+				m_XBin = 1;
+				m_YBin = 2;
+			}
+
+			else if ( jRBtn.getText().equals( ACTION_2x1 ) )
+			{
+				m_XBin = 2;
+				m_YBin = 1;
+			}
+
+			else if ( jRBtn.getText().equals( ACTION_2x2 ) )
+			{
+				m_XBin = 2;
+				m_YBin = 2;
+			}
+
+			if ( jRBtn.isSelected() )
+			{
+				( new Thread( this ) ).start();
+			}
+		}
+	}
+
+	public void run()
+	{
+		try
+		{
+			SetupFrame setupFrame =
+					owl.main.MainApp.mainFrame.cameraPanel.setupFrame;
+
+			oldRows = setupFrame.getRowSize();
+			oldCols = setupFrame.getColSize();
+
+			logger.infoStart( "Setting binning parameters" );
+			CameraAPI.SetBinning( oldRows, oldCols, m_YBin, m_XBin );
+			logger.infoEnd();
+		}
+		catch ( ReplyException e )
+		{
+			logger.error( e.toString() );
+		}
+		catch ( Exception e )
+		{
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			readControllerState();
+		}
+	}
+}
+
+
+// +---------------------------------------------------------------------------------------+
+// |  SpeedPanel Class                                                                     |
+// +---------------------------------------------------------------------------------------+
+// |  This class that handles all SPEED parameters                                         |
+// +---------------------------------------------------------------------------------------+
+public class SpeedPanel extends BasePanel
+{
+	final int SPS			=	0x535053;
+	final int SLOW_SPEED	=	0;
+	final int FAST_SPEED	=	1;
+
+	ButtonGroup			m_btnGroup;
+	JRadioButton		m_slowRBtn;
+	JRadioButton		m_fastRBtn;
+
+	public SpeedPanel()
+	{
+		super( "Pixel Speed" );
+
+		m_slowRBtn = new JRadioButton( "Slow" );
+		m_slowRBtn.addMouseListener( this );
+
+		m_fastRBtn = new JRadioButton( "Fast" );
+		m_fastRBtn.addMouseListener( this );
+
+		m_btnGroup = new ButtonGroup();
+		m_btnGroup.add( m_slowRBtn );
+		m_btnGroup.add( m_fastRBtn );
+
+		addComponent( m_slowRBtn, 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 0, 1, 1 );
+		addComponent( m_fastRBtn, 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 1, 1, 1 );
+
+		readControllerState();
+	}
+
+	public void readControllerState()
+	{
+		if ( !CameraAPI.IsControllerConnected() )
+		{
+			logger.error( "No controller connected or initialized!" );
+			m_btnGroup.clearSelection();
+			return;
+		}
+
+		try
+		{
+			logger.infoStart( "Reading speed parameters from controller" );
+
+			XMem0 = CameraAPI.Cmd2( CameraAPI.TIM_ID, CameraAPI.RDM, ( CameraAPI.X_MEM | 0 ) );
+
+			if ( XMem0 == CameraAPI.TOUT || XMem0 == CameraAPI.ERR ||
+			     XMem0 == CameraAPI.SYR  || XMem0 == CameraAPI.READOUT )
+			{
+				throw Exception( "Timeout while reading SPEED parameter!" );
+			}
+
+			logger.infoEnd();
+
+			m_slowRBtn.setSelected( ( ( XMem0 & 0x8000 ) > 0 ? false : true ) );
+			m_fastRBtn.setSelected( ( ( XMem0 & 0x8000 ) > 0 ? true : false ) );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( "Failed to read binning parameters from controller!" );
+			logger.error( e.getMessage() );
+
+			m_btnGroup.clearSelection();
+		}
+	}
+
+	public void mouseClicked( MouseEvent e )
+	{
+		JRadioButton jRBtn = ( JRadioButton )e.getSource();
+
+		if ( jRBtn != null && jRBtn.isSelected() )
+		{
+			( new Thread( this ) ).start();
+		}
+	}
+
+	public void run()
+	{
+		try
+		{
+			logger.infoStart( "Setting speed parameter" );
+
+			if ( m_slowRBtn.isSelected() )
+			{
+				CameraAPI.Cmd( CameraAPI.TIM_ID, SPS, SLOW_SPEED, CameraAPI.DON );
+			}
+
+			else
+			{
+				CameraAPI.Cmd( CameraAPI.TIM_ID, SPS, FAST_SPEED, CameraAPI.DON );
+			}
+
+			logger.infoEnd();
+		}
+		catch ( ReplyException e )
+		{
+			logger.infoFail();
+			logger.error( e.toString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			readControllerState();
+		}
+	}
+}
+
+// +---------------------------------------------------------------------------------------+
+// |  SOSPanel Class                                                                       |
+// +---------------------------------------------------------------------------------------+
+// |  This class that handles all OUTPUT SOURCE parameters                                 |
+// +---------------------------------------------------------------------------------------+
+public class SOSPanel extends BasePanel
+{
+	final String ACTION_A	=	"A";
+	final String ACTION_B	=	"B";
+	final String ACTION_ALL	=	"ALL";
+	final String ACTION_0	=	"0";
+	final String ACTION_1	=	"1";
+	final String ACTION_2	=	"2";
+	final String ACTION_3	=	"3";
+
+	final int AMP_A			=	CameraAPI.AMP_3;
+	final int AMP_B			=	CameraAPI.AMP_2;
+	final int SBP			=	0x534250;
+
+	ButtonGroup			m_btnGroup;
+	JRadioButton		m_ARBtn;
+	JRadioButton		m_BRBtn;
+	JRadioButton		m_AllRBtn;
+	JRadioButton		m_0RBtn;
+	JRadioButton		m_1RBtn;
+	JRadioButton		m_2RBtn;
+	JRadioButton		m_3RBtn;
+	int					m_amp;
+
+	public SOSPanel()
+	{
+		super( "Readout Source" );
+
+		m_amp = -1;
+
+		m_ARBtn = new JRadioButton( ACTION_A );
+		m_ARBtn.addMouseListener( this );
+
+		m_BRBtn = new JRadioButton( ACTION_B );
+		m_BRBtn.addMouseListener( this );
+
+		m_AllRBtn = new JRadioButton( ACTION_ALL );
+		m_AllRBtn.addMouseListener( this );
+
+		m_0RBtn = new JRadioButton( ACTION_0 );
+		m_0RBtn.addMouseListener( this );
+
+		m_1RBtn = new JRadioButton( ACTION_1 );
+		m_1RBtn.addMouseListener( this );
+
+		m_2RBtn = new JRadioButton( ACTION_2 );
+		m_2RBtn.addMouseListener( this );
+
+		m_3RBtn = new JRadioButton( ACTION_3 );
+		m_3RBtn.addMouseListener( this );
+
+		m_btnGroup = new ButtonGroup();
+		m_btnGroup.add( m_ARBtn );
+		m_btnGroup.add( m_BRBtn );
+		m_btnGroup.add( m_AllRBtn );
+		m_btnGroup.add( m_0RBtn );
+		m_btnGroup.add( m_1RBtn );
+		m_btnGroup.add( m_2RBtn );
+		m_btnGroup.add( m_3RBtn );
+
+		picLabel = new JLabel( new javax.swing.ImageIcon( bitmapPath + "VIRUS_Readout.gif" ) );
+
+		addComponent( picLabel, 0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 0, 1, 1 );
+		addComponent( m_ARBtn,  0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 1, 1, 1 );
+		addComponent( m_BRBtn,  0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 2, 1, 1 );
+		addComponent( m_AllRBtn,  0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 3, 1, 1 );
+		addComponent( m_0RBtn,   0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 4, 1, 1 );
+		addComponent( m_1RBtn,   0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 5, 1, 1 );
+		addComponent( m_2RBtn,   0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 6, 1, 1 );
+		addComponent( m_3RBtn,   0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 7, 1, 1 );
+
+		readControllerState();
+	}
+
+	public void readControllerState()
+	{
+		if ( !CameraAPI.IsControllerConnected() )
+		{
+			logger.error( "No controller connected or initialized!" );
+			m_btnGroup.clearSelection();
+			return;
+		}
+
+		try
+		{
+			logger.infoStart( "Reading output source parameters from controller" );
+
+			m_amp = CameraAPI.Cmd2( CameraAPI.TIM_ID, CameraAPI.RDM, ( CameraAPI.X_MEM | 3 ) );
+
+			if ( m_amp == CameraAPI.TOUT || m_amp == CameraAPI.ERR ||
+			     m_amp == CameraAPI.SYR  || m_amp == CameraAPI.READOUT )
+			{
+				throw Exception( "Failed to read output source parameter!" );
+			}
+
+			logger.infoEnd();
+
+			m_AllRBtn.setSelected( ( m_amp == CameraAPI.AMP_ALL ? true : false ) );
+			m_ARBtn.setSelected( ( m_amp == AMP_A ? true : false ) );
+			m_BRBtn.setSelected( ( m_amp == AMP_B ? true : false ) );
+			m_0RBtn.setSelected( ( m_amp == 0 ? true : false ) );
+			m_1RBtn.setSelected( ( m_amp == 1 ? true : false ) );
+			m_2RBtn.setSelected( ( m_amp == 2 ? true : false ) );
+			m_3RBtn.setSelected( ( m_amp == 3 ? true : false ) );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( "Failed to read binning parameters from controller!" );
+			logger.error( e.getMessage() );
+
+			m_btnGroup.clearSelection();
+		}
+	}
+
+	public void mouseClicked( MouseEvent e )
+	{
+		JRadioButton jRBtn = ( JRadioButton )e.getSource();
+
+		if ( jRBtn != null )
+		{
+			if ( jRBtn.getText().equals( ACTION_A ) )
+			{
+				m_amp = AMP_A;
+			}
+
+			else if ( jRBtn.getText().equals( ACTION_B ) )
+			{
+				m_amp = AMP_B;
+			}
+
+			else if ( jRBtn.getText().equals( ACTION_ALL ) )
+			{
+				m_amp = CameraAPI.AMP_ALL;
+			}
+
+			else if ( jRBtn.getText().equals( ACTION_0 ) )
+			{
+				m_amp = 0;
+			}
+
+			else if ( jRBtn.getText().equals( ACTION_1 ) )
+			{
+				m_amp = 1;
+			}
+
+			else if ( jRBtn.getText().equals( ACTION_2 ) )
+			{
+				m_amp = 2;
+			}
+
+			else if ( jRBtn.getText().equals( ACTION_3 ) )
+			{
+				m_amp = 3;
+			}
+
+			if ( jRBtn.isSelected() )
+			{
+				( new Thread( this ) ).start();
+			}
+		}
+	}
+
+	public void run()
+	{
+		try
+		{
+			logger.infoStart( "Setting output source parameter" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SOS, m_amp, CameraAPI.DON );
+			logger.infoEnd();
+		}
+		catch ( ReplyException e )
+		{
+			logger.infoFail();
+			logger.error( e.toString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			readControllerState();
+		}
+	}
+}
+
+
+// +---------------------------------------------------------------------------------------+
+// |  TempCtrlPanel Class                                                                  |
+// +---------------------------------------------------------------------------------------+
+// |  This handles the TEMPERATURE control                                                 |
+// +---------------------------------------------------------------------------------------+
+public class TempCtrlPanel extends OwlPanel implements Runnable
+{
+	final String APPLY_ACTION	=	"APPLY";
+	final String STOP_ACTION	=	"ABORT";
+
+	final String ON_ACTION		=	"On";
+	final String OFF_ACTION		=	"Off";
+
+	final double TEMP_CONST1	=	168.7;
+	final double TEMP_CONST2	=	0.004186;
+
+	final double HEATER_CONST1	=	0.010;
+	final double HEATER_CONST2	=	0.000075684;
+
+	final int CDT				=	0x434454;
+	final int RDT				=	0x524454;
+	final int RHV				=	0x524856;
+
+	final int LEFT_SIDE_ID		=	0;
+	final int RIGHT_SIDE_ID		=	1;
+	final int COLD_FINGER_ID	=	2;
+
+	OwlNumberField		m_leftSideTxtfld;
+	OwlNumberField		m_rightSideTxtfld;
+	OwlNumberField		m_leftDisplayTxtfld;
+	OwlNumberField		m_rightDisplayTxtfld;
+	OwlNumberField		m_leftVoltgeTxtfld;
+	OwlNumberField		m_rightVoltgeTxtfld;
+	OwlNumberField		m_coldFingerTxtfld;
+	JCheckBox			m_leftSideCheckBox;
+	JCheckBox			m_rightSideCheckBox;
+	OwlBoldButton		m_applyButton;
+	boolean				m_bAbort;
+
+
+	public TempCtrlPanel()
+	{
+		super( "Temperature Control" );
+
+		m_bAbort = false;
+
+		targetLabel = new JLabel( "<html><b><u><font color=\"#880000\">TARGET TEMP C</font></u></b></html>" );
+		ctrlLabel   = new JLabel( "<html><b><u><font color=\"#008800\">CTRL</font></u></b></html>" );
+		actualLabel = new JLabel( "<html><b><u><font color=\"#000088\">ACTUAL TEMP C</font></u></b></html>" );
+		voltgeLabel = new JLabel( "<html><b><u><font color=\"#880088\">HEATER VOLTAGE</font></u></b></html>" );
+
+		leftSideLabel  = new JLabel( "Left Side A: " );
+		rightSideLabel = new JLabel( "Right Side B: " );
+
+		m_leftSideTxtfld = new OwlNumberField( "", 7 );
+		m_rightSideTxtfld = new OwlNumberField( "", 7 );
+
+		m_leftDisplayTxtfld = new OwlNumberField( "", 9 );
+		m_leftDisplayTxtfld.setEditable( false );
+
+		m_leftVoltgeTxtfld = new OwlNumberField( "", 9 );
+		m_leftVoltgeTxtfld.setEditable( false );
+
+		m_rightDisplayTxtfld = new OwlNumberField( "", 9 );
+		m_rightDisplayTxtfld.setEditable( false );
+
+		m_rightVoltgeTxtfld = new OwlNumberField( "", 9 );
+		m_rightVoltgeTxtfld.setEditable( false );
+
+		m_leftSideCheckBox  = new JCheckBox();
+		m_rightSideCheckBox = new JCheckBox();
+
+		coldFingerLabel = new JLabel( "Cold Finger  . . . . . . . . . . . . . . . . " );
+
+		m_coldFingerTxtfld = new OwlNumberField( "", 9 );
+		m_coldFingerTxtfld.setEditable( false );
+
+		m_applyButton = new OwlBoldButton( "Apply", Color.RED );
+		m_applyButton.setActionCommand( APPLY_ACTION );
+		m_applyButton.addActionListener ( this );
+		m_applyButton.setPreferredSize( m_coldFingerTxtfld.getPreferredSize() );
+
+		addComponent( targetLabel,         9, 0, 5, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 0, 1, 2 );
+		addComponent( ctrlLabel,           9, 5, 5, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 2, 1, 1 );
+		addComponent( actualLabel,         9, 5, 5, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 3, 1, 1 );
+		addComponent( voltgeLabel,         9, 9, 5, 9, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 4, 1, 1 );
+
+		addComponent( leftSideLabel,       0, 9, 5, 0, GridBagConstraints.NONE, GridBagConstraints.WEST,   1, 0, 1, 1 );
+		addComponent( m_leftSideTxtfld,    0, 5, 5, 0, GridBagConstraints.NONE, GridBagConstraints.WEST,   1, 1, 1, 1 );
+		addComponent( m_leftSideCheckBox,  0, 5, 5, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 1, 2, 1, 1 );
+		addComponent( m_leftDisplayTxtfld, 0, 8, 5, 9, GridBagConstraints.NONE, GridBagConstraints.CENTER, 1, 3, 1, 1 );
+		addComponent( m_leftVoltgeTxtfld,  0, 9, 5, 9, GridBagConstraints.NONE, GridBagConstraints.CENTER, 1, 4, 1, 1 );
+
+		addComponent( rightSideLabel,       0, 9, 5, 0, GridBagConstraints.NONE, GridBagConstraints.WEST,   2, 0, 1, 1 );
+		addComponent( m_rightSideTxtfld,    0, 5, 5, 0, GridBagConstraints.NONE, GridBagConstraints.WEST,   2, 1, 1, 1 );
+		addComponent( m_rightSideCheckBox,  0, 5, 5, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 2, 2, 1, 1 );
+		addComponent( m_rightDisplayTxtfld, 0, 8, 5, 9, GridBagConstraints.NONE, GridBagConstraints.CENTER, 2, 3, 1, 1 );
+		addComponent( m_rightVoltgeTxtfld,  0, 8, 5, 9, GridBagConstraints.NONE, GridBagConstraints.CENTER, 2, 4, 1, 1 );
+
+		addComponent( coldFingerLabel,    0, 9, 9, 0, GridBagConstraints.NONE, GridBagConstraints.WEST,   3, 0, 1, 3 );
+		addComponent( m_coldFingerTxtfld, 0, 8, 9, 9, GridBagConstraints.NONE, GridBagConstraints.CENTER, 3, 3, 1, 1 );
+		addComponent( m_applyButton,      0, 8, 9, 9, GridBagConstraints.NONE, GridBagConstraints.CENTER, 3, 4, 1, 1 );
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( APPLY_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		else
+		{
+			if ( event.getActionCommand().equals( STOP_ACTION ) )
+			{
+				m_bAbort = true;
+			}
+
+			super.actionPerformed( event );
+		}
+	}
+
+	public void run()
+	{
+		m_applyButton.setColored( STOP_ACTION );
+
+		m_bAbort = false;
+
+		try
+		{
+			adu = 0xFFFFFF;
+
+			if ( m_bAbort ) { return; }
+
+			if ( m_leftSideCheckBox.isSelected() )
+			{
+				adu = calculateADU( m_leftSideTxtfld.getDouble() );
+			}
+
+			if ( m_bAbort ) { return; }
+
+			logger.infoStart( "Sending LEFT control info" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CDT, LEFT_SIDE_ID, adu, CameraAPI.DON );
+			logger.infoEnd();
+
+			adu = 0xFFFFFF;
+
+			if ( m_bAbort ) { return; }
+
+			if ( m_rightSideCheckBox.isSelected() )
+			{
+				adu = calculateADU( m_rightSideTxtfld.getDouble() );
+			}
+
+			if ( m_bAbort ) { return; }
+
+			logger.infoStart( "Sending RIGHT control info" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CDT, RIGHT_SIDE_ID, adu, CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( m_bAbort ) { return; }
+
+			logger.infoStart( "Reading LEFT temperature" );
+			adu = CameraAPI.Cmd2( CameraAPI.TIM_ID, RDT, LEFT_SIDE_ID );
+			logger.infoEnd();
+
+			if ( m_bAbort ) { return; }
+
+			m_leftDisplayTxtfld.setValue( calculateTemp( adu ), "%.1f" );
+
+			logger.infoStart( "Reading LEFT heater voltage" );
+			hv = CameraAPI.Cmd2( CameraAPI.TIM_ID, RHV, LEFT_SIDE_ID );
+			logger.infoEnd();
+
+			if ( m_bAbort ) { return; }
+
+			m_leftVoltgeTxtfld.setValue( calculateVoltage( hv ), "%.3f" );
+
+			logger.infoStart( "Reading RIGHT temperature" );
+			adu = CameraAPI.Cmd2( CameraAPI.TIM_ID, RDT, RIGHT_SIDE_ID );
+			logger.infoEnd();
+
+			if ( m_bAbort ) { return; }
+
+			m_rightDisplayTxtfld.setValue( calculateTemp( adu ), "%.1f" );
+
+			logger.infoStart( "Reading RIGHT heater voltage" );
+			hv = CameraAPI.Cmd2( CameraAPI.TIM_ID, RHV, RIGHT_SIDE_ID );
+			logger.infoEnd();
+
+			if ( m_bAbort ) { return; }
+
+			m_rightVoltgeTxtfld.setValue( calculateVoltage( hv ), "%.3f" );
+
+			logger.infoStart( "Reading COLD FINGER temperature" );
+			adu = CameraAPI.Cmd2( CameraAPI.TIM_ID, RDT, COLD_FINGER_ID );
+			logger.infoEnd();
+
+			if ( m_bAbort ) { return; }
+
+			m_coldFingerTxtfld.setValue( calculateTemp( adu ), "%.1f" );
+
+			if ( m_bAbort ) { return; }
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+			logger.error( re.toString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			m_applyButton.setBlack( APPLY_ACTION );
+		}
+	}
+
+	private int calculateADU( double temp )
+	{
+		return ( int )( ( temp + TEMP_CONST1 ) / TEMP_CONST2 );
+	}
+
+	private double calculateTemp( int adu )
+	{
+		return ( ( -1.0 * TEMP_CONST1 ) + ( TEMP_CONST2 * adu ) );
+	}
+
+	private double calculateVoltage( int hv )
+	{
+		return ( HEATER_CONST1 + ( ( double )hv * HEATER_CONST2 ) );
+	}
+}
+
+
+// +---------------------------------------------------------------------------------------+
+// |  VirusCtrlFrame Class                                                                 |
+// +---------------------------------------------------------------------------------------+
+// |  This is the primary window                                                           |
+// +---------------------------------------------------------------------------------------+
+public class VirusCtrlFrame extends CCScriptFrame
+{
+	JToolBar m_toolbar;
+
+	public VirusCtrlFrame()
+	{
+		super( "VIRUS Ctrl" );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new javax.swing.BoxLayout( panel, javax.swing.BoxLayout.Y_AXIS ) );
+		panel.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
+
+		subPanel = new JPanel();
+		subPanel.setLayout( new javax.swing.BoxLayout( subPanel, javax.swing.BoxLayout.X_AXIS ) );
+
+		subPanel.add( new BinPanel() );
+		subPanel.add( new SpeedPanel() );
+
+		panel.add( subPanel );
+		panel.add( new SOSPanel() );
+		panel.add( new TempCtrlPanel() );
+
+		return panel;
+	}
+}
+
+
+VirusCtrl()
+{
+	CCScriptFrame frame =
+			( CCScriptFrame )( new VirusCtrlFrame() );
+
+	frame.setVisible( true );
+
+	return frame;
+}
+
+
+t = VirusCtrl();
+t.show();

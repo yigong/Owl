@@ -1,0 +1,32 @@
+Monday April 7, 2008
+
+Sub-array readout is implemented. Subarray readout is selected from a 
+window accessible from the "voodoo" header. Binning is not supported. 
+Readout can be chosen from either one of the four readouts, or from 
+all four readout simultaneously. This is selectable from the Parameters, 
+Readout window in voodoo. Binning is not supported.   
+			
+The high voltage bias supplied by the Berkeley board can be turned on
+and off with these commands:
+
+	BON		Bias ON
+	BOF		Bias OFf (default)
+
+The bias voltage is controlled by the constant HV_BIAS located in the
+"LBNL.waveforms" file, entered as a decimal voltage. The ramping rate
+RATE time is also entered in this file. The turn on and off times are 
+both 1.4 seconds. 
+
+Note that video processor gain will need to be chosen once you get
+the system running. This is controlled by the dual slope integration 
+time and the line in the waveforms file: 
+
+	DC	VID0+$0D000C			; Gain from 0 to $F
+
+Details can be found in the video processor user's manual. 
+
+However, the clocking waveforms are obviously wrong, as parallel up 
+is the same as down and split, and serial left is the same as serial 
+right and split. I was unwilling to proceed too far down this path
+without better documentation of the register structure of the 
+LBNL 3.5k x 3.5k CCD.   

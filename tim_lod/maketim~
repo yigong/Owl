@@ -1,0 +1,38 @@
+#!/bin/sh
+# DOWNLOAD selects application code to be loaded from EEPROM or 
+#   downloaded from the host over the fiber optic link
+#
+# DOWNLOAD = HOST or EEPROM
+DOWNLOAD=HOST
+#WAVEFORM_FILE=LBNL_3.5k.waveforms
+WAVEFORM_FILE=LBNL_3.5k.waveforms
+
+
+WINE="wine"
+ASM56000="/usr/local/win_exe/DSP563/BIN/ASM56300.EXE"
+DSPLNK="/usr/local/win_exe/DSP563/BIN/DSPLNK.EXE"
+CLDLOD="/usr/local/win_exe/DSP563/BIN/CLDLOD.EXE"
+
+
+# $WINE $ASM56000 -b -l$PWD/timboot.ls $PWD/timboot.asm
+$WINE $ASM56000 -b -l$PWD/$1.ls -d DOWNLOAD $DOWNLOAD  -d WAVEFORM_FILE "$WAVEFORM_FILE" $PWD/$1.asm
+$WINE $DSPLNK -b$PWD/$1.cld -v $PWD/$1.cln 
+\rm $PWD/$1.lod
+$WINE $CLDLOD $PWD/$1.cld > $PWD/$1.lod
+\rm $PWD/$1.log
+date > $PWD/$1.log
+grep " voltage " $PWD/$1.ls | grep waveforms >> $PWD/$1.log
+grep " voltage " $PWD/$1.ls | grep ".asm" >> $PWD/$1.log
+if [ "$DOWNLOAD" = "HOST" ] ; then
+	echo ""
+	echo "Created file '"$1".lod' for downloading over optical fiber"
+	echo ""
+fi
+
+if [ "$DOWNLOAD" = "EEPROM" ] ; then
+	echo ""
+	echo "Created Motorola S-record file '"$1".s' for EEPROM burning"
+	echo ""
+	srec -bs tim.lod
+	rm tim.lod 
+fi

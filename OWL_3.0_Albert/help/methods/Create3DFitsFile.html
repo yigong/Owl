@@ -1,0 +1,61 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">Create3DFitsFile</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.Create3DFitsFile( filename, rows, cols, bits-per-pixel );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">String filename</span></td>
+<td valign="top">The filename of the FITS file to create.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int rows</span></td>
+<td valign="top">The image row size.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int cols</span></td>
+<td valign="top">The image column size.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int bits-per-pixel</span></td>
+<td valign="top">The number of bits-per-pixel. Typically 16 for ccds and 32
+for infrared cameras.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">int - </span>A handle to the newly created FITS file.
+</div>
+
+<div id="header">Remarks</div>
+Create a FITS data cube that persists until closed by <a href="CloseFitsFile.html">
+CloseFitsFile()</a>. Data can be written to the file using
+<a href="WriteTo3DFitsFile.html">WriteTo3DFitsFile()</a>. Throws java.lang.Exception
+if an error occurs. All exceptions can be caught using a
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+The scripts
+used by Owl are written in “loosely” typed Java and interpreted 
+using the BeanShell interpreter. Details on the BeanShell interpreter 
+can be found at <a href="http://www.beanshell.org/">http://www.beanshell.org/</a> 
+and general Java tutorials can be found at <a href="http://www.java.sun.com">
+http://www.java.sun.com</a>. The BeanShell interpreter conforms to Java SE1.4, 
+which does not support generics in the collections classes (such as ArrayList, etc). 
+The Owl installation directory contains a sub-directory called “Scripts”, which 
+contains a set of scripts used by Owl that can be used for reference. These scripts 
+can also be called by other (user-defined) scripts. Users are urged to not store 
+scripts in this directory, as any future upgrades of the program may result in loss 
+of your scripts.<br><br>
+
+The scripts areinterpreter has several built in constants and classes
+that may useful when writing scripts:
+
+<br><br>
+<!-- ################################################################################################ -->
+<!-- bitmapPath                                                                                       -->
+<!-- ################################################################################################ -->
+
+<div id="bigheader">bitmapPath ( String )</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+bitmapPath;
+</span>
+</div>
+
+<div id="header">Remarks</div>
+A String object that contains the full path to the bitmap directory 
+in the Owl installation directory. The icons in this directory can 
+be used within scripts if needed. The default path is:
+<owl-install-directory>/bitmaps/.
+
+<br><br>
+<!-- ################################################################################################ -->
+<!-- xmlPath                                                                                          -->
+<!-- ################################################################################################ -->
+
+<div id="bigheader">xmlPath ( String )</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+xmlPath;
+</span>
+</div>
+
+<div id="header">Remarks</div>
+A String object that contains the full path to the XML directory in the 
+Owl installation directory. The xml files in this directory can be used 
+within scripts if needed. The default path is: <owl-install-directory>/xml/. 
+This is mostly for FITS headers and users can store there own files in this 
+directory or in their own.
+
+<br><br>
+<!-- ################################################################################################ -->
+<!-- interp                                                                                           -->
+<!-- ################################################################################################ -->
+
+<div id="bigheader">interp ( Class )</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+interp;
+</span>
+</div>
+
+<div id="header">Remarks</div>
+A reference to the Bean Shell interpreter. In general, scripts should
+have no reason to access the interpreter, but it is there in case. This
+is a large and fully documented class that can be found
+<a href="http://www.beanshell.org/docs.html">here</a>.
+
+</div>
+
+</body>
+
+</html>

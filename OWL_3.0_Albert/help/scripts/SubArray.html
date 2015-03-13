@@ -1,0 +1,130 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">SubArray</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+SubArray( useGUI );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">boolean useGUI</span></td>
+<td valign="top">True to launch the SubArray window; false to run without
+using a windowed interface.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+javax.swing.JFrame (useGUI=true) or SubArray Object (useGUI=false)
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void setSubImageWidth( int width )</td>
+<td>Pixel width of sub-area.</td>
+</tr>
+
+<tr>
+<td valign="top">void setSubImageHeight( int height )</td>
+<td>Pixel height of sub-area.</td>
+</tr>
+
+<tr>
+<td valign="top">void setSubImageCenterRow( int row )</td>
+<td>Center row pixel of sub-area on image.</td>
+</tr>
+
+<tr>
+<td valign="top">void setSubImageCenterCol( int col )</td>
+<td>Center column pixel of sub-area on image.</td>
+</tr>
+
+<tr>
+<td valign="top">void setSubImageRowOffset( int offset )</td>
+<td>Offset in row direction, in pixels, from left edge of the image.</td> 
+</tr>
+
+<tr>
+<td valign="top">void setSubImageColOffset( int offset )</td>
+<td>Offset in column direction, in pixels, from bottom edge of the image.</td>
+</tr>
+
+<tr>
+<td valign="top">void setBiasWidth( int bias )</td>
+<td>Width, in pixels, of bias region.</td>
+</tr>
+
+<tr>
+<td valign="top">void setBiasPosition( int position )</td>
+<td>Offset, in pixels, of the image width plus the bias offset.</td>
+</tr>
+
+<tr>
+<td valign="top">void setBiasOffset( int offset )</td>
+<td>Offset, in pixels, of the bias region from the right edge of the image.</td>
+</tr>
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Allows sub-array parameters to be set on the controller.
+Can be run with or without a graphical user interface.
+
+<br><br>
+To run with a graphical user interface:
+<pre>
+	SubArray( true ).run();
+
+	<span style="text-decoration: underline">or</span>
+
+	s = SubArray( true );
+	s.run();
+</pre>
+
+<br>
+To run without a user interface:
+<pre>
+	s = SubArray( false );
+	s.setSubImageWidth( width );
+	s.setSubImageHeight( height );
+	s.setSubImageCenterRow( row );
+	s.setSubImageCenterCol( col );
+	s.setSubImageRowOffset( offset );
+	s.setSubImageColOffset( offset );
+	s.setBiasWidth( bias );
+	s.setBiasPosition( position );
+	s.setBiasOffset( offset );
+</pre>
+
+</div>
+
+</body>
+
+</html>

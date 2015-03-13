@@ -1,0 +1,48 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">PCICommand</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.PCICommand( command );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">int command</span></td>
+<td valign="top">A valid PCI command:
+<a href="../constants/PCICommands.html">CameraAPI.RESET_CONTROLLER</a>, 
+<a href="../constants/PCICommands.html">CameraAPI.RESET_PCI</a>,
+<a href="../constants/PCICommands.html">CameraAPI.ABORT_READOUT</a>.
+</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">int - </span>The reply for the specific PCI command
+(see command documentation for details).
+</div>
+
+<div id="header">Remarks</div>
+Sends a command to the PCI board. Throws a java.lang.Exception if an error
+occurs, which can be caught using a 
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

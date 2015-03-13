@@ -1,0 +1,51 @@
+<cc-group-rules>
+	<object-create-rule pattern="params" classname="java.util.ArrayList" />
+
+	<pattern value="params/group">
+		<object-create-rule classname="owl.CCParams.CCScriptGroup" />
+		<set-next-rule methodname="add" />
+	</pattern>
+
+	<pattern value="params/group/ccscript">
+		<object-create-rule classname="owl.CCParams.CCScript" />
+		<set-next-rule methodname="add" />
+		<set-properties-rule />
+		<bean-property-setter-rule pattern="script" />
+		<bean-property-setter-rule pattern="text" />
+		<bean-property-setter-rule pattern="action" />
+		<bean-property-setter-rule pattern="bits" />
+		<bean-property-setter-rule pattern="infoOnly" />
+	</pattern>
+
+	<pattern value="params/pci">
+		<object-create-rule classname="owl.CCParams.CCScriptGroup" />
+		<set-next-rule methodname="add" />
+		<set-properties-rule />
+		<bean-property-setter-rule pattern="name" />
+	</pattern>
+
+	<pattern value="params/pci/devscript">
+		<object-create-rule classname="owl.CCParams.CCScript" />
+		<set-next-rule methodname="add" />
+		<set-properties-rule />
+		<bean-property-setter-rule pattern="script" />
+		<bean-property-setter-rule pattern="text" />
+		<bean-property-setter-rule pattern="action" />
+	</pattern>
+
+	<pattern value="params/pcie">
+		<object-create-rule classname="owl.CCParams.CCScriptGroup" />
+		<set-next-rule methodname="add" />
+		<set-properties-rule />
+		<bean-property-setter-rule pattern="name" />
+	</pattern>
+
+	<pattern value="params/pcie/devscript">
+		<object-create-rule classname="owl.CCParams.CCScript" />
+		<set-next-rule methodname="add" />
+		<set-properties-rule />
+		<bean-property-setter-rule pattern="script" />
+		<bean-property-setter-rule pattern="text" />
+		<bean-property-setter-rule pattern="action" />
+	</pattern>
+</cc-group-rules>

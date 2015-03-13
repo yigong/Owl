@@ -1,0 +1,64 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">WriteTo3DFitsFile</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.WriteTo3DFitsFile( handle, bytes, image_number, offset );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">int handle</span></td>
+<td valign="top">The handle to a previously created and open FITS
+data cube. The return value from <a href="Create3DFitsFile.html">
+Create3DFitsFile()</a>.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int bytes</span></td>
+<td valign="top">The number of bytes to write to the file.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int image_number</span></td>
+<td valign="top">The image number within the data cube. Image numbers start
+at 0.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int offset</span></td>
+<td valign="top">The number of bytes to skip within the primary image
+buffer before reading data to write to the file. Typically set to 0.
+</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Writes data from the primary image buffer to a FITS data cube that was
+previously opened with <a href="Create3DFitsFile.html">Create3DFitsFile()</a>.
+Throws java.lang.Exception if an error occurs. All exceptions can be caught
+using a <a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,177 @@
+import owl.cameraAPI.ImageAPI;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+
+LogFrameCount( pciFrameCount, numberOfFrames )
+{
+	logger.warn( "Image readout ABORTED\nRead " +
+				 Integer.toString( pciFrameCount ) + "/" +
+				 Integer.toString( numberOfFrames ) + " frames" );
+}
+
+//CRWriteToDiskExpose( numberOfFrames, framesPerBuffer, boundedImageSize, decimalExpTime, deinterlaceAlgorithm )
+CRWriteToDiskExpose( numberOfFrames, framesPerBuffer, decimalExpTime )
+{
+	stop = false;
+	new Thread( this ).start();
+//	this.deinterlaceAlgorithm = deinterlaceAlgorithm;
+	filename = "C:\\Documents and Settings\\streit\\Desktop\\Image.fit";
+
+	abort()
+	{
+		stop = true;
+		logger.warn( "Aborting CRDebugExpose!" );
+	}
+
+	public void run()
+	{
+		try
+		{
+			expTime = ( int )( decimalExpTime * 1000.0 );
+			logger.info( "EXP TIME: " + expTime );
+
+			if( stop ) return;
+
+			// Get the image size
+			// --------------------------------------------------------------
+			rows = CameraAPI.GetImageRows();
+			cols = CameraAPI.GetImageCols();
+			pixelCount = rows * cols;
+			imageSize = pixelCount * 2;
+
+			if ( ( imageSize & 0x3FF ) != 0 )
+				boundedImageSize = imageSize - ( imageSize & 0x3FF ) + 1024;
+			else
+				boundedImageSize = imageSize;
+
+			if( stop ) return;
+
+			// Create the FITS "data cube" file
+			// --------------------------------------------------------------
+			fitsFile3D = CameraAPI.Create3DFitsFile( filename, rows, cols, 16 );
+
+			progressWin = ProgressWindow( 0, numberOfFrames );
+			progressWin.setCustomLabel( "Frame #", true );
+			progressWin.show();
+
+			if( stop ) return;
+
+			// Set the exposure time
+			// --------------------------------------------------------------
+			logger.infoStart( "Setting exposure time" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SET, expTime, CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( stop ) return;
+
+			// Start the exposure
+			// --------------------------------------------------------------
+			logger.infoStart( "Starting exposure " );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SEX, CameraAPI.DON );
+			logger.infoEnd();
+
+			if( stop ) return;
+
+			frameCount     = 0;
+			pciFrameCount  = 0;
+			buffFrameCount = 0;
+
+			if( stop ) return;
+
+			// Start the continuous readout loop
+			// --------------------------------------------------------------
+			while ( pciFrameCount < numberOfFrames )
+			{
+				pciFrameCount = CameraAPI.GetFrameCount();
+
+				// Set the progress bar with the current value.
+				progressWin.setReadoutValue( pciFrameCount );
+				progressWin.setElapsedTime( pciFrameCount );
+
+				while ( pciFrameCount > frameCount)
+				{
+					CameraAPI.WriteTo3DFitsFile( fitsFile3D, imageSize, frameCount, buffFrameCount * boundedImageSize ); 
+
+					frameCount++;
+					buffFrameCount++;
+
+					if ( frameCount > ( framesPerBuffer - 1 ) ) buffFrameCount = 0;
+				}
+
+			}
+
+			// Close the FITS file
+			// --------------------------------------------------------------
+			CameraAPI.CloseFitsFile( fitsFile3D );
+
+			// Deinterlace the FITS file
+			// --------------------------------------------------------------
+//			CameraAPI.Deinterlace3DFitsFile( filename, CameraAPI.DEINTERLACE_CCD_QUAD );
+//			CameraAPI.Deinterlace3DFitsFile( filename, CameraAPI.DEINTERLACE_NONE );
+			CameraAPI.DeinterlaceFitsFile( filename, CameraAPI.DEINTERLACE_CCD_QUAD );
+
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+			logger.error( "Reply expected: " + re.getExpectedHexString() +
+				 	  " actual: " + re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			progressWin.close();
+		}
+	}
+
+	//  This method returns the current time. Returns a string containing the
+	//  current time in the format HH:MM:SS.ms
+	// ----------------------------------------------------------------------------------
+	private String getCurrentTime()
+	{
+     		GregorianCalendar calendar = new GregorianCalendar( TimeZone.getTimeZone( "UT" ) );
+     		String hour_string;
+     		String minutes_string;
+     		String seconds_string;
+		String milliseconds_string;
+     		int hour;
+     		int minutes;
+     		int seconds;
+     		int milliseconds;
+
+     		// Get the hour.
+     		if ( ( hour = calendar.get( Calendar.HOUR ) ) < 10 )
+     			hour_string = "0" + Integer.toString( hour );
+		else
+     			hour_string = Integer.toString( hour );
+     			
+     		// Get the minutes.
+     		if ( ( minutes = calendar.get( Calendar.MINUTE ) ) < 10 )
+     			minutes_string = "0" + Integer.toString( minutes );
+		else
+     			minutes_string = Integer.toString( minutes );
+
+     		// Get the seconds.
+     		if ( ( seconds = calendar.get( Calendar.SECOND ) ) < 10 )
+     			seconds_string = "0" + Integer.toString( seconds );
+		else
+     			seconds_string = Integer.toString( seconds );
+
+     		// Get the milliseconds.
+     		if ( ( milliseconds = calendar.get( Calendar.MILLISECOND ) ) < 10 )
+     			milliseconds_string = "0" + Integer.toString( milliseconds );
+		else
+     			milliseconds_string = Integer.toString( milliseconds );
+
+     		// Set the current time.
+     		String time = hour_string + ":" + minutes_string + ":" + seconds_string + "." + milliseconds_string;
+     		       
+     		return time;
+     	}
+
+	return this;
+}

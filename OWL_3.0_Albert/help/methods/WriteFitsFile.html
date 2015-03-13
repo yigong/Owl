@@ -1,0 +1,54 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">WriteFitsFile</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.WriteFitsFile( filename, rows, cols );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">String filename</span></td>
+<td valign="top">The filename of the FITS file to create.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int rows</span></td>
+<td valign="top">The image rows.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int cols</span></td>
+<td valign="top">The image columns.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Write the primary image buffer data to a FITS file. The size of the
+image to write is specified by the rows and cols parameters. Throws
+java.lang.Exception if an error occurs. All exceptions can be caught
+using a <a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

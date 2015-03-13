@@ -1,0 +1,145 @@
+import owl.cameraAPI.ImageAPI;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+
+LogFrameCount( pciFrameCount, numberOfFrames )
+{
+	logger.warn( "Image readout ABORTED\nRead " +
+				 Integer.toString( pciFrameCount ) + "/" +
+				 Integer.toString( numberOfFrames ) + " frames" );
+}
+
+CRCoaddExpose( numberOfFrames, framesPerBuffer, decimalExpTime, deinterlaceAlgorithm )
+{
+	stop = false;
+	new Thread( this ).start();
+	this.deinterlaceAlgorithm = deinterlaceAlgorithm;
+
+	abort()
+	{
+		stop = true;
+		logger.warn( "Aborting CRDebugExpose!" );
+	}
+
+	public void run()
+	{
+		try
+		{
+			expTime = ( int )( decimalExpTime * 1000.0 );
+			logger.info( "EXP TIME: " + expTime );
+
+			if( stop ) return;
+
+			// Get the image size
+			// --------------------------------------------------------------
+			imageSize = CameraAPI.GetImageSize();
+			rows = imageSize[0];
+			cols = imageSize[1];
+			pixelCount = rows * cols;
+
+			if( stop ) return;
+
+			progressWin = ProgressWindow( 0, numberOfFrames );
+			progressWin.setCustomLabel( "Frame #", true );
+			progressWin.show();
+
+			if( stop ) return;
+
+			// Set the exposure time
+			// --------------------------------------------------------------
+			logger.infoStart( "Setting exposure time" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SET, expTime, CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( stop ) return;
+
+			// Start the exposure
+			// --------------------------------------------------------------
+			logger.infoStart( "Starting exposure " );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SEX, CameraAPI.DON );
+			logger.infoEnd();
+
+			if( stop ) return;
+
+			// Start the coaddition.
+			// --------------------------------------------------------------
+			m = 0;
+			frameCount = 1;
+			totalFrameCount = 0;
+			pciFrameCount = 0;
+
+			ImageAPI.AssignBlankImage( rows, cols, 0, 0 );
+			logger.debug( "Image buffer 0 assigned!" );
+
+			logger.infoStart( "Performing co-addition" );
+			while ( ( totalFrameCount < numberOfFrames ) && !stop )
+			{
+				do {
+					pciFrameCount = CameraAPI.GetFrameCount();
+				} while ( totalFrameCount >= pciFrameCount && totalFrameCount != numberOfFrames && !stop );
+
+				if ( stop ) return;
+
+				// Deinterlace the data
+				// --------------------------------------------------------------
+				logger.infoStart( "Deinterlacing image data" );
+				CameraAPI.DeinterlaceImage( rows, cols, deinterlaceAlgorithm );
+				logger.infoEnd();
+
+				if ( stop ) return;
+
+				ImageAPI.AssignFromBuffer( CameraAPI.GetImageBufferReference() + m, rows, cols, 1 );
+				ImageAPI.AddImages();
+
+				m += pixelCount;
+				frameCount++;
+				totalFrameCount++;
+
+				// Determine where each new image starts on a 1024 address boundary (512 in
+				// this case because we are working with pixels and not bytes).
+				if ( ( m % 512 ) != 0 )
+					m = 512 * ( ( int )( m / 512 ) + 1 );
+
+				// Set the progress bar with the current value
+				progressWin.setReadoutValue( totalFrameCount + 1 );
+				progressWin.setElapsedTime( totalFrameCount );
+
+				// Loop back to start of kernel image buffer ( pixels[ 0 ] ), and
+			   	// re-initialize the frame count.
+				if ( frameCount >= framesPerBuffer )
+				{
+					m = 0;
+					frameCount = 1;
+				}
+			}
+
+			progressWin.close();
+			logger.infoEnd();
+
+			if ( stop ) return;
+
+			// Save image to disk
+			// --------------------------------------------------------------
+			logger.infoStart( "Writing FITS file" );
+			ImageAPI.WriteFitsFile( "C:\\Documents and Settings\\streit\\Desktop\\Image.fit", 32, 0 );
+			logger.infoEnd();
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+			logger.error( "Reply expected: " + re.getExpectedHexString() +
+				 	  " actual: " + re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			progressWin.close();
+		}
+	}
+
+	return this;
+}

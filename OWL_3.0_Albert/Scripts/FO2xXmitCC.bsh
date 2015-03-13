@@ -1,0 +1,136 @@
+import javax.swing.border.TitledBorder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.gui.utils.OwlUtilities;
+
+
+public class Fo2xXmitFrame extends CCScriptFrame implements Runnable
+{
+	final String RUN_ACTION		=	"RUN";
+	final String STOP_ACTION	=	"ABORT";
+
+	JToolBar			m_toolbar;
+	OwlBoldButton		m_runButton;
+	JCheckBox			m_fo2xChkbox;
+
+
+	public Fo2xXmitFrame()
+	{
+		super( "2x Fiber Optic Transmitter CC" );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+
+		JLabel picLabel = new JLabel(
+							new ImageIcon(
+									owl.main.MainApp.getBitmapPath() +
+									"FiberOptic.gif" ) );
+
+		m_fo2xChkbox = new JCheckBox( "Use 2x Fiber Optic Transmitters" );
+		m_fo2xChkbox.setName( "Enable" );
+
+		subPanel = new JPanel();
+		subPanel.setLayout( new BoxLayout( subPanel, BoxLayout.X_AXIS ) );
+		subPanel.add( Box.createHorizontalStrut( 10 ) );
+		subPanel.add( picLabel );
+		subPanel.add( Box.createHorizontalStrut( 5 ) );
+		subPanel.add( m_fo2xChkbox );
+		subPanel.add( Box.createHorizontalStrut( 10 ) );
+
+		panel.add( Box.createVerticalStrut( 10 ) );
+		panel.add( subPanel );
+		panel.add( Box.createVerticalStrut( 10 ) );
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+
+	// NOTE: There's no point in "stopping" this thread, since it only
+	// sends one command, which blocks until complete.
+	public void run()
+	{
+		m_runButton.setColored( STOP_ACTION );
+
+		boolean onOff = m_fo2xChkbox.isSelected();
+
+		try
+		{
+			logger.infoStart( "Setting 2x fiber optic transmitter mode" );
+			CameraAPI.Set2xFOTransmitter( onOff );
+			logger.infoEnd();
+
+			setDescription( ( onOff == true ? "On" : "Off" ) );
+			fireScriptApplied();
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+
+			m_runButton.setBlack( RUN_ACTION );
+		}
+		finally
+		{
+			m_runButton.setBlack( RUN_ACTION );
+		}
+	}
+}
+
+
+FO2xXmitCC()
+{
+	CCScriptFrame frame = null;
+
+	if ( CameraAPI.IsCCParamSupported( CameraAPI.FO_2X_TRANSMITR ) )
+	{
+		frame = ( CCScriptFrame )( new Fo2xXmitFrame() );
+		frame.setVisible( true );
+	}
+	else
+	{
+		logger.warn(
+				"Additional 2x FIBER OPTIC TRANSMIT options not available! CC Param Value: 0x" +
+				 Integer.toHexString( CameraAPI.GetCCParams() ) );
+	}
+
+	return frame;
+}

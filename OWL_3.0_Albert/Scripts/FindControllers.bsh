@@ -1,0 +1,83 @@
+// +----------------------------------------------------------------------------+
+// |  FindControllers.bsh                                                       |
+// +----------------------------------------------------------------------------+
+// |  This script will probe all PCI/PCIe boards in the system and test if a    |
+// |  controller is currently connected and powered-on to each PCI/PCIe board.  |
+// |  This process will cause any currently open devices to be closed, so after |
+// |  probing completes the last device that was open before the probe will be  |
+// |  re-opened.                                                                |
+// |                                                                            |
+// |  Author:  Scott Streit                                                     |
+// |  Date:    March 10, 2011                                                   |
+// |  Company: Astronomical Research Cameras, Inc.                              |
+// +----------------------------------------------------------------------------+
+import owl.cameraAPI.CameraAPI;
+import owl.main.MainApp;
+
+stop = false;
+
+//  Get the current list of devices
+// +------------------------------------------------+
+sDevList = CameraAPI.GetDeviceList( null );
+
+MainApp.debug( "Probing devices for controllers ... " );
+
+MainApp.warn( "Open device: " + MainApp.getDriverName() );
+
+//  Loop over device list
+// +------------------------------------------------+
+for ( i=0; i<sDevList.length; i++ )
+{
+	bOk = true;
+
+	if ( stop ) { break; }
+
+	try
+	{
+		CameraAPI.OpenDevice( sDevList[ i ] );
+
+		if ( stop ) { break; }
+
+		//  Test for a controller
+		// +------------------------------------------------+
+		if ( !CameraAPI.IsControllerConnected() )
+		{
+			bOk = false;
+		}
+
+		if ( stop ) { break; }
+	}
+	catch ( Exception e )
+	{
+		bOk = false;
+	}
+	finally
+	{
+		//  Close the device
+		// +------------------------------------------------+
+		if ( !MainApp.getDriverName().equals( sDevList[ i ] ) )
+		{
+			CameraAPI.CloseDevice();
+		}
+	}
+
+	MainApp.debug( "Device: " + sDevList[ i ] + " Controller: " + bOk );
+}
+
+//  Re-Open the device open before probing
+// +------------------------------------------------+
+try
+{
+	if ( MainApp.getDriverName() != null && !MainApp.getDriverName().isEmpty() )
+	{
+		MainApp.debug( "Re-Opening device: " + MainApp.getDriverName() );
+		CameraAPI.OpenDevice( MainApp.getDriverName() );
+		CameraAPI.MapDevice( MainApp.getDefaultBufferSize() );
+	}
+}
+catch ( Exception e )
+{
+	MainApp.warn( e.getMessage() );
+}
+
+MainApp.debug( "Finished probing devices for controllers!" );

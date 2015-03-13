@@ -1,0 +1,37 @@
++--------------------------------------------------------------------------------+
+	VERSION 2.0.e ( Last Updated: 03/25/2012 )
++--------------------------------------------------------------------------------+
+	1. Changed plotting to use JFreeChart.
+	2. Added IR support by allowing ExposeRunnable to handle "up the ramp" type
+	   exposures.
+
++--------------------------------------------------------------------------------+
+	VERSION 2.0.d ( Last Updated: 03/25/2010 )
++--------------------------------------------------------------------------------+
+	1. Added support for resizing the image buffer automatically on owl restart
+	   under the conditions that the controller is already running and setup.
+
++--------------------------------------------------------------------------------+
+	VERSION 2.0.c ( Last Updated: 04/08/2009 )
++--------------------------------------------------------------------------------+
+	1. Rebuilt owl.plot.* to use PlotCanvas2D. This also affects owl.gui.analysis.
+
+	( Last Updated: 09/28/2009 )
+	2. Updated silicon diode temperature calculations; added for SmallCam.
+	3. Added temperature/DN plots.
+
++--------------------------------------------------------------------------------+
+	VERSION 2.0.b ( Last Updated: 03/18/2009 )
++--------------------------------------------------------------------------------+
+	1. Restructured packages; especially owl.main and owl.gui.utils.
+	2. Started and completed migration of ImageAPI from CImg to my CImage class.
+	3. Created owl.plot package.
+	4. Moved PTC from a script to owl.ptc package.
+	5. Created owl.display.ds9 package for direct (non-script) access to DS9.
+	6. Added info, warn, debug and error shortcut methods to MainApp.
+
++--------------------------------------------------------------------------------+
+	VERSION 2.0.a
++--------------------------------------------------------------------------------+
+	1. Added owl.dir.dialog package
+	2. Changed packaged JRE from 1.5.0_03 to 1.6.0_07

@@ -1,0 +1,64 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">Deinterlace3DFitsFile</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.Deinterlace3DFitsFile( filename, algorithm );
+CameraAPI.Deinterlace3DFitsFile( filename, algorithm, arg );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">String filename</span></td>
+<td valign="top">The filename of the FITS image to deinterlace.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int algorithm</span></td>
+<td valign="top">The deinterlacing algorithm to use:
+CameraAPI.DEINTERLACE_NONE, CameraAPI.DEINTERLACE_PARALLEL,
+CameraAPI.DEINTERLACE_SERIAL, CameraAPI.DEINTERLACE_CCD_QUAD,
+CameraAPI.DEINTERLACE_IR_QUAD, CameraAPI.DEINTERLACE_CDS_IR_QUAD,
+CameraAPI.DEINTERLACE_HAWAII_RG, CameraAPI.DEINTERLACE_STA1600.
+</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int arg</span></td>
+<td valign="top">(optional) An argument to the deinterlace routine.
+Currently only used by CameraAPI.DEINTERLACE_HAWAII_RG, where it is
+used to specify the number of column sections in the image.
+</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Deinterlaces the FITS data cube using the specified algorithm. Each
+image in the data cube is deinterlaced with the same algorithm and
+the data in each image is permanently modified. Throws
+java.lang.Exception if an error occurs. All exceptions can be caught
+using a <a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

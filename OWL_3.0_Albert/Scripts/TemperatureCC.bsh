@@ -1,0 +1,188 @@
+import javax.swing.border.TitledBorder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlTextField;
+import owl.gui.utils.OwlUtilities;
+import owl.main.MainApp;
+
+
+public class TemperatureFrame extends CCScriptFrame implements Runnable
+{
+	final String RUN_ACTION		=	"RUN";
+	final String STOP_ACTION	=	"ABORT";
+
+	JToolBar			m_toolbar;
+	OwlBoldButton		m_runButton;
+	JCheckBox			m_tempCtrlChkbox;
+	OwlTextField		m_tempCtrlTxtfld;
+
+
+	public TemperatureFrame()
+	{
+		super( "Temperature Control CC" );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.add( createControlPanel() );
+
+		return panel;
+	}
+
+	private JPanel createControlPanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setBorder( BorderFactory.createEmptyBorder( 3, 5, 5, 5 ) );
+		panel.setLayout( new BoxLayout( panel, BoxLayout.X_AXIS ) );
+		panel.setLayout( new FlowLayout() );
+
+		m_tempCtrlChkbox = new JCheckBox( "Set array temperature to ( Celcuis ): " );
+		m_tempCtrlChkbox.setName( "SetTemp" );
+
+		m_tempCtrlTxtfld = new OwlTextField( "0", 6 );
+		m_tempCtrlTxtfld.setName( "Temp" );
+
+		JLabel picLabel = new JLabel(
+								new ImageIcon(
+										MainApp.getBitmapPath() + "Temperature3.gif" ) );
+
+		Component spacer = javax.swing.Box.createHorizontalStrut( 3 );
+
+		panel.add( spacer );
+		panel.add( picLabel );
+		panel.add( spacer );
+		panel.add( m_tempCtrlChkbox );
+		panel.add( m_tempCtrlTxtfld );
+		panel.add( spacer );
+
+		return panel;
+	}
+
+	private JPanel createLinearControlPanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		infoLabel1 = new JLabel( "Please supply the following values:" );
+		infoLabel2 = new JLabel( "T = (Coeff #1) + (Coeff #2)*adu" );
+		coeffLabel1 = new JLabel( "Coeff #1: " );
+		coeffLabel2 = new JLabel( "Coeff #2: " );
+		
+		//  Create the linear textfields.
+		// +-----------------------------------------+
+		coeffTxtfld1 = new JTextField( "0", 7 );
+		coeffTxtfld2 = new JTextField( "0", 7 );
+
+		addComponent( panel, infoLabel1,   7, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 0, 0, 1, 4 );
+		addComponent( panel, infoLabel2,   7, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.CENTER, 1, 0, 1, 4 );
+		addComponent( panel, coeffLabel1,  5, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST,   2, 0, 1, 1 );
+		addComponent( panel, coeffTxtfld1, 5, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST,   2, 1, 1, 1 );
+		addComponent( panel, coeffLabel2,  5, 5, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST,   2, 2, 1, 1 );
+		addComponent( panel, coeffTxtfld2, 5, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST,   2, 3, 1, 1 );
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+
+	public void run()
+	{
+		m_runButton.setColored( STOP_ACTION );
+
+		try
+		{
+			if ( m_tempCtrlChkbox.isSelected() )
+			{
+				temperature = Double.parseDouble( m_tempCtrlTxtfld.getText() );
+
+				logger.infoStart( "Setting array temperature" );
+				CameraAPI.SetArrayTemperature( temperature );
+				logger.infoEnd();
+
+				setDescription( temperature + " C" );
+				fireScriptApplied();
+			}
+			else
+			{
+				// Disable the temperature control if system is SmallCam
+				id = CameraAPI.Cmd2( CameraAPI.PCI_ID, CameraAPI.SID );
+
+				if ( ( ( id & 0xFF0000 ) >> 16 ) == 'S' && ( ( id & 0x00FF00 ) >> 8 ) == 'C' )
+				{
+					reply = CameraAPI.Cmd2( CameraAPI.TIM_ID, CameraAPI.CDT, 0xFFFFFF );
+
+					if ( reply != CameraAPI.DON )
+					{
+						throw new Exception( "Failed to disable temperature control, reply: 0x" + 
+											  Integer.toHexString( reply ) );
+					}
+				}
+			}
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			m_runButton.setBlack( RUN_ACTION );
+		}
+	}
+}
+
+
+TemperatureCC()
+{
+	CCScriptFrame frame = null;
+
+	if ( CameraAPI.IsCCParamSupported( CameraAPI.TEMP_SIDIODE ) )
+	{
+		frame = ( CCScriptFrame )( new TemperatureFrame() );
+		frame.setVisible( true );
+	}
+	else
+	{
+		logger.warn(
+				"Additional TEMPERATURE CONTROL options not available! CC Param Value: 0x" +
+				 Integer.toHexString( CameraAPI.GetCCParams() ) );
+	}
+
+	return frame;
+}

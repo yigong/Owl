@@ -1,0 +1,55 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">Exception</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+java.lang.Exception
+</span>
+</div>
+
+<div id="header">Type</div>
+<div id="indent">
+<span class="code">class</span>
+</div>
+
+<div id="header">Remarks</div>
+The standard java exception class that is the base for most
+other exceptions. You can catch most exceptions by catching
+this exception with a try/catch block.
+
+<br><br>
+<span style="text-decoration: underline">Example</span>:<br>
+If any error occurs with the method call, an Exception will
+be thrown.
+
+<br>
+<pre>
+	try
+	{
+		... do something here, such as ...
+
+		CameraAPI.WriteFitsFile( "Image.fit", 600, 512 );
+	}
+	catch ( Exception e }
+	{
+		... do something here,
+                such as log an error ...
+
+		logger.error( e );
+	}
+</pre>
+
+</div>
+
+</body>
+
+</html>

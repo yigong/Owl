@@ -1,0 +1,40 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">GetPCIStatus</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.GetPCIStatus();
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">int - </span>The pci status value: 0 (timeout),
+5 (readout), and 6 (busy).
+</div>
+
+<div id="header">Remarks</div>
+Returns the current value of the pci boards HTF (Host Transfer Flags)
+bits (3,4 & 5) from the HSTR register. Throws java.lang.Exception if an error
+occurs. All exceptions can be caught using a 
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

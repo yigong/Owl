@@ -1,0 +1,48 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">WriteFitsHistory</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.WriteFitsHistory( history, filename );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">String history</span></td>
+<td valign="top">A history tag to add to the FITS header.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">String filename</span></td>
+<td valign="top">The filename of the FITS file to modify.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Write a history tag to the specified FITS file. Uses the HISTORY keyword.
+Throws java.lang.Exception if an error occurs. All exceptions can be caught
+using a <a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

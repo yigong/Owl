@@ -1,0 +1,259 @@
+import javax.swing.border.TitledBorder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlNumberField;
+import owl.gui.utils.OwlUtilities;
+import owl.main.setup.SetupEvent;
+import owl.main.setup.SetupListener;
+import owl.main.setup.SetupFrame;
+import owl.main.MainApp;
+
+
+public class BinningFrame extends CCScriptFrame implements Runnable, SetupListener
+{
+	final String RUN_ACTION		=	"RUN";
+	final String STOP_ACTION	=	"ABORT";
+	final String BX_ACTION		=	"BX ACTION";
+	final String BY_ACTION		=	"BY_ACTION";
+
+	JToolBar			m_toolbar;
+	OwlBoldButton		m_runButton;
+	OwlNumberField		m_oldRowsTxtfld;
+	OwlNumberField		m_oldColsTxtfld;
+	OwlNumberField		m_newRowsTxtfld;
+	OwlNumberField		m_newColsTxtfld;
+	JComboBox			m_rowFactorCombo;
+	JComboBox			m_colFactorCombo;
+	int					m_dRowFactor;
+	int					m_dColFactor;
+
+	public BinningFrame()
+	{
+		super( "Binning CC" );
+
+		m_dRowFactor = 1;
+		m_dColFactor = 1;
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = super.createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		super.appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		SetupFrame.addSetupListener( this );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		else if ( event.getActionCommand().equals( BX_ACTION ) )
+		{
+			updateNewRowField();
+		}
+
+		else if ( event.getActionCommand().equals( BY_ACTION ) )
+		{
+			updateNewColField();
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void setupChanged( SetupEvent event )
+	{
+		owl.main.setup.SetupFrame setupFrame =
+					( owl.main.setup.SetupFrame )event.getSource();
+
+		if ( setupFrame != null )
+		{
+			m_oldRowsTxtfld.setValue( setupFrame.getRowSize() );
+			m_oldColsTxtfld.setValue( setupFrame.getColSize() );
+
+			updateNewRowField();
+			updateNewColField();
+		}
+	}
+
+	// NOTE: There's no point in "stopping" this thread, since
+	// it only sends one command, which blocks until complete.
+	// +-------------------------------------------------------+
+	public void run()
+	{
+		int dRows = 0;
+		int dCols = 0;
+
+		m_runButton.setColored( STOP_ACTION );
+
+		try
+		{
+			dRows = m_oldRowsTxtfld.getInt();
+			dCols = m_oldColsTxtfld.getInt();
+
+			if ( dRows <= 0 || dRows >= 90000 || dCols <= 0 || dCols >= 90000 )
+			{
+				dRows = CameraAPI.GetImageRows();
+				dCols = CameraAPI.GetImageCols();
+			}
+
+			logger.infoStart( "Setting binning parameters" );
+			CameraAPI.SetBinning( dRows, dCols, m_dRowFactor, m_dColFactor );
+			logger.infoEnd();
+
+			super.setDescription( m_dRowFactor + "x" + m_dColFactor );
+			super.fireScriptApplied();
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+
+			if ( e.getMessage() != null )
+			{
+				logger.error( e.getMessage() );
+			}
+		}
+		finally
+		{
+			m_runButton.setBlack( RUN_ACTION );
+		}
+	}
+
+	private void updateNewRowField()
+	{
+		int dRows = m_oldRowsTxtfld.getInt();
+		m_dRowFactor = ( new Integer( m_rowFactorCombo.getSelectedItem() ) ).intValue();
+		m_newRowsTxtfld.setText( Integer.toString( dRows / m_dRowFactor ) );
+	}
+
+	private void updateNewColField()
+	{
+		int dCols = m_oldColsTxtfld.getInt();
+		m_dColFactor = ( new Integer( m_colFactorCombo.getSelectedItem() ) ).intValue();
+		m_newColsTxtfld.setText( Integer.toString( dCols / m_dColFactor ) );
+	}
+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		int dRows = 0;
+		int dCols = 0;
+
+		try
+		{
+			logger.infoStart( "Reading image dimensions from controller" );
+			dRows = CameraAPI.GetImageRows();
+			dCols = CameraAPI.GetImageCols();
+			logger.infoEnd();
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( "Failed to read image dimensions from controller!" );
+			logger.error( e.getMessage() );
+		}
+
+		m_oldRowsTxtfld = new OwlNumberField( dRows, 5 );
+		m_oldRowsTxtfld.setEditable( false );
+		m_oldRowsTxtfld.setBackground( java.awt.Color.WHITE );
+		m_oldRowsTxtfld.setHorizontalAlignment( JTextField.CENTER );
+		m_oldRowsTxtfld.setBorder( javax.swing.BorderFactory.createLineBorder( Color.green ) );
+
+		m_oldColsTxtfld = new OwlNumberField( dCols, 5 );
+		m_oldColsTxtfld.setEditable( false );
+		m_oldColsTxtfld.setBackground( java.awt.Color.WHITE );
+		m_oldColsTxtfld.setHorizontalAlignment( JTextField.CENTER );
+		m_oldColsTxtfld.setBorder( javax.swing.BorderFactory.createLineBorder( Color.green ) );
+
+		String[] items = { "1", "2", "3", "4", "5", "6", "7", "8" };
+		m_rowFactorCombo = new JComboBox( items );
+		m_rowFactorCombo.setActionCommand( BX_ACTION );
+		m_rowFactorCombo.addActionListener( this );
+		m_rowFactorCombo.setName( "RowFactor" );
+		m_rowFactorCombo.setPreferredSize( new Dimension( 55, 25 ) );
+		m_rowFactorCombo.getRenderer().setHorizontalAlignment( javax.swing.SwingConstants.CENTER );
+
+		m_colFactorCombo = new JComboBox( items );
+		m_colFactorCombo.setActionCommand( BY_ACTION );
+		m_colFactorCombo.addActionListener( this );
+		m_colFactorCombo.setName( "ColFactor" );
+		m_colFactorCombo.setPreferredSize( new Dimension( 55, 25 ) );
+		m_colFactorCombo.getRenderer().setHorizontalAlignment( javax.swing.SwingConstants.CENTER );
+
+		m_dRowFactor = ( new Integer( m_rowFactorCombo.getSelectedItem() ) ).intValue();
+		m_newRowsTxtfld = new OwlNumberField( ( dRows / m_dRowFactor ), 5 );
+		m_newRowsTxtfld.setEditable( false );
+		m_newRowsTxtfld.setBackground( java.awt.Color.WHITE );
+		m_newRowsTxtfld.setHorizontalAlignment( JTextField.CENTER );
+		m_newRowsTxtfld.setBorder( javax.swing.BorderFactory.createLineBorder( Color.cyan ) );
+
+		m_dColFactor = ( new Integer( m_colFactorCombo.getSelectedItem() ) ).intValue();
+		m_newColsTxtfld = new OwlNumberField( ( dCols / m_dColFactor ), 5 );
+		m_newColsTxtfld.setEditable( false );
+		m_newColsTxtfld.setBackground( java.awt.Color.WHITE );
+		m_newColsTxtfld.setHorizontalAlignment( JTextField.CENTER );
+		m_newColsTxtfld.setBorder( javax.swing.BorderFactory.createLineBorder( Color.cyan ) );
+
+		JLabel picLabel = new JLabel( new ImageIcon( MainApp.getBitmapPath() + "binning.gif" ) );
+		JLabel oldLabel = new JLabel( "<html><u>&nbsp;OLD&nbsp;</u></html>" );
+		JLabel newLabel = new JLabel( "<html><u>&nbsp;NEW&nbsp;</u></html>" );
+
+		addComponent( panel, picLabel,				 0,  9,  0,  0, GridBagConstraints.CENTER, 1, 2, 1, 1 );
+		addComponent( panel, oldLabel,               0,  0,  0,  0, GridBagConstraints.CENTER, 1, 1, 1, 1 );
+		addComponent( panel, newLabel,               0,  0,  0,  0, GridBagConstraints.CENTER, 1, 3, 1, 1 );
+		addComponent( panel, new JLabel( "ROWS: " ), 0,  9,  0,  0, GridBagConstraints.CENTER, 2, 0, 1, 1 );
+		addComponent( panel, m_oldRowsTxtfld,        4,  9,  0,  0, GridBagConstraints.CENTER, 2, 1, 1, 1 );
+		addComponent( panel, m_rowFactorCombo,       4,  9,  0,  0, GridBagConstraints.CENTER, 2, 2, 1, 1 );
+		addComponent( panel, m_newRowsTxtfld,        4,  9,  0,  9, GridBagConstraints.CENTER, 2, 3, 1, 1 );
+		addComponent( panel, new JLabel( "COLS: " ), 0,  9,  9,  0, GridBagConstraints.CENTER, 3, 0, 1, 1 );
+		addComponent( panel, m_oldColsTxtfld,        4,  9,  9,  0, GridBagConstraints.CENTER, 3, 1, 1, 1 );
+		addComponent( panel, m_colFactorCombo,       4,  9,  9,  0, GridBagConstraints.CENTER, 3, 2, 1, 1 );
+		addComponent( panel, m_newColsTxtfld,        4,  9,  9,  9, GridBagConstraints.CENTER, 3, 3, 1, 1 );
+
+		return panel;
+	}
+}
+
+
+BinningCC()
+{
+	CCScriptFrame frame = null;
+
+	if ( CameraAPI.IsCCParamSupported( CameraAPI.BINNING ) )
+	{
+		frame = ( CCScriptFrame )( new BinningFrame() );
+		frame.setVisible( true );
+	}
+	else
+	{
+		logger.warn(
+				"Additional BINNING options not available! CC Param Value: 0x" +
+				 Integer.toHexString( CameraAPI.GetCCParams() ) );
+	}
+
+	return frame;
+}

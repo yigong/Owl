@@ -1,0 +1,286 @@
+// +----------------------------------------------------------------------------+
+// |  ARC4748GainDC                                                             |
+// +----------------------------------------------------------------------------+
+// |  Used to set the video m_gain for the following boards:                      |
+// |                                                                            |
+// |  ARC-47                                                                    |
+// |  ARC-48                                                                    |
+// |                                                                            |
+// +----------------------------------------------------------------------------+
+import javax.swing.border.TitledBorder;
+import javax.swing.BoxLayout;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.owltypes.OwlTextField;
+import owl.main.owltypes.OwlBoldButton;
+import owl.gui.utils.OwlUtilities;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+
+public class ARC4748GainFrame extends CCScriptFrame implements Runnable, ItemListener
+{
+	final static String BOARD_NAME	=	"ARC-47/48";
+
+	final String APPLY_ACTION	=	"APPLY";
+	final String STOP_ACTION	=	"ABORT";
+
+	JToolBar			m_toolbar;
+	OwlBoldButton		m_applyButton;
+	JComboBox			m_boardComboBox;
+	JComboBox			m_gainComboBox;
+	JComboBox			m_timeComboBox;
+	boolean				m_stop;
+	int					m_boardID;
+	int					m_gain;
+	int					m_time;
+
+
+	public ARC4748GainFrame()
+	{
+		super( ARC4748GainFrame.BOARD_NAME + " Gain" );
+
+		m_boardID	= 0;
+		m_gain		= 0;
+		m_time		= 0;
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_applyButton = super.createBoldToolbarButton( APPLY_ACTION, Color.RED );
+		m_toolbar.add( m_applyButton);
+
+		super.appendToolbar( m_toolbar );
+
+		panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+		panel.setBackground( java.awt.Color.WHITE );
+
+		panel.add( createTitlePanel() );
+		panel.add( createPanel() );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( panel,   BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	public JPanel createTitlePanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+
+ 		JLabel label = new JLabel(
+ 							 "<html><b><font size=4 color=#FFFFFF>" +
+							 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+							 BOARD_NAME + " VIDEO GAIN" +
+							 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+							 "</font></b></html>" );
+
+		label.setBorder( BorderFactory.createLineBorder( owl.gui.utils.OwlColors.getGreen1() ) );
+		label.setOpaque( true );
+		label.setBackground( owl.gui.utils.OwlColors.getGreen2() );
+
+		panel.add( label );
+
+		return panel;
+	}
+
+	public JPanel createPanel()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		//  Add Board List
+		// +---------------------------------------------------+
+		String[] boardList = { "0", "1", "2", "3", "4", "5", "6",
+							   "7", "8", "9", "10", "11", "12",
+							   "13", "14", "15  " };
+
+		m_boardComboBox  = new JComboBox( boardList );
+		m_boardComboBox.setPreferredSize( new Dimension( 60, 25 ) );
+		m_boardComboBox.setBackground( java.awt.Color.WHITE );
+		m_boardComboBox.setSelectedIndex( 0 );
+
+		JLabel boardLabel = new JLabel( "Board Number: " );
+
+		addComponent( panel, boardLabel,    0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.EAST, 0, 0, 1, 1 );
+		addComponent( panel, m_boardComboBox, 0, 5, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 1, 1, 1 );
+
+		//  Add Gain List
+		// +---------------------------------------------------+
+		String[] gainList = { "1", "1.25", "1.5", "1.75",
+							  "2", "2.25", "2.5", "2.75",
+							  "3", "3.25", "3.5", "3.75",
+							  "4", "4.25", "4.5", "4.75" };
+
+		m_gainComboBox = new JComboBox( gainList );
+		m_gainComboBox.setPreferredSize( new Dimension( 60, 25 ) );
+		m_gainComboBox.setBackground( java.awt.Color.WHITE );
+		m_gainComboBox.setSelectedIndex( 0 );
+
+		JLabel gainLabel = new JLabel( "Gain: " );
+
+		addComponent( panel, gainLabel,    0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.EAST, 1, 0, 1, 1 );
+		addComponent( panel, m_gainComboBox, 0, 5, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 1, 1, 1, 1 );
+
+		//  Add Time List
+		// +---------------------------------------------------+
+		String[] timeList = { "8.00", "4.02", "2.68", "2.00",
+							  "1.60", "1.34", "1.14", "0.50",
+							  "0.47", "0.44", "0.42", "0.40",
+							  "0.38", "0.36", "0.35" };
+
+		m_timeComboBox = new JComboBox( timeList );
+		m_timeComboBox.setPreferredSize( new Dimension( 60, 25 ) );
+		m_timeComboBox.setBackground( java.awt.Color.WHITE );
+		m_timeComboBox.setSelectedIndex( 7 );
+
+		JLabel rangeLabel = new JLabel ( "R ( KOmega )" );
+		JLabel timeLabel  = new JLabel( "Time Constant: " );
+
+		addComponent( panel, timeLabel,    0, 0, 0, 0, GridBagConstraints.NONE, GridBagConstraints.EAST, 2, 0, 1, 1 );
+		addComponent( panel, m_timeComboBox, 0, 5, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 2, 1, 1, 1 );
+		addComponent( panel, rangeLabel,   0, 7, 0, 0, GridBagConstraints.NONE, GridBagConstraints.WEST, 2, 2, 1, 1 );
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( APPLY_ACTION ) )
+		{
+			m_stop = false;
+
+			new Thread( this ).start();
+		}
+
+		else if ( event.getActionCommand().equals( STOP_ACTION ) )
+		{
+			m_stop = true;
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	public void setBoardId( id )
+	{
+		m_boardID = id;
+	}
+
+	public void setGain( g )
+	{
+		m_gain = g;
+	}
+
+	public void setTimeConstant( t )
+	{
+		m_time = t;
+	}
+
+	public void run()
+	{
+		m_applyButton.setText( STOP_ACTION );
+		m_applyButton.setColored();
+
+		// ----------------------------------------
+		// NOTE: m_gain & m_time indexes equal values
+		//       to send to the controller!
+		// ----------------------------------------
+		m_boardID	= m_boardComboBox.getSelectedIndex();
+		m_gain	= m_gainComboBox.getSelectedIndex();
+		m_time	= m_timeComboBox.getSelectedIndex();
+
+		try
+		{
+			if ( m_boardID < 0 )
+			{
+				throw new Exception( "Invalid board id: " + m_boardID );
+			}
+
+			if ( m_gain < 0 )
+			{
+				throw new Exception( "Invalid m_gain: " + m_gain );
+			}
+
+			if ( m_time < 0 )
+			{
+				throw new Exception( "Invalid m_time constant: " + m_time );
+			}
+
+			if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+			// -------------------------------------
+			// Send the m_gain
+			// -------------------------------------
+			logger.infoStart( "Setting " + BOARD_NAME + " m_gain" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID,
+						   CameraAPI.SGN,
+						   m_boardID,
+						   m_gain,
+						   m_time,
+						   CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( m_stop ) { throw new Exception( STOP_ACTION ); }
+
+			fireScriptApplied();
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+
+			logger.error( "( ARC4748GainDC script ): SGN reply error. Expected: " +
+						   re.getExpectedHexString() + " Received: " +
+						   re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+
+			if ( !e.getMessage().equals( STOP_ACTION ) )
+			{
+				logger.error( "( ARC4748GainDC script ): " + e.getMessage() );
+			}
+		}
+		finally
+		{
+			m_applyButton.setBlack( APPLY_ACTION );
+		}
+	}
+}
+
+
+
+ARC4748GainDC()
+{
+	CCScriptFrame frame = null;
+
+	if ( CameraAPI.IsCCParamSupported( CameraAPI.ARC47 ) || CameraAPI.IsCCParamSupported( CameraAPI.ARC48 ) )
+	{
+		frame = ( CCScriptFrame )( new ARC4748GainFrame() );
+		frame.setVisible( true );
+	}
+	else
+	{
+		logger.warn(
+				"Additional " + ARC4748GainFrame.BOARD_NAME +
+				" gain options not available! CC Param Value: 0x" +
+				Integer.toHexString( CameraAPI.GetCCParams() ) );
+	}
+
+	return frame;
+}

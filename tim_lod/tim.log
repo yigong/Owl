@@ -1,0 +1,133 @@
+Mon Jan  7 10:38:42 PST 2013
+**** 2063 [LBNL_3.5k.waveforms 70]: Defining voltage OFFA0 type VID board 0 dac 1 with limits -10.0 10.0
+**** 2076 [LBNL_3.5k.waveforms 71]: Defining voltage OFFA1 type VID board 1 dac 1 with limits -10.0 10.0
+**** 2089 [LBNL_3.5k.waveforms 72]: Defining voltage OFFB0 type VID board 0 dac 3 with limits -10.0 10.0
+**** 2102 [LBNL_3.5k.waveforms 73]: Defining voltage OFFB1 type VID board 1 dac 3 with limits -10.0 10.0
+**** 2117 [LBNL_3.5k.waveforms 76]: Defining voltage VDD1 type VID board 2 dac 0 with limits 0.0 -25.0
+**** 2130 [LBNL_3.5k.waveforms 77]: Defining voltage VDD2 type VID board 2 dac 1 with limits 0.0 -25.0
+**** 2143 [LBNL_3.5k.waveforms 78]: Defining voltage VDD3 type VID board 2 dac 2 with limits 0.0 -25.0
+**** 2156 [LBNL_3.5k.waveforms 79]: Defining voltage VDD4 type VID board 2 dac 3 with limits 0.0 -25.0
+**** 2169 [LBNL_3.5k.waveforms 80]: Defining voltage VR1 type VID board 2 dac 4 with limits 0.0 -25.0
+**** 2182 [LBNL_3.5k.waveforms 81]: Defining voltage VR2 type VID board 2 dac 5 with limits 0.0 -25.0
+**** 2195 [LBNL_3.5k.waveforms 82]: Defining voltage VR3 type VID board 2 dac 6 with limits 0.0 -25.0
+**** 2208 [LBNL_3.5k.waveforms 83]: Defining voltage VR4 type VID board 2 dac 7 with limits 0.0 -25.0
+**** 2221 [LBNL_3.5k.waveforms 84]: Defining voltage VOG1 type VID board 2 dac 8 with limits 0.0 5
+**** 2234 [LBNL_3.5k.waveforms 85]: Defining voltage VOG2 type VID board 2 dac 9 with limits 0.0 5
+**** 2247 [LBNL_3.5k.waveforms 86]: Defining voltage VOG3 type VID board 2 dac 10 with limits 0.0 5
+**** 2260 [LBNL_3.5k.waveforms 87]: Defining voltage VOG4 type VID board 2 dac 11 with limits 0.0 5
+**** 2273 [LBNL_3.5k.waveforms 88]: Defining voltage VSUB type VID board 2 dac 12 with limits 0.0 200.8
+**** 2286 [LBNL_3.5k.waveforms 89]: Defining voltage RAMP type VID board 2 dac 13 with limits 0.0 10.0
+**** 2302 [LBNL_3.5k.waveforms 93]: Defining voltage V1_HI type CLK board 2 dac 0 with limits -13.0 +13.0
+**** 2315 [LBNL_3.5k.waveforms 94]: Defining voltage V1_LO type CLK board 2 dac 1 with limits -13.0 +13.0
+**** 2328 [LBNL_3.5k.waveforms 95]: Defining voltage V2_HI type CLK board 2 dac 2 with limits -13.0 +13.0
+**** 2341 [LBNL_3.5k.waveforms 96]: Defining voltage V2_LO type CLK board 2 dac 3 with limits -13.0 +13.0
+**** 2354 [LBNL_3.5k.waveforms 97]: Defining voltage V3_HI type CLK board 2 dac 4 with limits -13.0 +13.0
+**** 2367 [LBNL_3.5k.waveforms 98]: Defining voltage V3_LO type CLK board 2 dac 5 with limits -13.0 +13.0
+**** 2381 [LBNL_3.5k.waveforms 100]: Defining voltage FS1_HI type CLK board 2 dac 6 with limits -13.0 +13.0
+**** 2394 [LBNL_3.5k.waveforms 101]: Defining voltage FS1_LO type CLK board 2 dac 7 with limits -13.0 +13.0
+**** 2407 [LBNL_3.5k.waveforms 102]: Defining voltage FS2_HI type CLK board 2 dac 8 with limits -13.0 +13.0
+**** 2420 [LBNL_3.5k.waveforms 103]: Defining voltage FS2_LO type CLK board 2 dac 9 with limits -13.0 +13.0
+**** 2433 [LBNL_3.5k.waveforms 104]: Defining voltage FS3_HI type CLK board 2 dac 10 with limits -13.0 +13.0
+**** 2446 [LBNL_3.5k.waveforms 105]: Defining voltage FS3_LO type CLK board 2 dac 11 with limits -13.0 +13.0
+**** 2460 [LBNL_3.5k.waveforms 107]: Defining voltage T1_HI type CLK board 2 dac 12 with limits -13.0 +13.0
+**** 2473 [LBNL_3.5k.waveforms 108]: Defining voltage T1_LO type CLK board 2 dac 13 with limits -13.0 +13.0
+**** 2486 [LBNL_3.5k.waveforms 109]: Defining voltage T2_HI type CLK board 2 dac 14 with limits -13.0 +13.0
+**** 2499 [LBNL_3.5k.waveforms 110]: Defining voltage T2_LO type CLK board 2 dac 15 with limits -13.0 +13.0
+**** 2514 [LBNL_3.5k.waveforms 113]: Defining voltage H1U_HI type CLK board 2 dac 24 with limits -13.0 +13.0
+**** 2527 [LBNL_3.5k.waveforms 114]: Defining voltage H1U_LO type CLK board 2 dac 25 with limits -13.0 +13.0
+**** 2540 [LBNL_3.5k.waveforms 115]: Defining voltage H2U_HI type CLK board 2 dac 26 with limits -13.0 +13.0
+**** 2553 [LBNL_3.5k.waveforms 116]: Defining voltage H2U_LO type CLK board 2 dac 27 with limits -13.0 +13.0
+**** 2566 [LBNL_3.5k.waveforms 117]: Defining voltage H3U_HI type CLK board 2 dac 28 with limits -13.0 +13.0
+**** 2579 [LBNL_3.5k.waveforms 118]: Defining voltage H3U_LO type CLK board 2 dac 29 with limits -13.0 +13.0
+**** 2592 [LBNL_3.5k.waveforms 119]: Defining voltage H1L_HI type CLK board 2 dac 30 with limits -13.0 +13.0
+**** 2605 [LBNL_3.5k.waveforms 120]: Defining voltage H1L_LO type CLK board 2 dac 31 with limits -13.0 +13.0
+**** 2618 [LBNL_3.5k.waveforms 121]: Defining voltage H2L_HI type CLK board 2 dac 32 with limits -13.0 +13.0
+**** 2631 [LBNL_3.5k.waveforms 122]: Defining voltage H2L_LO type CLK board 2 dac 33 with limits -13.0 +13.0
+**** 2644 [LBNL_3.5k.waveforms 123]: Defining voltage H3L_HI type CLK board 2 dac 34 with limits -13.0 +13.0
+**** 2657 [LBNL_3.5k.waveforms 124]: Defining voltage H3L_LO type CLK board 2 dac 35 with limits -13.0 +13.0
+**** 2670 [LBNL_3.5k.waveforms 125]: Defining voltage SWU_HI type CLK board 2 dac 36 with limits -13.0 +13.0
+**** 2683 [LBNL_3.5k.waveforms 126]: Defining voltage SWU_LO type CLK board 2 dac 37 with limits -13.0 +13.0
+**** 2696 [LBNL_3.5k.waveforms 127]: Defining voltage SWL_HI type CLK board 2 dac 38 with limits -13.0 +13.0
+**** 2709 [LBNL_3.5k.waveforms 128]: Defining voltage SWL_LO type CLK board 2 dac 39 with limits -13.0 +13.0
+**** 2722 [LBNL_3.5k.waveforms 129]: Defining voltage RU_HI type CLK board 2 dac 40 with limits -13.0 +13.0
+**** 2735 [LBNL_3.5k.waveforms 130]: Defining voltage RU_LO type CLK board 2 dac 41 with limits -13.0 +13.0
+**** 2748 [LBNL_3.5k.waveforms 131]: Defining voltage RL_HI type CLK board 2 dac 42 with limits -13.0 +13.0
+**** 2761 [LBNL_3.5k.waveforms 132]: Defining voltage RL_LO type CLK board 2 dac 43 with limits -13.0 +13.0
+**** 3024 [LBNL_3.5k.waveforms 390]: Setting voltage VSUB 20.0V 407
+**** 3031 [LBNL_3.5k.waveforms 392]: Setting voltage VSUB 0V 0
+**** 3037 [LBNL_3.5k.waveforms 393]: Setting voltage V1_HI 9V 3465
+**** 3043 [LBNL_3.5k.waveforms 394]: Setting voltage V1_LO 9V 3465
+**** 3049 [LBNL_3.5k.waveforms 395]: Setting voltage V2_HI 9V 3465
+**** 3055 [LBNL_3.5k.waveforms 396]: Setting voltage V2_LO 9V 3465
+**** 3061 [LBNL_3.5k.waveforms 397]: Setting voltage V3_HI 9V 3465
+**** 3067 [LBNL_3.5k.waveforms 398]: Setting voltage V3_LO 9V 3465
+**** 3073 [LBNL_3.5k.waveforms 399]: Setting voltage FS1_HI 9V 3465
+**** 3079 [LBNL_3.5k.waveforms 400]: Setting voltage FS1_LO 9V 3465
+**** 3085 [LBNL_3.5k.waveforms 401]: Setting voltage FS2_HI 9V 3465
+**** 3091 [LBNL_3.5k.waveforms 402]: Setting voltage FS2_LO 9V 3465
+**** 3097 [LBNL_3.5k.waveforms 403]: Setting voltage FS3_HI 9V 3465
+**** 3103 [LBNL_3.5k.waveforms 404]: Setting voltage FS3_LO 9V 3465
+**** 3110 [LBNL_3.5k.waveforms 406]: Setting voltage V1_HI 5.0V 2835
+**** 3116 [LBNL_3.5k.waveforms 407]: Setting voltage V1_LO -3.0V 1575
+**** 3122 [LBNL_3.5k.waveforms 408]: Setting voltage V2_HI 5.0V 2835
+**** 3128 [LBNL_3.5k.waveforms 409]: Setting voltage V2_LO -3.0V 1575
+**** 3134 [LBNL_3.5k.waveforms 410]: Setting voltage V3_HI 5.0V 2835
+**** 3140 [LBNL_3.5k.waveforms 411]: Setting voltage V3_LO -3.0V 1575
+**** 3146 [LBNL_3.5k.waveforms 412]: Setting voltage FS1_HI 5.0V 2835
+**** 3152 [LBNL_3.5k.waveforms 413]: Setting voltage FS1_LO -3.0V 1575
+**** 3158 [LBNL_3.5k.waveforms 414]: Setting voltage FS2_HI 5.0V 2835
+**** 3164 [LBNL_3.5k.waveforms 415]: Setting voltage FS2_LO -3.0V 1575
+**** 3170 [LBNL_3.5k.waveforms 416]: Setting voltage FS3_HI 5.0V 2835
+**** 3176 [LBNL_3.5k.waveforms 417]: Setting voltage FS3_LO -3.0V 1575
+**** 3186 [LBNL_3.5k.waveforms 422]: Setting voltage V1_HI 5.0V 2835
+**** 3192 [LBNL_3.5k.waveforms 423]: Setting voltage V1_LO -3.0V 1575
+**** 3198 [LBNL_3.5k.waveforms 424]: Setting voltage V2_HI 5.0V 2835
+**** 3204 [LBNL_3.5k.waveforms 425]: Setting voltage V2_LO -3.0V 1575
+**** 3210 [LBNL_3.5k.waveforms 426]: Setting voltage V3_HI 5.0V 2835
+**** 3216 [LBNL_3.5k.waveforms 427]: Setting voltage V3_LO -3.0V 1575
+**** 3222 [LBNL_3.5k.waveforms 428]: Setting voltage FS1_HI 5.0V 2835
+**** 3228 [LBNL_3.5k.waveforms 429]: Setting voltage FS1_LO -3.0V 1575
+**** 3234 [LBNL_3.5k.waveforms 430]: Setting voltage FS2_HI 5.0V 2835
+**** 3240 [LBNL_3.5k.waveforms 431]: Setting voltage FS2_LO -3.0V 1575
+**** 3246 [LBNL_3.5k.waveforms 432]: Setting voltage FS3_HI 5.0V 2835
+**** 3252 [LBNL_3.5k.waveforms 433]: Setting voltage FS3_LO -3.0V 1575
+**** 3258 [LBNL_3.5k.waveforms 434]: Setting voltage T1_HI 5.0V 2835
+**** 3264 [LBNL_3.5k.waveforms 435]: Setting voltage T1_LO -3.0V 1575
+**** 3270 [LBNL_3.5k.waveforms 436]: Setting voltage T2_HI 5.0V 2835
+**** 3276 [LBNL_3.5k.waveforms 437]: Setting voltage T2_LO -3.0V 1575
+**** 3283 [LBNL_3.5k.waveforms 439]: Setting voltage H1U_HI +6.0V 2993
+**** 3289 [LBNL_3.5k.waveforms 440]: Setting voltage H1U_LO -4.0V 1417
+**** 3295 [LBNL_3.5k.waveforms 441]: Setting voltage H2U_HI +6.0V 2993
+**** 3301 [LBNL_3.5k.waveforms 442]: Setting voltage H2U_LO -4.0V 1417
+**** 3307 [LBNL_3.5k.waveforms 443]: Setting voltage H3U_HI +6.0V 2993
+**** 3313 [LBNL_3.5k.waveforms 444]: Setting voltage H3U_LO -4.0V 1417
+**** 3319 [LBNL_3.5k.waveforms 445]: Setting voltage H1L_HI +6.0V 2993
+**** 3325 [LBNL_3.5k.waveforms 446]: Setting voltage H1L_LO -4.0V 1417
+**** 3331 [LBNL_3.5k.waveforms 447]: Setting voltage H2L_HI +6.0V 2993
+**** 3337 [LBNL_3.5k.waveforms 448]: Setting voltage H2L_LO -4.0V 1417
+**** 3343 [LBNL_3.5k.waveforms 449]: Setting voltage H3L_HI +6.0V 2993
+**** 3349 [LBNL_3.5k.waveforms 450]: Setting voltage H3L_LO -4.0V 1417
+**** 3355 [LBNL_3.5k.waveforms 451]: Setting voltage SWU_HI 5.0V 2835
+**** 3361 [LBNL_3.5k.waveforms 452]: Setting voltage SWU_LO -5.0V 1260
+**** 3367 [LBNL_3.5k.waveforms 453]: Setting voltage SWL_HI 5.0V 2835
+**** 3373 [LBNL_3.5k.waveforms 454]: Setting voltage SWL_LO -5.0V 1260
+**** 3379 [LBNL_3.5k.waveforms 455]: Setting voltage RU_HI -6.0V 1102
+**** 3385 [LBNL_3.5k.waveforms 456]: Setting voltage RU_LO 0.0V 2048
+**** 3391 [LBNL_3.5k.waveforms 457]: Setting voltage RL_HI -6.0V 1102
+**** 3397 [LBNL_3.5k.waveforms 458]: Setting voltage RL_LO 0.0V 2048
+**** 3477 [LBNL_3.5k.waveforms 533]: Setting voltage VSUB 20.0V 407
+**** 3483 [LBNL_3.5k.waveforms 534]: Setting voltage RAMP 5.0V 2048
+**** 3489 [LBNL_3.5k.waveforms 535]: Setting voltage VDD1 -22.0V 3604
+**** 3495 [LBNL_3.5k.waveforms 536]: Setting voltage VDD2 -22.0V 3604
+**** 3501 [LBNL_3.5k.waveforms 537]: Setting voltage VDD3 -22.0V 3604
+**** 3507 [LBNL_3.5k.waveforms 538]: Setting voltage VDD4 -22.0V 3604
+**** 3513 [LBNL_3.5k.waveforms 539]: Setting voltage VR1 -12.5V 2048
+**** 3519 [LBNL_3.5k.waveforms 540]: Setting voltage VR2 -12.5V 2048
+**** 3525 [LBNL_3.5k.waveforms 541]: Setting voltage VR3 -12.5V 2048
+**** 3531 [LBNL_3.5k.waveforms 542]: Setting voltage VR4 -12.5V 2048
+**** 3537 [LBNL_3.5k.waveforms 543]: Setting voltage VOG1 2.16V 1769
+**** 3543 [LBNL_3.5k.waveforms 544]: Setting voltage VOG2 2.16V 1769
+**** 3549 [LBNL_3.5k.waveforms 545]: Setting voltage VOG3 2.16V 1769
+**** 3555 [LBNL_3.5k.waveforms 546]: Setting voltage VOG4 2.16V 1769
+**** 3564 [LBNL_3.5k.waveforms 550]: Setting voltage VSUB 20.0V 407
+**** 3571 [LBNL_3.5k.waveforms 552]: Setting voltage VSUB 0.0V 0

@@ -1,0 +1,137 @@
+import javax.swing.border.TitledBorder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+
+ScriptFrameTemplate( useGUI )
+{
+	final String RUN_ACTION			=	"RUN";
+	final String STOP_ACTION		=	"ABORT";
+	final String CLOSE_ACTION		=	"CLOSE";
+
+	JFrame frame;
+	GridBagLayout gbl;
+	GridBagConstraints gbc;
+	JToolBar toolbar;
+	JButton runButton;
+	JButton closeButton;
+	boolean stop;
+
+	private buildFrame()
+	{
+		frame = new JFrame();
+
+		///////////////////////////////////////////////////////
+		// TODO - Replace "Frame Title" with your own
+		///////////////////////////////////////////////////////
+		frame.setTitle( "Frame Title" );
+
+		frame.getContentPane().setLayout( new BorderLayout() );
+
+		toolbar = new JToolBar();
+		toolbar.setFloatable( false );
+
+		runButton = new JButton( RUN_ACTION );
+		runButton.setBorderPainted( false );
+		runButton.setFocusPainted( false );
+		runButton.addActionListener( this );
+		toolbar.add( runButton );
+
+		closeButton = new JButton( CLOSE_ACTION );
+		closeButton.setBorderPainted( false );
+		closeButton.setFocusPainted( false );
+		closeButton.addActionListener( this );
+		toolbar.add( closeButton );
+
+		gbl = new GridBagLayout();
+		gbc = new GridBagConstraints();
+
+		frame.getContentPane().add( toolbar, BorderLayout.PAGE_START );
+		frame.getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		frame.pack();
+		centerFrame();
+		frame.show();
+	}
+
+	private centerFrame()
+	{
+		Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+		int xPos = d.width / 2 - frame.getWidth() / 2 - 50;
+		int yPos = d.height / 4  - frame.getHeight() / 2;
+		frame.setLocation( xPos, yPos );
+	}
+
+	private JPanel createComponents()
+	{
+			panel = new JPanel();
+			panel.setLayout( gbl );
+
+			///////////////////////////////////////////////////////
+			// TODO - Create your component panel here
+			///////////////////////////////////////////////////////
+
+			return panel;
+	}
+
+	///////////////////////////////////////////////////////
+	// TODO - Add any additional action commands you need
+	///////////////////////////////////////////////////////
+	void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		else if ( event.getActionCommand().equals( CLOSE_ACTION ) )
+		{
+			frame.dispose();
+		}
+	}
+
+	addComponent( JPanel panel, JComponent comp, int insetTOP, int insetLEFT,
+				  int insetBOTTOM, int insetRIGHT, int fill, int anchr, int row,
+				  int col, int rowSpan, int colSpan )
+	{
+      		// Set the grid layout constraints.
+      		gbc.fill = fill;
+      		gbc.anchor = anchr;
+      		gbc.insets = new Insets( insetTOP, insetLEFT, insetBOTTOM, insetRIGHT );
+      		gbc.gridx = col;
+      		gbc.gridy = row;
+      		gbc.gridwidth = colSpan;
+      		gbc.gridheight = rowSpan;
+
+      		// Add the component to the panel.
+      		gbl.setConstraints( comp, gbc );
+      		panel.add( comp );
+	}
+
+	// NOTE: There's no point in "stopping" this thread, since it only
+	// sends one command, which blocks until complete. Remember that all
+	// GUI code must be preceded by "if ( useGUI )", otherwise calling
+	// run() when [useGUI=false] will generate errors.
+	public void run()
+	{
+		if ( !isSupported ) return;
+
+		if ( useGUI ) runButton.setText( STOP_ACTION );
+
+		///////////////////////////////////////////////////////
+		// TODO - Add your code here that will do the work
+		// REMEMBER to use 'if ( stop ) return;' a lot.
+		///////////////////////////////////////////////////////
+
+		if ( useGUI ) runButton.setText( RUN_ACTION );
+	}
+
+	frame = null;
+
+	///////////////////////////////////////////////////////
+	// TODO - Add any constructor code here. DON'T forget
+	// to call 'buildFrame()' somewhere in here!
+	///////////////////////////////////////////////////////
+
+	if ( useGUI ) return frame;
+	else return this;
+}

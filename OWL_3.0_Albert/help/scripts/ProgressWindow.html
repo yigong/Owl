@@ -1,0 +1,157 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">ProgressWindow</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+ProgressWindow( min, max );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">int min</span></td>
+<td valign="top">Minimum value of the progress bar.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int max</span></td>
+<td valign="top">Maximum value of the progress bar. Can be reset
+at anytime using the <span class="code">setNewMax()</span> method.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+ProgressWindow Object
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void setNewMax( int max )</td>
+<td>Sets the new maximum value for the progress bar.</td>
+</tr>
+
+<tr>
+<td valign="top">void setReadoutValue( int value )</td>
+<td>Sets the current value of the progress bar.</td>
+</tr>
+
+<tr>
+<td valign="top">void setElapsedTime( int time )</td>
+<td>(optional) Sets the elapsed exposure time in seconds
+if the window is used for camera readout progress.
+</td>
+</tr>
+
+<tr>
+<td valign="top">void showElapsedTime( boolean show )</td>
+<td>Set to true to use the window for camera readout progress.
+This will allow the elapsed exposure time to be shown on the
+window. False to disable this feature. Set to true by default.
+</td>
+</tr>
+
+<tr>
+<td valign="top">void setCustomLabel( String text, boolean showsValue )</td>
+<td>Allows one to set a custom label for the elapsed exposure
+time label. The label text is set by the text parameter. The
+showsValue parameter is true if the custom label can set an
+integer value; false to only show the custom text label with no
+associated value.</td> 
+</tr>
+
+<tr>
+<td valign="top">void setCustomTitle( String text )</td>
+<td>Allows one to set a custom title for the window.</td> 
+</tr>
+
+<tr>
+<td valign="top">void setIcon( File file )</td>
+<td>Allows one to set a custom icon for the window.</td> 
+</tr>
+
+<tr>
+<td valign="top">void show()</td>
+<td>Displays the progress window.</td> 
+</tr>
+
+<tr>
+<td valign="top">void close()</td>
+<td>Exits/closes the progress window.</td> 
+</tr>
+
+<tr>
+<td valign="top">void test()</td>
+<td>Runs the progress window with test data for a
+demo.</td> 
+</tr>
+
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Displays a progress window that can be used from scripts.
+For example, can be used to show exposure elapsed time
+and pixel readout. Can be used to represent the progress
+of other tasks from within scripts as well.
+
+<br><br>
+Example: Create an expose/readout progress window ...
+<pre>
+	p = ProgressWindow( 0, 200 );
+	p.show();
+
+	... do exposure code here ...
+	p.setElapsedTime( elapsedTimeValue );
+
+	... do readout code here ...
+	p.setReadoutValue( pixelCount );
+
+	p.close();
+</pre>
+
+<br>
+Example: Create a custom progress window ...
+<pre>
+	p = ProgressWindow( 0, 200 );
+	p.showElapsedTime( false );
+	p.setCustomLabel( "My Task", false );
+	p.setCustomTitle( "My Window" );
+	p.show();
+
+	... do some task here and call setReadoutValue ...
+	p.setReadoutValue( someValue );
+
+	p.close();
+</pre>
+
+</div>
+
+</body>
+
+</html>

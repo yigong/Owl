@@ -1,0 +1,67 @@
+import owl.cameraAPI.ImageAPI;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+
+CRWriteToDiskPixRead()
+{
+	private final int MAX_BUFFER_SIZE = 4096 * 4096;
+
+	stop = false;
+	new Thread( this ).start();
+//	this.deinterlaceAlgorithm = deinterlaceAlgorithm;
+	filename = "C:\\Documents and Settings\\streit\\Desktop\\Image.fit";
+
+	abort()
+	{
+		stop = true;
+		logger.warn( "Aborting CRWriteToDiskPixRead!" );
+	}
+
+	public void run()
+	{
+		try
+		{
+			frameCount = 0;
+			pciFrameCount = 0;
+			imageCount = 0;
+			currentPixelCount = 0;
+
+			if( stop ) return;
+
+			// Start the continuous readout loop
+			// --------------------------------------------------------------
+			while ( !stop )
+			{
+				// Save the last pixel count for use by the timeout counter.
+				currentPixelCount = CameraAPI.GetPixelCount();
+
+				if( stop ) break;
+
+//				logger.debug( "Current Pixel Count: " + currentPixelCount );
+
+				if ( currentPixelCount >= ( imageCount + 1 ) * 2048 * 2048 )
+				{
+					logger.debug( "Copying image #" + imageCount + " to list" );
+
+//					bytes = 2048 * 2048 * 2;
+//					CameraAPI.CopyMemToList( ( int )( imageCount % 4.0 ) );
+					imageCount++;
+				}
+			}
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+			logger.error( "Reply expected: " + re.getExpectedHexString() +
+				 	  " actual: " + re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+	}
+
+	return this;
+}
+

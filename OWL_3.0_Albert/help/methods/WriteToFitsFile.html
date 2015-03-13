@@ -1,0 +1,65 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">WriteToFitsFile</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.WriteToFitsFile( handle, bytes, bytes_to_skip, first_pixel );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">int handle</span></td>
+<td valign="top">The handle to a previously created and open FITS
+file. The return value from <a href="CreateFitsFile.html">CreateFitsFile()
+</a>.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int bytes</span></td>
+<td valign="top">The number of bytes to write to the file.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int bytes_to_skip</span></td>
+<td valign="top">The number of bytes to skip within the image buffer before
+reading data for writing to the file. Typically set to 0.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">int first_pixel</span></td>
+<td valign="top">The first pixel to write in the FITS file. This is only
+used if you need to skip over existing pixels in the file before starting
+to write image data, such as for writing a sub-image into an existing
+image. Typically set to 0.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Writes data from the primary image buffer to a FITS file that was previously
+opened with <a href="CreateFitsFile.html">CreateFitsFile()</a>. Throws
+java.lang.Exception if an error occurs. All exceptions can be caught using a
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

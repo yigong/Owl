@@ -1,0 +1,13 @@
+<cc-rules>
+	<object-create-rule pattern="params" classname="java.util.ArrayList" />
+
+	<pattern value="params/ccscript">
+		<object-create-rule classname="owl.CCParams.CCScript" />
+		<set-properties-rule />
+		<bean-property-setter-rule pattern="script"/>
+		<bean-property-setter-rule pattern="text"/>
+		<bean-property-setter-rule pattern="action"/>
+		<bean-property-setter-rule pattern="bits"/>
+		<set-next-rule methodname="add"/>
+	</pattern>
+</cc-rules>

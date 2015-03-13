@@ -1,0 +1,51 @@
+import arc.mlo.MloGpsAPI;
+
+System.out.println( "JAVA Test String -> " + MloGpsAPI.ToString() );
+
+System.out.println( "JAVA Test String -> " + MloGpsAPI.NativeToString() );
+
+try
+{
+	logger.infoStart( "Opening GPS device" );
+	MloGpsAPI.Open();
+	logger.infoEnd();
+
+	MloGpsAPI.GetTime();
+
+	logger.infoStart( "Tracking : " + MloGpsAPI.GetTrackingString() );
+	logger.infoStart( "Date : " + MloGpsAPI.GetDateString() );
+	logger.infoStart( "Time : " + MloGpsAPI.GetTimeString() );
+}
+catch ( Exception e )
+{
+	logger.error( e.getMessage() );
+}
+
+
+/****
+import arc.test.JNITestLib;
+
+System.out.println( "JAVA Test String -> " + JNITestLib.ToString() );
+
+JNITestLib testLib = new JNITestLib();
+System.out.println( "JAVA Test String -> " + testLib.ObjToString() );
+
+System.out.println( "JAVA Test String -> " + JNITestLib.NativeToString() );
+
+System.out.println( "JAVA Test String -> " + JNITestLib.NativeDevString() );
+
+try
+{
+logger.infoStart( "Calling OPEN" );
+JNITestLib.Open();
+logger.infoEnd();
+
+logger.infoStart( "Calling CLOSE" );
+JNITestLib.Close();
+logger.infoEnd();
+}
+catch ( Exception e )
+{
+	logger.error( e.getMessage() );
+}
+*****/

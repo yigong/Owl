@@ -1,0 +1,27 @@
+System.out.println( "Hello From Print Test!" );
+
+import owl.main.MainApp;
+
+MainApp.infoStart( "Hello From Print Test" );
+MainApp.infoEnd();
+ 
+MainApp.infoStart( "Hello From Print Test" );
+MainApp.infoFail();
+
+MainApp.infoStart( "Hello From Print Test" );
+MainApp.getLogger().infoCancel();
+
+MainApp.infoStart( "Hello From Print Test" );
+MainApp.infoEnd();
+
+MainApp.infoStart( "Hello From Print Test" );
+MainApp.infoEnd();
+
+MainApp.infoStart( "Hello From Print Test" );
+MainApp.infoEnd();
+
+MainApp.infoStart( "Hello From Print Test" );
+MainApp.infoFail();
+
+MainApp.infoStart( "Hello From Print Test" );
+MainApp.infoEnd();

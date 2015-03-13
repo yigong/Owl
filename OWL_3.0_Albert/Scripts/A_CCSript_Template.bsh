@@ -1,0 +1,137 @@
+import javax.swing.border.TitledBorder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlNumberField;
+import owl.gui.utils.OwlUtilities;
+import owl.main.setup.SetupEvent;
+import owl.main.setup.SetupListener;
+import owl.main.setup.SetupFrame;
+import owl.main.MainApp;
+
+
+// +---------------------------------------------------------------------------------------+
+// |  CLASS TemplateFrame                                                                  |
+// +---------------------------------------------------------------------------------------+
+// |  Creates the primary window.                                                          |
+// +---------------------------------------------------------------------------------------+
+public class TemplateFrame extends CCScriptFrame implements Runnable, SetupListener
+{
+	final String RUN_ACTION		=	"RUN";
+	final String STOP_ACTION	=	"ABORT";
+
+	JToolBar			m_toolbar;
+	OwlBoldButton		m_runButton;
+
+	// +-----------------------------------------------------------------+
+	// |  Constructor                                                    |
+	// +-----------------------------------------------------------------+
+	public TemplateFrame()
+	{
+		super( "Template" );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = super.createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		super.appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		SetupFrame.addSetupListener( this );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  destroy                                                        |
+	// +-----------------------------------------------------------------+
+	// |  Disposes of the window                                         |
+	// +-----------------------------------------------------------------+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  actionPerformed                                                |
+	// +-----------------------------------------------------------------+
+	// |  Override for ActionListener class                              |
+	// +-----------------------------------------------------------------+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  setupChanged                                                   |
+	// +-----------------------------------------------------------------+
+	// |  Override for SetupListener class                               |
+	// +-----------------------------------------------------------------+
+	public void setupChanged( SetupEvent event )
+	{
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  run                                                            |
+	// +-----------------------------------------------------------------+
+	// |  Override for Runnable class                                    |
+	// +-----------------------------------------------------------------+
+	public void run()
+	{
+		m_runButton.setColored( STOP_ACTION );
+
+		try
+		{
+			super.setDescription( " " );
+			super.fireScriptApplied();
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+
+			if ( e.getMessage() != null )
+			{
+				logger.error( e.getMessage() );
+			}
+		}
+		finally
+		{
+			m_runButton.setBlack( RUN_ACTION );
+		}
+	}
+
+	// +-----------------------------------------------------------------+
+	// |  createComponents                                               |
+	// +-----------------------------------------------------------------+
+	// |  Creates the primary window components.                         |
+	// +-----------------------------------------------------------------+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		addComponent( panel, new JLabel( "test" ), 0, 0, 0, 0, GridBagConstraints.CENTER, 0, 0, 1, 1 );
+
+		return panel;
+	}
+}
+
+
+frame = ( CCScriptFrame )( new TemplateFrame() );
+frame.setVisible( true );

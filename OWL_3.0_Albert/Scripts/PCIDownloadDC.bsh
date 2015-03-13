@@ -1,0 +1,194 @@
+import javax.swing.border.TitledBorder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlIconedFileChooser;
+import owl.main.owltypes.OwlTextField;
+import owl.main.owltypes.OwlBoldButton;
+import owl.gui.utils.OwlUtilities;
+import owl.main.MainApp;
+
+
+public class PCIDownloadFrame extends CCScriptFrame implements Runnable
+{
+	final String RUN_ACTION			=	"RUN";
+	final String STOP_ACTION		=	"ABORT";
+	final String PCI_BROWSE_ACTION	=	"PCI BROWSE";
+	final String PCI_EDIT_ACTION	=	"PCI EDIT";
+
+	JToolBar           m_toolbar;
+	OwlBoldButton      m_runButton;
+	OwlTextField       m_pciLoadTxtfld;
+	boolean            m_stop;
+	File               m_file;
+
+
+	public PCIDownloadFrame()
+	{
+		super( "PCI Download" );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = super.createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		super.appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		m_file = new File( "." );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+	}
+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		ImageIcon browseIcon = new ImageIcon( MainApp.getBitmapPath() +
+									 "folder.gif",
+									 "Browse" );
+
+		ImageIcon editIcon = new ImageIcon( MainApp.getBitmapPath() +
+								    "edit.gif",
+								    "Edit File" );
+
+		m_pciLoadTxtfld = new OwlTextField( 33 );
+		m_pciLoadTxtfld.setName( "PCIFile" );
+
+		pciBrowseButton  = new JButton( browseIcon );
+		pciBrowseButton.setPreferredSize( new Dimension( 25, 20 ) );
+		pciBrowseButton.setActionCommand( PCI_BROWSE_ACTION );
+		pciBrowseButton.addActionListener( this );
+
+		pciEditButton  = new JButton( editIcon );
+		pciEditButton.setPreferredSize( new Dimension( 25, 20 ) );
+		pciEditButton.setActionCommand( PCI_EDIT_ACTION );
+		pciEditButton.addActionListener( this );
+
+		JLabel label = new JLabel( "PCI File: " );
+
+		addComponent( panel, label,           7, 7, 7, 5, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 0, 1, 1 );
+		addComponent( panel, m_pciLoadTxtfld,   7, 0, 7, 5, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 1, 1, 1 );
+		addComponent( panel, pciBrowseButton, 7, 0, 7, 5, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 2, 1, 1 );
+		addComponent( panel, pciEditButton,   7, 0, 7, 7, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 3, 1, 1 );
+
+		return panel;
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			new Thread( this ).start();
+		}
+
+		else if ( event.getActionCommand().equals( STOP_ACTION ) )
+		{
+			m_stop = true;
+		}
+
+		else if ( event.getActionCommand().equals( PCI_BROWSE_ACTION ) )
+		{
+			String[] ext = { "lod" };
+			String[] desc = { "DSP Load File ( *.lod )" };
+			ImageIcon[] icons = { new ImageIcon( MainApp.getBitmapPath() + "LOD2.gif" ) };
+			OwlIconedFileChooser lodfc = new OwlIconedFileChooser( m_file, ext, desc, icons );
+
+			if ( lodfc.openDialog() )
+			{
+				m_file = lodfc.getSelectedFile();
+
+				if ( event.getActionCommand().equals( PCI_BROWSE_ACTION ) )
+				{
+					m_pciLoadTxtfld.setText( m_file.getPath() );
+				}
+			}
+		}
+
+		else if ( event.getActionCommand().equals( PCI_EDIT_ACTION ) )
+		{
+			File m_file = null;
+
+			if ( event.getActionCommand().equals( PCI_EDIT_ACTION ) )
+			{
+				m_file = new File( m_pciLoadTxtfld.getText() );
+			}
+
+			if ( m_file != null && m_file.isFile() )
+			{
+				MainApp.launchTextEditor( m_file.getPath() );
+			}
+			else
+			{
+				MainApp.launchTextEditor( "" );
+				MainApp.warn( "File doesn't exist! Opening empty text editor." );
+			}
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	// NOTE: There's no point in "stopping" this thread, since
+	// it only sends one command, which blocks until complete.
+	//
+	public void run()
+	{
+		m_stop = false;
+
+		m_runButton.setText( STOP_ACTION );
+		m_runButton.setColored();
+
+		try
+		{
+			if ( !m_stop )
+			{
+				logger.infoStart( "Loading PCI m_file" );
+				CameraAPI.LoadDeviceFile( m_pciLoadTxtfld.getText() );
+				logger.infoEnd();
+			}
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			m_runButton.setBlack( RUN_ACTION );
+		}
+	}
+}
+
+
+
+PCIDownloadDC()
+{
+	CCScriptFrame frame = null;
+
+	if ( CameraAPI.GetDeviceId() == 0 && CameraAPI.GetDeviceString().contains( "64" ) )
+	{
+		frame = ( CCScriptFrame )( new PCIDownloadFrame() );
+		frame.setVisible( true );
+	}
+	else
+	{
+		logger.warn( "Device download not supported! BoardId: 0x"
+					+ Integer.toHexString( CameraAPI.GetDeviceId() )
+					+ " DeviceString: " + CameraAPI.GetDeviceString() );
+	}
+
+	return frame;
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/BeanShell/bsh-classgen-2.0b4.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/BeanShell/bsh-classpath-2.0b4.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/BeanShell/bsh-core-2.0b4.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/BeanShell/bsh-reflect-2.0b4.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/BeanShell/bsh-util-2.0b4.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/commons-beanutils-1.7.0/commons-beanutils.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/commons-beanutils-1.7.0/commons-beanutils-bean-collections.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/commons-beanutils-1.7.0/commons-beanutils-core.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/commons-collections-3.1/commons-collections-3.1.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/commons-digester-1.7/commons-digester-1.7.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/commons-logging-1.0.4/commons-logging.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/commons-logging-1.0.4/commons-logging-api.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/logging-log4j-1.2.13/dist/lib/log4j-1.2.13.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/jfreechart-1.0.14/lib/jfreechart-1.0.14.jar"/>
+	<classpathentry kind="lib" path="/home/streit/Documents/JAVA/Owl/3.0/jfreechart-1.0.14/lib/jcommon-1.0.17.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,112 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">StandardSetup</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+StandardSetup();
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+StandardSetup Object
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void enableResetController( boolean enable )</td>
+<td>Enable a reset controller.</td>
+</tr>
+
+<tr>
+<td valign="top">void enablePCITests( boolean enable, int num_of_tests )</td>
+<td>Enable a PCI hardware test (TDL) the number of specified times.</td>
+</tr>
+
+<tr>
+<td valign="top">void enableTIMTests( boolean enable, int num_of_tests )</td>
+<td>Enable a timing hardware test (TDL) the number of specified times.</td>
+</tr>
+
+<tr>
+<td valign="top">void enableUTLTests( boolean enable, int num_of_tests )</td>
+<td>Enable a utility hardware test (TDL) the number of specified times.</td>
+</tr>
+
+<tr>
+<td valign="top">void enablePCIDownload( boolean enable, String file )</td>
+<td>Enable a PCI .lod file upload using the specified file.</td> 
+</tr>
+
+<tr>
+<td valign="top">void enableTIMDownload( boolean enable, String file )</td>
+<td>Enable a timing .lod file upload using the specified file.</td> 
+</tr>
+
+<tr>
+<td valign="top">void enableUTLDownload( boolean enable, String file )</td>
+<td>Enable a utility .lod file upload using the specified file.</td> 
+</tr>
+
+<tr>
+<td valign="top">void enablePowerOn( boolean enable )</td>
+<td>Enable controller power-on.</td>
+</tr>
+
+<tr>
+<td valign="top">void enableImageSize( boolean enable, int rows, int cols )</td>
+<td>Enable the readout image size to be rows by cols pixels.</td>
+</tr>
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Performs the standard controller setup without any graphical user
+interface.
+
+<br><br>
+<span style="text-decoration: underline">Example</span>:
+<pre>
+	setup = StandardSetup();
+	setup.enableResetController( true );
+	setup.enablePCITests( true, 234 );
+	setup.enableTIMTests( true, 123 );
+	setup.enablePCIDownload( false, "" );
+	setup.enableTIMDownload( true, "C:\\tim.lod" );
+	setup.enablePowerOn( true );
+	setup.enableImageSize( true, 1000, 1000 );
+	setup .run();
+</pre>
+
+</div>
+
+</body>
+
+</html>

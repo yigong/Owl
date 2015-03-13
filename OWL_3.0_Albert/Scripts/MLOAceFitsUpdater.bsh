@@ -1,0 +1,136 @@
+import java.io.*;
+import java.net.*;
+import javax.swing.Timer;
+import owl.main.*;
+
+SERVER = "205.154.251.20";
+PORT   = 2901;
+
+//  Create socket that is connected to server on specified port
+// +-----------------------------------------------------------+
+logger.infoStart( "Updating FITS header, connecting to server" );
+Socket socket = new Socket( SERVER, PORT );
+logger.infoEnd();
+
+//  Create a timer to force a stop
+// +-----------------------------------------------------------+
+boolean timeout = false;
+ActionListener timeoutListener = new ActionListener()
+{
+	public void actionPerformed( ActionEvent evt )
+	{
+		timeout = true;
+	}
+};
+timer = new Timer( 1000, timeoutListener );
+timer.start();
+
+BufferedInputStream bis = new BufferedInputStream( socket.getInputStream() );
+InputStreamReader isr   = new InputStreamReader( bis, "US-ASCII" );
+StringBuffer buffer     = new StringBuffer();
+int c;
+
+//  Read the socket's InputStream and append to a StringBuffer
+// +-----------------------------------------------------------+
+while ( !timeout )
+{
+	while ( ( c = isr.read() ) != -1 )
+	{
+		if ( c >= 0x20 && c <= 0x7E )
+		{
+			buffer.append( ( char )c );
+		}
+
+		if ( buffer.length() == 80 )
+		{
+			tokens = buffer.toString().split( "=" );
+
+			for ( j=0; j<tokens.length; j++ )
+			{
+				if ( fits.hasField( tokens[ 0 ].trim() ) )
+				{
+					fits.setField( tokens[ 0 ].trim(), tokens[ 1 ].replace( '\'', ' ' ).trim() );
+				}
+				else
+				{
+					fits.addField( tokens[ 0 ].trim(), tokens[ 1 ].replace( '\'', ' ' ).trim() );
+				}
+			}
+			buffer.delete( 0, 81 );
+		}
+
+		timer.restart();
+	}
+}
+// end of telnet get from TCS
+	//  Set the Lat/Long Fields
+	// +------------------------------------------------+
+	fits.setField( "LONGITUD", "-7.7617778", "Longitude (Hours E of UT)");
+	fits.setField( "LATITUDE", "32.84", "Latitude (Deg N of Equator)");
+
+//-------------------------------------------------------------------------
+// Start of OWL Parameters
+
+	// If the fits header is cleared of fields....
+	if(!fits.hasField("CCDTEMP" )) fits.addField("CCDTEMP",  " ", "CCD Temperature");
+	if(!fits.hasField("IRAFNAME")) fits.addField("IRAFNAME", " ", "File Name");
+	if(!fits.hasField("EXP_TIME")) fits.addField("EXP_TIME", " ", "Length of Exposure");
+	if(!fits.hasField("TIMESYS" )) fits.addField("TIMESYS",  "UTC", "Time System Used");
+	if(!fits.hasField("INSTRUME")) fits.addField("INSTRUME", " ", "Instrument in use");
+	if(!fits.hasField("OBSERVER")) fits.addField("OBSERVER", " ", "Name of Observer");
+
+	//  Set the CCD Temp Field
+	// +------------------------------------------------+
+	fits.setField( "CCDTEMP", String.valueOf( CameraAPI.GetArrayTemperature() ) );
+
+	//  Set the IMAGETYP field
+	// +------------------------------------------------+
+	if(CameraAPI.IsSyntheticImageMode())
+	{
+		fits.setField("IMAGETYP","Synthetic");
+	}
+	else if(expose.getExposeTime() == 0 && MainApp.mainFrame.exposePanel.isOpenShutter() == false)
+	{
+		fits.setField("IMAGETYP","Bias");
+	}
+	else if(MainApp.mainFrame.exposePanel.isOpenShutter() == false)
+	{
+		fits.setField("IMAGETYP","Dark");
+	}
+	else
+	{
+		fits.setField("IMAGETYP","Light");
+	}
+
+	//  Set the IRAF filename
+	// +------------------------------------------------+
+	fullIrafname = expose.getFilename();
+	dirPathEndIndex = fullIrafname.lastIndexOf( System.getProperty( "file.separator" ) );
+	fileExtIndex = fullIrafname.lastIndexOf( "." );
+
+	if ( dirPathEndIndex < 0 && fileExtIndex > 0 )
+	{
+		irafname = fullIrafname.substring( 0, fileExtIndex );
+	}
+
+	else if ( dirPathEndIndex > 0 && fileExtIndex > 0 )
+	{
+		irafname = fullIrafname.substring( dirPathEndIndex + 1, fileExtIndex );
+	}
+
+	else
+	{
+		irafname = "";
+	}
+
+	if ( !irafname.equals( "" ) ) { fits.setField( "IRAFNAME", irafname ); }
+	else { logger.error( "Failed to parse iraf filename!" ); }
+
+	//  Set the exposure time
+	// +------------------------------------------------+
+	fits.setField( "EXP_TIME", String.valueOf( expose.getExposeTime() ) );
+
+
+isr.close();
+bis.close();
+socket.close();

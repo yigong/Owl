@@ -1,0 +1,165 @@
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+
+
+READ_TIMEOUT = 200;
+stop	     = false;
+
+LogPixelCount( currentPixelCount, rows, cols )
+{
+	logger.warn( "Image readout ABORTED\nRead " +
+				 Integer.toString( currentPixelCount ) + "/" +
+				 Integer.toString( rows*cols ) + " pixels" );
+}
+
+Expose( decimalExpTime, openShutter, deinterlaceAlgorithm, imageFile )
+{
+	try
+	{
+		expTime = ( int )( decimalExpTime * 1000.0 );
+		logger.info( "EXP TIME: " + expTime );
+
+		currentPixelCount	= 0;
+		lastPixelCount		= 0;
+		elapsedTime			= 0;
+		cameraElapsedTime	= 0;
+		exposureCounter		= 0;
+		timeoutCounter		= 0;
+
+		// Get the image size
+		// --------------------------------------------------------------
+		imageSize = CameraAPI.GetImageSize();
+		rows = imageSize[0];
+		cols = imageSize[1];
+
+		progressWin = ProgressWindow( 0, rows*cols );
+		progressWin.show();
+
+		// Set the exposure time
+		// --------------------------------------------------------------
+		logger.infoStart( "Setting exposure time" );
+		CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SET, expTime, CameraAPI.DON );
+		logger.infoEnd();
+
+		if ( stop ) return;
+
+		// Set shutter position
+		// --------------------------------------------------------------
+		logger.infoStart( "Setting shutter position" );
+		CameraAPI.SetOpenShutter( openShutter );
+		logger.infoEnd();
+
+		if ( stop ) return;
+
+		// Start the exposure
+		// --------------------------------------------------------------
+		logger.infoStart( "Starting exposure " );
+		CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SEX, CameraAPI.DON );
+		logger.infoEnd();
+
+		while ( currentPixelCount < rows*cols && !stop )
+		{
+			// ----------------------------
+			// READ ELAPSED EXPOSURE TIME
+			// ----------------------------
+			// Checking the elapsed time > 1 sec. is to prevent race conditions with
+			// sending RET while the PCI(e) board is going into readout. Added check
+			// for exposure_time > 1 sec. to prevent RET error.
+			if ( !CameraAPI.IsReadout() && exposureCounter >= 5 && expTime > 1000 )
+			{
+				// Read the elapsed exposure time.
+				cameraElapsedTime = CameraAPI.Command( CameraAPI.TIM_ID, CameraAPI.RET, -1, -1, -1, -1 );
+
+				if ( stop ) return;
+
+				exposureCounter = 0;
+				timeoutCounter  = 0;
+
+				elapsedTime = ( expTime/1000 ) - ( cameraElapsedTime/1000 );
+				progressWin.setElapsedTime( elapsedTime );
+			}
+
+			exposureCounter++;
+
+			if ( CameraAPI.IsReadout() ) progressWin.setElapsedTime( 0 );
+
+			// ----------------------------
+			// READOUT PIXEL COUNT
+			// ----------------------------
+
+			// Check for abort
+			if ( stop )
+			{
+				LogPixelCount( currentPixelCount, rows, cols );
+				return;
+			}
+
+			// Save the last pixel count for use by the timeout counter.
+			lastPixelCount = currentPixelCount;
+
+			currentPixelCount = CameraAPI.GetPixelCount();
+
+			if ( stop )
+			{
+				LogPixelCount( currentPixelCount, rows, cols );
+				return;
+			}
+
+			// Set the progress bar with the current value.
+			progressWin.setReadoutValue( currentPixelCount );
+
+			// Increment the timeout counter.
+			if ( CameraAPI.GetDeviceStatus() == 0x5 && currentPixelCount == lastPixelCount )
+				timeoutCounter++;
+			else
+				timeoutCounter = 0;
+
+			if ( stop || timeoutCounter >= READ_TIMEOUT )
+			{
+				LogPixelCount( currentPixelCount, rows, cols );
+				return;
+			}
+
+			Thread.sleep(25);
+		}
+
+		if ( stop ) return;
+
+		progressWin.close();
+
+		// Deinterlace the data
+		// --------------------------------------------------------------
+		logger.infoStart( "Deinterlacing image data" );
+		CameraAPI.DeinterlaceImage( rows, cols, deinterlaceAlgorithm );
+		logger.infoEnd();
+
+		if ( stop ) return;
+
+		// Save image to disk
+		// --------------------------------------------------------------
+		if ( imageFile != null )
+		{
+			logger.info( "ROWS: " + Integer.toString( rows ) + " COLS: " + Integer.toString( cols ) );
+			logger.infoStart( "Writing FITS file" );
+			CameraAPI.WriteFitsFile( imageFile, rows, cols );
+			logger.infoEnd();
+		}
+	}
+	catch ( ReplyException re )
+	{
+		logger.infoFail();
+		logger.error( "Reply expected: " +
+			 	  	re.getExpectedHexString() +
+				 	" actual: " +
+				  	re.getActualHexString()
+					 );
+	}
+	catch ( Exception e )
+	{
+		logger.error( e.getMessage() );
+	}
+	finally
+	{
+		progressWin.close();
+	}
+}

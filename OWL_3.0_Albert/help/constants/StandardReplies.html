@@ -1,0 +1,46 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">Standard Reply Constants</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.DON<br>
+CameraAPI.ERR<br>
+CameraAPI.SYR<br>
+CameraAPI.TOUT<br>
+CameraAPI.READOUT
+</span>
+</div>
+
+<div id="header">Type</div>
+<div id="indent">
+<span class="code">int</span>
+</div>
+
+<div id="header">Remarks</div>
+Integer constants that represent replies from the pci board
+and controller.
+
+<br><br>
+<table border="1">
+<tr><td><b>REPLY</b></td><td><b>DESCRIPTION</b></td><td><b>HEX VALUE</b></td></tr>
+<tr><td>DON</td><td>done; success; everything ok</td><td>0x00444F4E</td></tr>
+<tr><td>ERR</td><td>error</td><td>0x00455252</td></tr>
+<tr><td>SYR</td><td>system reset; controller has been reset</td><td>0x00535952</td></tr>
+<tr><td>TOUT</td><td>timeout; no response</td><td>0x544F5554</td></tr>
+<tr><td>READOUT</td><td>controller is in readout</td><td>0x524F5554</td></tr>
+</table>
+
+</div>
+
+</body>
+
+</html>

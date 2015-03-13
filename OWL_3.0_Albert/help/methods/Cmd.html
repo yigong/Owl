@@ -1,0 +1,72 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">Cmd</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.Cmd( board_id, command, expected_reply );<br>
+CameraAPI.Cmd( board_id, command, arg, expected_reply );<br>
+CameraAPI.Cmd( board_id, command, arg1, arg2, expected_reply );<br>
+CameraAPI.Cmd( board_id, command, arg1, arg2, arg3, expected_reply );<br>
+CameraAPI.Cmd( board_id, command, arg1, arg2, arg3, arg4, expected_reply );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">int board_id</span></td>
+<td valign="top">Board to send the command to: CameraAPI.PCI_ID (pci board),
+CameraAPI.TIM_ID (timing board), or CameraAPI.UTIL_ID (utility board).</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">int command</span></td>
+<td valign="top">A valid pci, timing, or utility board command. See command
+list for details.
+</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">int arg/1/2/3/4</span></td>
+<td valign="top">(optional) An argument for the specified command. See
+command list for details.
+</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">int expected_reply</span></td>
+<td valign="top">The expected reply for the specified command. For most
+controller commands this will be CameraAPI.DON. See the command details
+for details.
+</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Sends a command to the pci, timing, or utility board. Throws an
+owl.cameraAPI.ReplyException if the expected reply doesn't match the
+actual reply from the board. Throws java.lang.Exception if an error
+occurs. All exceptions can be caught using a
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

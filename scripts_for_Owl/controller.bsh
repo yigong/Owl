@@ -1,0 +1,10 @@
+setup = StandardSetup();
+setup.enableResetController( true );
+setup.enablePCITests( true, 1234 );
+setup.enableTIMTests( true, 1234 );
+setup.enableUTLTests( false, 0 );
+setup.enableTIMDownload( true, "/home/photon_diag/Documents/CCD_controller/tim_lod/tim.lod" );
+setup.enableUTLDownload( false, "" );
+setup.enablePowerOn( true );
+setup.enableImageSize( true, 3508, 3512 );
+setup.run();

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+
+<header>
+
+	<card>
+		<key>EXPTIME</key>
+		<value>10.0</value>
+		<comment>Exposure time</comment>
+	</card>
+
+	<card>
+		<key>DATE-OBS</key>
+		<value>2014-05-05T15:18:46</value>
+		<comment>Date and time of observation</comment>
+	</card>
+
+	<card>
+		<key>VOLTAGE</key>
+		<value>60.0</value>
+		<comment>Bias Voltage</comment>
+	</card>
+
+</header>
+

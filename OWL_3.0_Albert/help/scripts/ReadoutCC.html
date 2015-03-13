@@ -1,0 +1,112 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">ReadoutCC</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+ReadoutCC( useGUI );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">boolean useGUI</span></td>
+<td valign="top">True to launch the readout controller configuration
+parameter window; false to run without using a windowed interface.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+owl.CCParams.CCScriptFrame (useGUI=true) or ReadoutCC Object (useGUI=false)
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void setAmp( int amp )</td>
+<td>The array readout amplifier to use. Can be one of the following sets
+(depending on the controller configuration parameters): set #1 { 
+<span class="code:>CameraAPI.AMP_L, CameraAPI.AMP_R, CameraAPI.AMP_LR</span>
+ } or set #2 { <span class="code">CameraAPI.AMP_0, CameraAPI.AMP_1, 
+CameraAPI.AMP_2, CameraAPI.AMP_3, CameraAPI.AMP_ALL</span> }.</td>
+</tr>
+
+<tr>
+<td valign="top">boolean isSupported()</td>
+<td>True if this parameter is supported by the controller; false
+otherwise.</td>
+</tr>
+
+<tr>
+<td valign="top">void run()</td>
+<td>Starts sending the command to the controller. For use with
+[useGUI = false] only.</td>
+</tr>
+
+<tr>
+<td valign="top">void show()</td>
+<td>Call to show the graphical user interface. For use with
+[useGUI = true ] only.</td>
+</tr>
+
+<tr>
+<td valign="top">void destroy()</td>
+<td>Closes and disposes of the graphical user interface. Call
+to exit. For use with [useGUI = true] only.</td> 
+</tr>
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Allows array readout amplifier parameters to be set on the 
+controller. Can be run with or without a graphical user 
+interface.
+
+<br><br>
+To run with a graphical user interface:
+<pre>
+	ReadoutCC( true ).show();
+
+	<span style="text-decoration: underline">or</span>
+
+	s = ReadoutCC( true );
+	s.show();
+</pre>
+
+<br>
+To run without a user interface:
+<pre>
+	s = ReadoutCC( false );
+	s.setAmp( CameraAPI.AMP_LR );
+	s.run();
+</pre>
+
+</div>
+
+</body>
+
+</html>

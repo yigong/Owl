@@ -1,0 +1,193 @@
+import javax.swing.border.TitledBorder;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlNumberField;
+import owl.gui.utils.OwlUtilities;
+
+
+MemoryProfiler()
+{
+	final String RUN_ACTION		=	"RUN";
+	final String STOP_ACTION		=	"STOP";
+
+	CCScriptFrame		frame;
+	GridBagLayout		gbl;
+	GridBagConstraints	gbc;
+	JToolBar			toolbar;
+	OwlBoldButton		runButton;
+	JButton			closeButton;
+	JLabel			totalMemLabel;
+	JLabel			maxMemLabel;
+	JLabel			freeMemLabel;
+	boolean			m_stop;
+
+
+	private buildFrame()
+	{
+		frame = new CCScriptFrame( "Memory Profiler" );
+		frame.getContentPane().setLayout( new BorderLayout() );
+		frame.addWindowListener( this );
+
+		toolbar = new JToolBar();
+		toolbar.setFloatable( false );
+
+		runButton = frame.createBoldToolbarButton( RUN_ACTION, Color.red );
+		runButton.addActionListener( this );
+		toolbar.add( runButton );
+
+		frame.appendToolbar( toolbar );
+
+		gbl = new GridBagLayout();
+		gbc = new GridBagConstraints();
+
+		frame.getContentPane().add( toolbar, BorderLayout.PAGE_START );
+		frame.getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		frame.pack();
+		OwlUtilities.centerFrame( frame );
+		frame.show();
+
+		frame.loadPreferences();
+
+		m_stop = false;
+	}
+
+	private JPanel createComponents()
+	{
+		panel = new JPanel();
+		panel.setLayout( gbl );
+
+		sTotalMem = "";
+		sMaxMem   = "";
+		sFreeMem  = "";
+
+		try
+		{
+			sTotalMem = Long.toString( Runtime.getRuntime().totalMemory() ) +
+					 " bytes [ " +
+					 ( Runtime.getRuntime().totalMemory() / 1.E6 ) +
+					 " MB ]";
+
+			sMaxMem = Long.toString( Runtime.getRuntime().maxMemory() ) +
+					 " bytes [ " +
+					 ( Runtime.getRuntime().maxMemory() / 1.E6 ) +
+					 " MB ]";
+
+			sFreeMem = Long.toString( Runtime.getRuntime().freeMemory() ) +
+					 " bytes [ " +
+					 ( Runtime.getRuntime().freeMemory() / 1.E6 ) +
+					 " MB ]";
+		}
+		catch ( Exception e )
+		{
+			logger.error( "Failed to read JVM memory status!" );
+			logger.error( e.getMessage() );
+		}
+
+		totalMemPrefix = new JLabel( "Java Total Memory: " );
+		maxMemPrefix   = new JLabel( "Java Max Memory: " );
+		freeMemPrefix  = new JLabel( "Java Free Memory: " );
+
+		totalMemLabel = new JLabel( sTotalMem );
+		maxMemLabel   = new JLabel( sMaxMem );
+		freeMemLabel  = new JLabel( sFreeMem );
+
+		addComponent( panel, totalMemPrefix, 10, 0,  0,  0, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 0, 1, 1 );
+		addComponent( panel, totalMemLabel,  10, 7,  0, 10, GridBagConstraints.NONE, GridBagConstraints.WEST, 0, 1, 1, 1 );
+		addComponent( panel, maxMemPrefix,    0, 0,  0,  0, GridBagConstraints.NONE, GridBagConstraints.WEST, 1, 0, 1, 1 );
+		addComponent( panel, maxMemLabel,     0, 7,  0, 10, GridBagConstraints.NONE, GridBagConstraints.WEST, 1, 1, 1, 1 );
+		addComponent( panel, freeMemPrefix,   0, 0, 10,  0, GridBagConstraints.NONE, GridBagConstraints.WEST, 2, 0, 1, 1 );
+		addComponent( panel, freeMemLabel,    0, 7, 10, 10, GridBagConstraints.NONE, GridBagConstraints.WEST, 2, 1, 1, 1 );
+
+		return panel;
+	}
+
+	void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			m_stop = false;
+
+			new Thread( this ).start();
+		}
+
+		else if ( ae.getActionCommand().equals( STOP_ACTION ) )
+		{
+			m_stop = true;
+		}
+	}
+
+	addComponent( JPanel panel, JComponent comp, int insetTOP, int insetLEFT,
+				  int insetBOTTOM, int insetRIGHT, int fill, int anchr, int row,
+				  int col, int rowSpan, int colSpan )
+	{
+      		// Set the grid layout constraints.
+      		gbc.fill = fill;
+      		gbc.anchor = anchr;
+      		gbc.insets = new Insets( insetTOP, insetLEFT, insetBOTTOM, insetRIGHT );
+      		gbc.gridx = col;
+      		gbc.gridy = row;
+      		gbc.gridwidth = colSpan;
+      		gbc.gridheight = rowSpan;
+
+      		// Add the component to the panel.
+      		gbl.setConstraints( comp, gbc );
+      		panel.add( comp );
+	}
+
+	void show()
+	{
+		frame.setVisible( true );
+	}
+
+	void destroy()
+	{
+		frame.dispose();
+	}
+
+	public void run()
+	{
+		runButton.setText( STOP_ACTION );
+
+		while ( !m_stop )
+		{
+			try
+			{
+				sTotalMem = Long.toString( Runtime.getRuntime().totalMemory() ) +
+						 " bytes [ " +
+						 ( Runtime.getRuntime().totalMemory() / 1.E6 ) +
+					 	 " MB ]";
+
+				sMaxMem = Long.toString( Runtime.getRuntime().maxMemory() ) +
+						 " bytes [ " +
+						 ( Runtime.getRuntime().maxMemory() / 1.E6 ) +
+						 " MB ]";
+
+				sFreeMem = Long.toString( Runtime.getRuntime().freeMemory() ) +
+						 " bytes [ " +
+						 ( Runtime.getRuntime().freeMemory() / 1.E6 ) +
+						 " MB ]";
+
+				totalMemLabel.setText( sTotalMem );
+				maxMemLabel.setText( sMaxMem );
+				freeMemLabel.setText( sFreeMem );
+
+				Thread.sleep( 500 );
+			}
+			catch ( Exception e ) {}
+		}
+
+		runButton.setText( RUN_ACTION );
+	}
+
+	frame = null;
+
+	buildFrame();
+
+	return this;
+}
+
+app = MemoryProfiler();
+app.show();

@@ -1,0 +1,548 @@
+import javax.swing.border.TitledBorder;
+//import java.util.Vector;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.owltypes.OwlTextField;
+import owl.gui.utils.OwlUtilities;
+import owl.main.setup.SetupEvent;
+import owl.main.setup.SetupListener;
+import owl.main.setup.SetupFrame;
+import owl.main.*;
+
+
+public class SubArrayFrame extends CCScriptFrame implements Runnable, SetupListener
+{
+	final String RUN_ACTION		=	"RUN";
+	final String RESET_ACTION	=	"RESET";
+	final String STOP_ACTION	=	"ABORT";
+	final String CLOSE_ACTION	=	"CLOSE";
+//	final String DS9_ACTION		=	"UseDS9";
+
+
+	JToolBar			m_toolbar;
+	OwlBoldButton		m_runButton;
+	OwlNumberField		m_imgWidthTxtfld;
+	OwlNumberField		m_imgHeightTxtfld;
+	OwlTextField		m_subImgWidthTxtfld;
+	OwlTextField		m_subImgHeightTxtfld;
+	OwlTextField		m_colCenterTxtfld;
+	OwlTextField		m_rowCenterTxtfld;
+	OwlTextField		m_biasWidthTxtfld;
+	OwlTextField		m_biasPosTxtfld;
+	JCheckBox			m_useDS9Chkbox;
+	boolean				m_bStop;
+	int					m_dSubImgWidth;
+	int					m_dSubImgHeight;
+	int					m_dSubImgCenterRow;
+	int					m_dSubImgCenterCol;
+	int					m_dSubImgRowOffset;
+	int					m_dSubImgColOffset;
+	int					m_dBiasWidth;
+	int					m_dBiasPosition;
+	int					m_dBiasOffset;
+
+
+	public SubArrayFrame()
+	{
+		super( "SubArray" );
+
+		m_dSubImgWidth		= 0;
+		m_dSubImgHeight		= 0;
+		m_dSubImgCenterRow	= 0;
+		m_dSubImgCenterCol	= 0;
+		m_dSubImgRowOffset	= 0;
+		m_dSubImgColOffset	= 0;
+		m_dBiasWidth		= 0;
+		m_dBiasPosition		= 0;
+		m_dBiasOffset		= 0;
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		resetButton = createNewToolbarButton( RESET_ACTION );
+		m_toolbar.add( resetButton );
+
+		super.appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		SetupFrame.addSetupListener( this );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		loadPreferences();
+	}
+
+	private JPanel createComponents()
+	{
+		m_useDS9Chkbox = new JCheckBox( "Get coordinates from DS9 selection box", true );
+//		m_useDS9Chkbox.setActionCommand( DS9_ACTION );
+//		m_useDS9Chkbox.addActionListener( this );
+		m_useDS9Chkbox.setName( "UseDS9" );
+
+		JPanel optPanel = new JPanel();
+		optPanel.setLayout( new FlowLayout( FlowLayout.LEFT ) );
+		optPanel.add( m_useDS9Chkbox );
+
+		ImagePanel panel = new ImagePanel();
+		panel.setBorder( BorderFactory.createLineBorder( Color.BLACK ) );
+		panel.setLayout( null );	// Uses absolute positioning of components!
+
+		int[] dImgSize = null;
+
+		if ( CameraAPI.IsControllerConnected() )
+		{
+			dImgSize = CameraAPI.GetImageSize();
+		}
+
+		m_imgWidthTxtfld = new OwlNumberField( ( dImgSize != null ? dImgSize[ 1 ] : 0 ), 7 );
+		m_imgWidthTxtfld.setHorizontalAlignment( JTextField.CENTER );
+		m_imgWidthTxtfld.setEnabled( false );
+		oldImageWidthSize = m_imgWidthTxtfld.getPreferredSize();
+
+		m_imgHeightTxtfld = new OwlNumberField( ( dImgSize != null ? dImgSize[ 0 ] : 0 ), 7 );
+		m_imgHeightTxtfld.setHorizontalAlignment( JTextField.CENTER );
+		m_imgHeightTxtfld.setEnabled( false );
+		oldImageHeightSize = m_imgHeightTxtfld.getPreferredSize();
+
+		m_subImgWidthTxtfld = new OwlTextField( "600", 8 );
+		m_subImgWidthTxtfld.setHorizontalAlignment( OwlTextField.CENTER );
+		m_subImgWidthTxtfld.setName( "SubImageWidth" );
+		subImageWidthSize = m_subImgWidthTxtfld.getPreferredSize();
+
+		m_subImgHeightTxtfld = new OwlTextField( "600", 8 );
+		m_subImgHeightTxtfld.setHorizontalAlignment( OwlTextField.CENTER );
+		m_subImgHeightTxtfld.setName( "SubImageHeight" );
+		subImageHeightSize = m_subImgHeightTxtfld.getPreferredSize();
+
+		m_colCenterTxtfld = new OwlTextField( "1100", 7 );
+		m_colCenterTxtfld.setHorizontalAlignment( OwlTextField.CENTER );
+		m_colCenterTxtfld.setName( "Col" );
+		colCenterSize = m_colCenterTxtfld.getPreferredSize();
+
+		m_rowCenterTxtfld = new OwlTextField( "400", 7 );
+		m_rowCenterTxtfld.setHorizontalAlignment( OwlTextField.CENTER );
+		m_rowCenterTxtfld.setName( "Row" );
+		rowCenterSize = m_rowCenterTxtfld.getPreferredSize();
+
+		m_biasWidthTxtfld = new OwlTextField( "350", 7 );
+		m_biasWidthTxtfld.setHorizontalAlignment( OwlTextField.CENTER );
+		m_biasWidthTxtfld.setName( "BiasWidth" );
+		biasWidthSize = m_biasWidthTxtfld.getPreferredSize();
+
+		m_biasPosTxtfld = new OwlTextField( "2200", 7 );
+		m_biasPosTxtfld.setHorizontalAlignment( OwlTextField.CENTER );
+		m_biasPosTxtfld.setName( "BiasPos" );
+		biasPosSize = m_biasPosTxtfld.getPreferredSize();
+
+		Insets insets = panel.getInsets();
+
+		panel.add( m_imgWidthTxtfld );
+		panel.add( m_imgHeightTxtfld );
+		panel.add( m_subImgWidthTxtfld );
+		panel.add( m_subImgHeightTxtfld );
+		panel.add( m_rowCenterTxtfld );
+		panel.add( m_colCenterTxtfld );
+		panel.add( m_biasWidthTxtfld );
+		panel.add( m_biasPosTxtfld );
+
+		m_imgHeightTxtfld.setBounds( 10 + insets.left, 196 + insets.top, oldImageWidthSize.width, oldImageWidthSize.height );
+		m_imgWidthTxtfld.setBounds( 98 + insets.left, 1 + insets.top, oldImageHeightSize.width, oldImageHeightSize.height );
+		m_subImgWidthTxtfld.setBounds( 121 + insets.left, 50 + insets.top, subImageWidthSize.width, subImageWidthSize.height );
+		m_subImgHeightTxtfld.setBounds( 156 + insets.left, 85 + insets.top, subImageHeightSize.width, subImageHeightSize.height );
+		m_rowCenterTxtfld.setBounds( 128 + insets.left, 227 + insets.top, rowCenterSize.width, rowCenterSize.height );
+		m_colCenterTxtfld.setBounds( 44 + insets.left, 145 + insets.top, colCenterSize.width, colCenterSize.height );
+		m_biasWidthTxtfld.setBounds( 328 + insets.left, 138 + insets.top, biasWidthSize.width, biasWidthSize.height );
+		m_biasPosTxtfld.setBounds( 330 + insets.left, 24 + insets.top, biasPosSize.width, biasPosSize.height );
+
+		container = new JPanel();
+		container.setLayout( new BoxLayout( container, BoxLayout.Y_AXIS ) );
+		container.add( panel );
+		container.add( optPanel );
+
+		return container;
+	}
+
+	class ImagePanel extends JPanel
+	{
+		Image bgImage;
+
+		public ImagePanel()
+		{
+			bgImage = getToolkit().createImage( bitmapPath + "SubArray3b.png" );
+ 			setPreferredSize( new Dimension( 400, 258 ) );
+ 		}
+
+		public void paintComponent( Graphics g )
+		{
+			super.paintComponent( g );
+			boolean fullyLoaded = g.drawImage( bgImage, 0, 0, this );
+		}
+	}
+
+	public setSubImageWidth( int width )
+	{
+		m_dSubImgWidth = width;
+	}
+
+	public setSubImageHeight( int height )
+	{
+		m_dSubImgHeight = height;
+	}
+
+	public setSubImageCenterRow( int row )
+	{
+		m_dSubImgCenterRow = row;
+	}
+
+	public setSubImageCenterCol( int col )
+	{
+		m_dSubImgCenterCol = col;
+	}
+
+	public setSubImageRowOffset( int offset )
+	{
+		m_dSubImgRowOffset = offset;
+	}
+
+	public setSubImageColOffset( int offset )
+	{
+		m_dSubImgColOffset = offset;
+	}
+
+	public setBiasWidth( int bias )
+	{
+		m_dBiasWidth = bias;
+	}
+
+	public setBiasPosition( int position )
+	{
+		m_dBiasPosition = position;
+	}
+
+	public setBiasOffset( int offset )
+	{
+		m_dBiasOffset = offset;
+	}
+
+	public unSet( int dRows, int dCols )
+	{
+		thread = new Thread(
+			new Runnable()
+			{
+				public void run()
+				{
+					try
+					{
+						// Reset the image dimensions
+						logger.infoStart( "Setting image dimensions " + dRows + " x " + dCols );
+ 						CameraAPI.SetImageSize( dRows, dCols );
+						logger.infoEnd();
+
+						if ( m_bStop ) return;
+
+						// Set SubArray size to zero
+						logger.infoStart( "Setting SubArray SIZE to zero" );
+						CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SSS, 0, 0, 0, CameraAPI.DON );
+						logger.infoEnd();
+					}
+					catch ( Exception e )
+					{
+						logger.infoFail();
+						logger.error( e.getMessage() );
+					}
+				}
+			} );
+
+	thread.start();
+	thread.join();
+	}
+
+	private getSubImageWidth() throws NumberFormatException
+	{
+		return Integer.parseInt( m_subImgWidthTxtfld.getText() );
+	}
+
+	private getSubImageHeight() throws NumberFormatException
+	{
+		return Integer.parseInt( m_subImgHeightTxtfld.getText() );
+	}
+
+	private getSubImageCenterRow() throws NumberFormatException
+	{
+		return Integer.parseInt( m_rowCenterTxtfld.getText() );
+	}
+
+	private getSubImageCenterCol() throws NumberFormatException
+	{
+		return Integer.parseInt( m_colCenterTxtfld.getText() );
+	}
+
+	private int getSubImageRowOffset() throws NumberFormatException
+	{
+		return ( getSubImageCenterRow() - getSubImageHeight()/2 );
+	}
+
+	private int getSubImageColOffset() throws NumberFormatException
+	{
+		return ( getSubImageCenterCol() - getSubImageWidth()/2 );
+	}
+
+	private getBiasWidth() throws NumberFormatException
+	{
+		return Integer.parseInt( m_biasWidthTxtfld.getText() );
+	}
+
+	private getBiasPosition() throws NumberFormatException
+	{
+		return Integer.parseInt( m_biasPosTxtfld.getText() );
+	}
+
+	private int getBiasOffset() throws NumberFormatException
+	{
+		return ( getBiasPosition() - getSubImageCenterCol() - getSubImageWidth()/2 );
+	}
+
+	private void getDS9Box()
+	{
+		final int BOX_CENTER_COL	= 0;
+		final int BOX_CENTER_ROW	= 1;
+		final int BOX_COLS		= 2;
+		final int BOX_ROWS		= 3;
+
+		try
+		{
+			ds9a = DS9Accessor();
+
+			if ( ds9a.isDS9Ready( true ) )
+			{
+				aVec = ds9a.doCmd( "xpaget ds9 regions" );
+
+				if ( aVec != null )
+				{
+					for ( i=0; i<aVec.size(); i++ )
+					{
+						aString = ( ( String )aVec.get( i ) );
+
+						//  Search for a box region
+						// +--------------------------------------------------+
+						if ( aString.contains( "box" ) )
+						{
+							leftIndex  = aString.indexOf( '(' );
+							rightIndex = aString.indexOf( ')' );
+
+							//  Remove the "box" parentheses
+							// +--------------------------------------------------+
+							if ( leftIndex >= 0 && rightIndex >= 0 )
+							{
+								subString = aString.substring( leftIndex + 1, rightIndex );
+								tokens    = subString.trim().split( "," );
+
+								//  Round the coordinates off
+								// +--------------------------------------------------+
+								for ( t=0; t<tokens.length; t++ )
+								{
+									intToken = Math.round( Float.parseFloat( tokens[ t ] ) );
+									tokens[ t ] = String.valueOf( intToken );
+								}
+
+								m_colCenterTxtfld.setText( tokens[ BOX_CENTER_COL ] );
+								m_rowCenterTxtfld.setText( tokens[ BOX_CENTER_ROW ] );
+								m_subImgWidthTxtfld.setText( tokens[ BOX_COLS ] );
+								m_subImgHeightTxtfld.setText( tokens[ BOX_ROWS ] );
+
+								m_biasWidthTxtfld.setText( "40" );
+								m_biasPosTxtfld.setText( String.valueOf( CameraAPI.GetImageCols() - 40 ) );
+
+								break;
+							}
+						}
+					}
+				}
+				else
+					logger.error( "( SubArray.getDS9Box ): Failed to read DS9 regions!" );
+			}
+			else
+				logger.error( "( SubArray.getDS9Box ): DS9 is NOT ready!" );
+		}
+		catch ( Exception e )
+		{
+			logger.error( "( SubArray.getDS9Box ): " + e.getMessage() );
+		}
+	}
+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			m_bStop = false;
+
+			new Thread( this ).start();
+		}
+
+		else if ( event.getActionCommand().equals( STOP_ACTION ) )
+		{
+			m_bStop = true;
+		}
+
+		else if ( event.getActionCommand().equals( RESET_ACTION ) )
+		{
+			int dRows = m_imgHeightTxtfld.getInt();
+			int dCols = m_imgWidthTxtfld.getInt();
+
+			if ( dRows > 0 && dCols > 0 )
+			{
+				unSet( dRows, dCols );
+
+				SetupFrame.callSetupListeners(
+							MainApp.mainFrame.cameraPanel.setupFrame );
+			}
+		}
+
+//		else if ( event.getActionCommand().equals( DS9_ACTION ) )
+//		{
+//			( new Thread( new Runnable()
+//			{
+//				public void run()
+//				{
+//					DS9Accessor ds9a = new DS9Accessor();
+//			
+//					try
+//					{
+//						Vector aVec = ds9a.doCmd( "xpaget ds9 regions shape" );
+//	
+//						if ( aVec.size() > 0 && !aVec.get( 0 ).contains( "box" ) )
+//						{
+//							ds9a.doCmd( "xpaset -p ds9 regions shape box" );
+//						}
+//					}
+//					catch ( Exception e )
+//					{
+//						MainApp.error( e.getMessage() );
+//					}
+//				}
+//			} ) ).start();
+//		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	public void setupChanged( SetupEvent event )
+	{
+		SetupFrame setupFrame = ( SetupFrame )event.getSource();
+
+		if ( setupFrame != null && CameraAPI.IsControllerConnected() )
+		{
+			int[] dImgSize = CameraAPI.GetImageSize();
+
+			m_imgHeightTxtfld.setValue(
+							dImgSize != null ? dImgSize[ 0 ] : 0 );
+
+			m_imgWidthTxtfld.setValue(
+							dImgSize != null ? dImgSize[ 1 ] : 0 );
+		}
+	}
+
+	public void run()
+	{
+		try
+		{
+			if ( m_bStop ) { return; }
+
+			if ( m_useDS9Chkbox.isSelected() )
+			{
+				getDS9Box();
+			}
+
+			m_runButton.setColored( STOP_ACTION );
+
+			m_dSubImgWidth     = getSubImageWidth();
+			m_dSubImgHeight    = getSubImageHeight();
+			m_dSubImgCenterRow = getSubImageCenterRow();
+			m_dSubImgCenterCol = getSubImageCenterCol();
+			m_dSubImgRowOffset = getSubImageRowOffset();
+			m_dSubImgColOffset = getSubImageColOffset();
+			m_dBiasWidth         = getBiasWidth();
+			m_dBiasPosition      = getBiasPosition();
+			m_dBiasOffset        = getBiasOffset();
+
+			if ( m_bStop ) { return; }
+
+			// Set the controller image size
+			logger.infoStart( "Setting sub-array image dimensions on the controller" );
+			CameraAPI.SetImageSize( m_dSubImgHeight, m_dSubImgWidth + m_dBiasWidth );
+			logger.infoEnd();
+
+			if ( m_bStop ) { return; }
+
+			// Send the sub-array SIZE info to the controller
+			logger.infoStart( "Sending sub-array SIZE info to the controller" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SSS, m_dBiasWidth, m_dSubImgWidth, m_dSubImgHeight, CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( m_bStop ) { return; }
+
+			// Send the sub-array POSITION info to the controller
+			logger.infoStart( "Sending sub-array POSITION info to the controller" );
+			CameraAPI.Cmd( CameraAPI.TIM_ID, CameraAPI.SSP, m_dSubImgRowOffset, m_dSubImgColOffset, m_dBiasOffset, CameraAPI.DON );
+			logger.infoEnd();
+
+			if ( m_bStop ) { return; }
+
+			fireScriptApplied();
+		}
+		catch ( NumberFormatException nfe )
+		{
+			logger.infoFail();
+			logger.error( nfe.getMessage() );
+		}
+		catch ( ReplyException re )
+		{
+			logger.infoFail();
+
+			logger.error( "Command ( " + OwlUtilities.intToAscii( re.getCommand() ) +
+					   " ) failed. Expected reply: " + re.getExpectedHexString() +
+					   " Actual reply: " + re.getActualHexString() );
+		}
+		catch ( Exception e )
+		{
+			logger.infoFail();
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			m_runButton.setBlack( RUN_ACTION );
+		}
+	}
+}
+
+
+SubArray()
+{
+	CCScriptFrame frame = null;
+
+	if ( CameraAPI.IsCCParamSupported( CameraAPI.SUBARRAY ) )
+	{
+		frame = ( CCScriptFrame )( new SubArrayFrame() );
+		frame.setVisible( true );
+	}
+	else
+	{
+		logger.warn(
+				"Additional SUBARRAY options not available! CC Param Value: 0x" +
+				 Integer.toHexString( CameraAPI.GetCCParams() ) );
+	}
+
+	return frame;
+}

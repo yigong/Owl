@@ -1,0 +1,57 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">ReplyException</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+owl.cameraAPI.ReplyException
+</span>
+</div>
+
+<div id="header">Type</div>
+<div id="indent">
+<span class="code">class</span>
+</div>
+
+<div id="header">Remarks</div>
+An exception class that is thrown when a reply doesn't match
+the expected reply. Can be caught using a try/catch block.
+
+<br><br>
+<span style="text-decoration: underline">Example</span>:<br>
+If the Cmd() method receives a reply value of anything other
+than 0x112233, then a ReplyException will be thrown.
+
+<br>
+<pre>
+	try
+	{
+		... do something here, such as ...
+
+		CameraAPI.Cmd( CameraAPI.TIM_ID,
+				   CameraAPI.TDL,
+				   0x112233,
+				   0x112233 );
+	}
+	catch ( ReplyException e }
+	{
+		... do something here,
+                such as log an error ...
+
+		logger.error( e );
+	}
+</pre>
+
+</div>
+
+</body>
+
+</html>

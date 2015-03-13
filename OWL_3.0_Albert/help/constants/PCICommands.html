@@ -1,0 +1,42 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">PCI Board Commands</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.RESET_CONTROLLER<br>
+CameraAPI.RESET_PCI<br>
+CameraAPI.ABORT_READOUT
+</span>
+</div>
+
+<div id="header">Type</div>
+<div id="indent">
+<span class="code">int</span>
+</div>
+
+<div id="header">Remarks</div>
+Integer constants that represent specific commands to the pci 
+board. See list below.
+
+<br><br>
+<table border="1">
+<tr><td><b>REPLY</b></td><td><b>DESCRIPTION</b></td></tr>
+<tr><td>RESET_CONTROLLER</td><td>resets the controller; power will be turned off</td></tr>
+<tr><td>RESET_PCI</td><td>resets the pci board by resetting the DSP program counter</td></tr>
+<tr><td>ABORT_READOUT</td><td>tells the pci board and controller to stop readout</td></tr>
+</table>
+
+</div>
+
+</body>
+
+</html>

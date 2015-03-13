@@ -1,0 +1,12 @@
+import owl.display.ds9.DS9Accessor;
+
+ds9 = new DS9Accessor();
+
+try
+{
+	System.out.println( "DS9 VERSION -> " + ds9.version( 7 ) );
+}
+catch ( Exception e )
+{
+	System.err.println( "DS9 Version Error : " + e.getMessage() );
+}

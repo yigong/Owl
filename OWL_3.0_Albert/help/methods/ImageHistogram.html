@@ -1,0 +1,68 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">ImageHistogram</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.ImageHistogram( llrow, llcol, urrow, urcol, cols );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">long llrow</span></td>
+<td valign="top">The start row.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">long llcol</span></td>
+<td valign="top">The start column.</td>
+</tr>
+
+<tr>
+<td width="150" valign="top"><span class="code">long urrow</span></td>
+<td valign="top">The end row.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">long urcol</span></td>
+<td valign="top">The end column.</td>
+</tr>
+
+<tr>
+<td valign="top"><span class="code" valign="top">long cols</span></td>
+<td valign="top">The total number of columns in the image.</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">Point[] - </span>An array of java.awt.Point data
+that represents the image histogram. Each point in the array contains
+an x value (Point.x) and a y value (Point.y). The x data represents
+a 16-bit adu value and the y data represents the number of pixels
+with that value.
+</div>
+
+<div id="header">Remarks</div>
+Calculates the image histogram over the region specified by the points
+(llrow, llcol) and (urrow, urcol). Throws an Exception if an error
+occurs, which can be caught using
+<a href="../exceptions/TryCatchBlock.html">try/catch</a> block.
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,819 @@
+import owl.main.MainApp;
+import owl.main.exposure.ExposePanel;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.gui.utils.OwlUtilities;
+import owl.display.ds9.DS9Accessor;
+import javax.swing.Timer;
+
+
+APIServer()
+{
+	static int PORT = 0; // assign to next avalible Port.
+
+	BufferedReader in = null;
+	PrintWriter out = null;
+
+	ServerSocket s = null;
+	Timer timer = null;
+
+	Socket socket = null;
+
+	stop = false;
+
+
+	//
+	// Kill the server after 5 minutes or only kill after
+	// user clicks stop on the script panel.
+	//
+	ActionListener taskPerformer = new ActionListener() {
+		public void actionPerformed( ActionEvent evt ) {
+			if ( stop ) {
+			System.out.println( "( taskPerformer ): Killing Server!" );
+			if ( timer != null ) { timer.stop(); }
+			if ( s != null ) { s.close(); } }
+		}
+	};
+
+	timer = new Timer( 1000, taskPerformer );
+//	timer = new Timer( 5 * 60000, taskPerformer );
+
+	public void init( int dPort ) throws IOException
+	{
+		PORT = dPort;  // assign to a given Port.
+
+		// Create a Server Socket.
+		s = new ServerSocket( PORT );
+		InetAddress addrs = InetAddress.getLocalHost();
+		// Or InetAddress  addrs= InetAddress.getByName( "localhost" );
+		// Or InetAddress  addrs= InetAddress.getByName( "127.0.0.1" );
+
+		System.out.println( "TCP/Server running on : "+ addrs +" ,Port "+s.getLocalPort() );
+
+		timer.start();
+
+		try
+		{
+			while( true )
+			{
+				//
+				// Blocks until a connection occurs:
+				//
+				socket = s.accept();
+
+				try
+				{
+					//
+					// Handle the incoming Client
+					//
+					System.out.println( "Serving: " + socket );
+
+					in = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
+
+					// Enable auto-flush:
+					out = new PrintWriter( new BufferedWriter( new OutputStreamWriter( socket.getOutputStream() ) ), true );
+
+					System.out.println( "Starting thread" );
+
+					// If any of the above calls throw an 
+					// exception, the caller is responsible for
+					// closing the socket. Otherwise the thread
+					// will close it.
+					( new Thread( this ) ).start();
+				}
+				catch( IOException e )
+				{
+					//
+					// If it fails, close the socket,
+					// otherwise the thread will close it:
+					//
+					socket.close();
+				}
+			}
+		}
+		finally
+		{
+			s.close();
+			timer.stop();
+		}
+	}
+
+	private String FixMultiStringData( String sData ) throws Exception
+	{
+		return sData.replaceAll( "\\+-\\+", " " );
+	}
+
+	private void SendException( String sMsg )
+	{
+		out.println( "EXCEPTION: " + sMsg );
+	}
+
+	private void SendOK()
+	{
+		out.println( "ARC API OK" );
+	}
+
+	public void run()
+	{
+		try
+		{
+			while ( true )
+			{
+				if ( stop )
+				{
+					throw Exception( "User Aborted Script" );
+				}
+
+				//logger.info( "....Server is waiting..." );
+				String str = in.readLine();
+
+				if ( str == null ) break;
+
+				//logger.info( "Received: " + str );
+				//logger.info( "From: "+ socket );
+
+				// +----------------------------------------------------------+
+				// |  SetupController                                         |
+				// +----------------------------------------------------------+
+				if ( str.contains( "SetupController" ) )
+				{
+					sTimFile  = null;
+					sUtilFile = null;
+					sPciFile  = null;
+
+					tokens = str.split( "[ \t]+" );
+
+					if ( tokens.length < 6 && tokens.length > 9 )
+					{
+						SendException(
+								"( SetupController ): Invalid number of parameters: " +
+								 tokens.length );
+					}
+
+					bReset = ( tokens[ 1 ].trim().equals( "1" ) ? true : false );
+					bTDLs  = ( tokens[ 2 ].trim().equals( "1" ) ? true : false );
+					bPower = ( tokens[ 3 ].trim().equals( "1" ) ? true : false );
+					dRows  = Integer.parseInt( tokens[ 4 ] );
+					dCols  = Integer.parseInt( tokens[ 5 ] );
+
+					if ( tokens[ 6 ].trim().equals( "1" ) )
+					{
+						sTimFile = RecvDspFile( "TIM" );
+					}
+
+					if ( tokens[ 7 ].trim().equals( "1" ) )
+					{
+						sUtilFile = RecvDspFile( "UTIL" );
+					}
+
+					if ( tokens[ 8 ].trim().equals( "1" ) )
+					{
+						sPciFile = RecvDspFile( "PCI" );
+					}
+
+					out.println( "DONE" );
+
+					CameraAPI.SetupController( bReset,
+								   		bTDLs,
+								   		bPower,
+								   		dRows,
+								   		dCols,
+								   		sTimFile,
+								   		sUtilFile,
+								   		sPciFile );
+
+					SendOK();
+				}
+
+		// +---------------------------------------------------+
+		// |  GetPCIImageBufferAddress                         |
+		// +---------------------------------------------------+
+		else if ( str.contains( "GetPCIImageBufferAddress" ) )
+		{
+			lBufRef = CameraAPI.GetImageBufferReference();
+
+			out.println( String.valueOf( lBufRef ) );
+		}
+
+		// +---------------------------------------------------+
+		// |  GetPCIImageBufferSize                            |
+		// +---------------------------------------------------+
+		else if ( str.contains( "GetPCIImageBufferSize" ) )
+		{
+			dBufSize = CameraAPI.GetImageBufferSize();
+
+			out.println( String.valueOf( dBufSize ) );
+		}
+
+		// +---------------------------------------------------+
+		// |  GetCRPixelCount                                  |
+		// +---------------------------------------------------+
+		else if ( str.contains( "GetCRPixelCount" ) )
+		{
+			dPixelCount = CameraAPI.GetCRPixelCount();
+
+			out.println( String.valueOf( dPixelCount ) );
+		}
+
+		// +---------------------------------------------------+
+		// |  GetFrameCount                                    |
+		// +---------------------------------------------------+
+		else if ( str.contains( "GetFrameCount" ) )
+		{
+			dFrameCount = CameraAPI.GetFrameCount();
+
+			out.println( String.valueOf( dFrameCount ) );
+		}
+
+		// +---------------------------------------------------+
+		// |  PCICommand                                       |
+		// +---------------------------------------------------+
+		else if ( str.contains( "PCICommand" ) )
+		{
+					tokens = str.split( "[ \t]+" );
+
+					if ( tokens.length != 2 )
+					{
+						throw new Exception(
+							"( PCICommand ): Invalid number of parameters: " +
+							  tokens.length );
+					}
+
+			dCommand = Integer.parseInt( tokens[ 1 ] );
+
+			dReply = CameraAPI.PCICommand( dCommand );
+
+			out.println( String.valueOf( dReply ) );
+		}
+
+				// +----------------------------------------------------------+
+				// |  Command                                                 |
+				// +----------------------------------------------------------+
+				else if ( str.contains( "Command" ) )
+				{
+				   	dArg1  = 0;
+		   			dArg2  = 0;
+		   			dArg3  = 0;
+	   				dArg4  = 0;
+
+					tokens = str.split( "[ \t]+" );
+
+					if ( tokens.length < 3 && tokens.length > 7 )
+					{
+						throw new Exception(
+							"( Command ): Invalid number of parameters: " +
+							  tokens.length );
+					}
+
+					dBrdId = Integer.parseInt( tokens[ 1 ] );
+				   	dCmd   = Integer.parseInt( tokens[ 2 ] );
+
+					switch ( tokens.length )
+					{
+						case 4:
+						{
+				   			dArg1  = Integer.parseInt( tokens[ 3 ] );
+						}
+						break;
+
+						case 5:
+						{
+					   		dArg1  = Integer.parseInt( tokens[ 3 ] );
+				   			dArg2  = Integer.parseInt( tokens[ 4 ] );
+						}
+						break;
+
+						case 6:
+						{
+					   		dArg1  = Integer.parseInt( tokens[ 3 ] );
+				   			dArg2  = Integer.parseInt( tokens[ 4 ] );
+				   			dArg3  = Integer.parseInt( tokens[ 5 ] );
+						}
+						break;
+
+						case 7:
+						{
+						   	dArg1  = Integer.parseInt( tokens[ 3 ] );
+				   			dArg2  = Integer.parseInt( tokens[ 4 ] );
+				   			dArg3  = Integer.parseInt( tokens[ 5 ] );
+			   				dArg4  = Integer.parseInt( tokens[ 6 ] );
+						}
+						break;
+					}					
+
+					dReply = CameraAPI.Command( dBrdId,
+					   	   		   		  dCmd,
+					   	   		   		  dArg1,
+					   	   		   		  dArg2,
+										  dArg3,
+										  dArg4 );
+
+					// send reply back to user
+		     			out.println( String.valueOf( dReply ) );
+				}
+
+				// +----------------------------------------------------------+
+				// |  Write FITS Keyword                                      |
+				// +----------------------------------------------------------+
+				else if ( str.contains( "WriteFitsKeyword" ) )
+				{
+					sComment = "";
+					tokens   = str.split( "[ \t]+" );
+
+					if ( tokens.length < 4 || tokens.length > 5 )
+					{
+						throw new Exception(
+								"( WriteFitsKeyword ): Invalid number of parameters: " +
+								  tokens.length );
+					}
+
+					sKey    = tokens[ 1 ];
+					sKeyVal = FixMultiStringData( tokens[ 2 ] );
+					dValType = Integer.parseInt( tokens[ 3 ] );
+
+					if ( tokens.length == 5 && !tokens[ 4 ].trim().equals( "0" ) )
+					{
+						sComment = FixMultiStringData( tokens[ 3 ] );
+					}
+
+					CameraAPI.WriteFitsKeyword(
+								sKey,
+							sKeyVal,
+							sComment,
+							MainApp.mainFrame.exposePanel.getFilename() );
+					SendOK();
+				}
+
+			// +----------------------------------------------------------+
+			// |  Set FITS File Path                                      |
+			// +----------------------------------------------------------+
+			else if ( str.contains( "SetFilePath" ) )
+			{
+				sComment = "";
+				tokens   = str.split( "[ \t]+" );
+
+				if ( tokens.length != 2 )
+				{
+					throw new Exception(
+							"( SetFilePath ): Invalid number of parameters: " +
+							  tokens.length + " Expected: 2" );
+				}
+
+				MainApp.mainFrame.exposePanel.setFilePath( tokens[ 1 ] );
+
+				SendOK();
+			}
+
+			// +----------------------------------------------------------+
+			// |  Set FITS Filename                                       |
+			// +----------------------------------------------------------+
+			else if ( str.contains( "SetFitsFilename" ) )
+			{
+				sComment = "";
+				tokens   = str.split( "[ \t]+" );
+
+				if ( tokens.length != 2 )
+				{
+					throw new Exception(
+							"( SetFitsFilename ): Invalid number of parameters: " +
+							  tokens.length + " Expected: 2" );
+				}
+
+				MainApp.mainFrame.exposePanel.setFilename( tokens[ 1 ] );
+
+				SendOK();
+			}
+
+			// +----------------------------------------------------------+
+			// |  Launch Display                                          |
+			// +----------------------------------------------------------+
+			else if ( str.contains( "LaunchDisplay" ) )
+			{
+				CameraAPI.LaunchDisplay();
+
+				SendOK();
+			}
+
+			// +----------------------------------------------------------+
+			// |  Display Image                                           |
+			// +----------------------------------------------------------+
+			else if ( str.contains( "DisplayImage" ) )
+			{
+				DS9Accessor ds9Ass = new DS9Accessor();
+
+				if ( ds9Ass.isDS9Ready( true ) )
+				{
+					ds9Ass.showFits(
+						MainApp.mainFrame.exposePanel.getFilename() );
+				}
+				else
+				{
+					throw Exception( "DS9 not ready!" );
+				}
+
+				SendOK();
+			}
+
+		// +---------------------------------------------------+
+		// |  IsBinningSet                                     |
+		// +---------------------------------------------------+
+		else if ( str.contains( "IsBinningSet" ) )
+		{
+			dIsSet = 1;
+
+	//
+	// Read the column factor from timing board Y:5
+	// --------------------------------------------------
+	dBinFactor =
+		CameraAPI.Cmd2( CameraAPI.TIM_ID,
+				      CameraAPI.RDM,
+					( CameraAPI.Y_MEM | 0x5 ) );
+
+	if ( dBinFactor == 1 )
+	{
+		//
+		// Read the row factor from timing board Y:6
+		// ----------------------------------------------
+		dBinFactor =
+			CameraAPI.Cmd2( CameraAPI.TIM_ID,
+						CameraAPI.RDM,
+						( CameraAPI.Y_MEM | 0x6 ) );
+
+		if ( dBinFactor == 1 )
+		{
+			dIsSet = 0;
+		}
+	}
+
+			out.println( String.valueOf( dIsSet ) );
+		}
+
+				// +---------------------------------------------------+
+				// |  Set Binning                                      |
+				// +---------------------------------------------------+
+				else if ( str.contains( "SetBinning" ) )
+				{
+					tokens = str.split( "[ \t]+" );
+
+					dRows = Integer.parseInt( tokens[ 1 ] );
+					dCols = Integer.parseInt( tokens[ 2 ] );
+
+					dRowFactor = Integer.parseInt( tokens[ 3 ] );
+					dColFactor = Integer.parseInt( tokens[ 4 ] );
+
+					CameraAPI.SetBinning( dRows,
+									 dCols,
+									 dRowFactor,
+									 dColFactor );
+
+					out.println( ( dRows / dRowFactor ) +
+							   " " +
+							   ( dCols / dColFactor ) );
+				}
+
+				// +---------------------------------------------------+
+				// |  Un-Set Binning                                   |
+				// +---------------------------------------------------+
+				else if ( str.contains( "UnsetBinning" ) )
+				{
+					tokens = str.split( "[ \t]+" );
+
+					dRows = Integer.parseInt( tokens[ 1 ] );
+					dCols = Integer.parseInt( tokens[ 2 ] );
+
+					CameraAPI.UnsetBinning( dRows, dCols );
+
+					SendOK();
+				}
+
+		// +---------------------------------------------------+
+		// |  SetSubArray                                      |
+		// +---------------------------------------------------+
+		else if ( str.contains( "SetSubArray" ) )
+		{
+					tokens = str.split( "[ \t]+" );
+
+			if ( tokens.length != 9 )
+			{
+						throw new Exception(
+							"( SetSubArray ): Invalid number of parameters: " +
+							  tokens.length );
+			}
+
+		dOldRows    = Integer.parseInt( tokens[ 1 ] );
+		dOldCols    = Integer.parseInt( tokens[ 2 ] );
+		dRow        = Integer.parseInt( tokens[ 3 ] );
+		dCol        = Integer.parseInt( tokens[ 4 ] );
+		dSubRows    = Integer.parseInt( tokens[ 5 ] );
+		dSubCols    = Integer.parseInt( tokens[ 6 ] );
+		dBiasOffset = Integer.parseInt( tokens[ 7 ] );
+		dBiasWidth  = Integer.parseInt( tokens[ 8 ] );
+
+		dRows = CameraAPI.GetImageRows();
+		dCols = CameraAPI.GetImageCols();
+
+		cSubArray = SubArray( false );
+		cSubArray.setSubImageWidth( dSubCols );
+		cSubArray.setSubImageHeight( dSubRows );
+		cSubArray.setSubImageCenterRow( dRow );
+		cSubArray.setSubImageCenterCol( dCol );
+		//cSubArray.setSubImageRowOffset( int offset );
+		//cSubArray.setSubImageColOffset( int offset );
+		cSubArray.setBiasWidth( dBiasWidth );
+		//cSubArray.setBiasPosition( int position );
+		cSubArray.setBiasOffset( dBiasOffset );
+		cSubArray.run();
+
+			out.println( dRows + " " + dCols );
+		}
+
+		// +---------------------------------------------------+
+		// |  UnsetSubArray                                    |
+		// +---------------------------------------------------+
+		else if ( str.contains( "UnsetSubArray" ) )
+		{
+					tokens = str.split( "[ \t]+" );
+
+		if ( tokens.length != 3 )
+		{
+					throw new Exception(
+						"( UnsetSubArray ): Invalid number of parameters: " +
+						  tokens.length );
+		}
+
+			dRows = Integer.parseInt( tokens[ 1 ] );
+			dCols = Integer.parseInt( tokens[ 2 ] );
+
+		cSubArray = SubArray( false );
+		cSubArray.unSet( dRows, dCols );
+
+			SendOK();
+		}
+
+		// +---------------------------------------------------+
+		// |  SetOpenShutter                                   |
+		// +---------------------------------------------------+
+		else if ( str.contains( "SetOpenShutter" ) )
+		{
+					tokens = str.split( "[ \t]+" );
+
+			if ( tokens.length != 2 )
+			{
+						throw new Exception(
+							"( SetOpenShutter ): Invalid number of parameters: " +
+							  tokens.length );
+			}
+
+			bShouldOpen =
+				( tokens[ 1 ].trim().equals( "1" ) ? true : false );
+
+			CameraAPI.SetOpenShutter( bShouldOpen );
+
+			SendOK();
+		}
+
+		// +---------------------------------------------------+
+		// |  IsReadout                                        |
+		// +---------------------------------------------------+
+		else if ( str.contains( "IsReadout" ) )
+		{
+			out.println(
+				( CameraAPI.IsReadout() ? "1" : "0" ) );
+		}
+
+	// +---------------------------------------------------+
+	// |  GetPixelCount                                    |
+	// +---------------------------------------------------+
+	else if ( str.contains( "GetPixelCount" ) )
+	{
+		out.println( CameraAPI.GetPixelCount() );
+	}
+
+				// +---------------------------------------------------+
+				// |  GetImageRows                                     |
+				// +---------------------------------------------------+
+				else if ( str.contains( "GetImageRows" ) )
+				{
+					dRows = CameraAPI.GetImageRows();
+					out.println( dRows );
+				}
+
+				// +---------------------------------------------------+
+				// |  GetImageCols                                     |
+				// +---------------------------------------------------+
+				else if ( str.contains( "GetImageCols" ) )
+				{
+					dCols = CameraAPI.GetImageCols();
+					out.println( dCols );
+				}
+
+				// +---------------------------------------------------+
+				// |  WriteFits                                        |
+				// +---------------------------------------------------+
+				else if ( str.contains( "WriteFits" ) )
+				{
+		dRows = CameraAPI.GetImageRows();
+		dCols = CameraAPI.GetImageCols();
+
+		sFileName =
+			MainApp.mainFrame.exposePanel.getFilename();
+
+		CameraAPI.WriteFitsFile( sFileName,
+						    dRows,
+						    dCols );
+
+		SendOK();
+				}
+
+		// +---------------------------------------------------+
+		// |  RunAlg ( Deinterlace )                           |
+		// +---------------------------------------------------+
+		else if ( str.contains( "RunAlg" ) )
+		{
+					tokens = str.split( "[ \t]+" );
+
+			if ( tokens.length != 6 )
+			{
+						throw new Exception(
+							"( RunAlg ): Invalid number of parameters: " +
+							  tokens.length + " Expected: 6" );
+			}
+
+			dRows   = Integer.parseInt( tokens[ 1 ] );
+			dCols   = Integer.parseInt( tokens[ 2 ] );
+			dAlg    = Integer.parseInt( tokens[ 3 ] );
+			dArg    = Integer.parseInt( tokens[ 4 ] );
+			dOffset = Integer.parseInt( tokens[ 5 ] );
+
+			CameraAPI.DeinterlaceImage( dRows, dCols, dAlg );
+
+			SendOK();
+		}
+
+		// +---------------------------------------------------+
+		// |  GetArrayTemperature                              |
+		// +---------------------------------------------------+
+		else if ( str.contains( "GetArrayTemperature" ) )
+		{
+			out.println(
+				String.valueOf(
+					CameraAPI.GetArrayTemperature() ) );
+		}
+
+		// +---------------------------------------------------+
+		// |  SetArrayTemperature                              |
+		// +---------------------------------------------------+
+		else if ( str.contains( "SetArrayTemperature" ) )
+		{
+			tokens = str.split( "[ \t]+" );
+
+			if ( tokens.length != 2 )
+			{
+				throw new Exception(
+					"( SetArrayTemperature ): Invalid number of parameters: " +
+					  tokens.length + " Expected: 2" );
+			}
+
+			gTemp = Float.parseFloat( tokens[ 1 ] );
+
+			CameraAPI.SetArrayTemperature( gTemp );
+
+			SendOK();
+		}
+
+/****
+		// +---------------------------------------------------+
+		// |  CFitsFile Constructor                            |
+		// +---------------------------------------------------+
+		else if ( str.contains( "CFitsFile::CFitsFile" ) )
+		{
+					tokens = str.split( "[ \t]+" );
+
+			if ( tokens.length != 6 )
+			{
+						throw new Exception(
+							"( CFitsFile ): Invalid number of parameters: " +
+							  tokens.length + " Expected: 6" );
+			}
+
+			sFilename = tokens[ 1 ];
+			dRows     = Integer.parseInt( tokens[ 2 ] );
+			dCols     = Integer.parseInt( tokens[ 3 ] );
+			dBpp      = Integer.parseInt( tokens[ 4 ] );
+			bIs3D     = ( tokens[ 5 ].equals( "1" ) ? true : false );
+
+			dFitsRef = CameraAPI.CreateFitsFile( sFilename,
+										dRows,
+										dCols,
+										dBpp );
+			SendOK();
+		}
+
+		// +---------------------------------------------------+
+		// |  CloseFits                                        |
+		// +---------------------------------------------------+
+		else if ( str.contains( "CloseFits" ) )
+		{
+			if ( dFitsRef == 0 )
+			{
+				throw new Exception(
+					"( CloseFits ): No open FITS file!" );
+			}
+
+			CameraAPI.CloseFitsFile( dFitsRef );
+			dFitsRef = 0;
+
+			SendOK();
+		}
+
+				// +---------------------------------------------------+
+				// |  WriteFits                                        |
+				// +---------------------------------------------------+
+				else if ( str.contains( "WriteFits" ) )
+				{
+			dRows = CameraAPI.GetImageRows();
+			dCols = CameraAPI.GetImageCols();
+
+			if ( dFitsRef == 0 )
+			{
+				throw new Exception(
+					"( WriteFits ): No open FITS file" );
+			}
+
+		CameraAPI.WriteToFitsFile( dFitsRef,
+							( dRows * dCols * 2 ),
+							0,
+							0 );
+			SendOK();
+				}
+*****/
+			}
+		}
+		catch ( Exception e )
+		{
+			System.err.println( e.getMessage() );
+			SendException( e.getMessage() );
+		}
+		finally
+		{
+			try
+			{
+				socket.close();
+				System.out.println( "Disconnected with.." + socket );
+			}
+			catch( IOException e ) {}
+		}
+	}
+
+	public void RecvFile( String sFilename, int dLength ) throws Exception
+	{
+		char[] buffer = new char[ dLength ];
+
+		int dBytesRead = in.read( buffer, 0, dLength );
+
+		if ( dBytesRead != dLength )
+		{
+			throw Exception(
+					"( RecvFile ): Failed to receive full file, received " +
+					 dBytesRead + " out of " + dLength + " bytes!" );
+		}
+
+		fw = new FileWriter( sFilename );
+		fw.write( buffer, 0, dLength );
+		fw.close();
+	}
+
+	public String RecvDspFile( String sBoard ) throws Exception
+	{
+		String sFileName = "";
+
+		out.println( sBoard );
+
+		int dLength = Integer.parseInt( in.readLine() );
+
+		if ( dLength > 0 )
+		{
+			SendOK();
+		}
+		else
+		{
+			String sMsg = "Invalid " + sBoard +
+					  " file length: " + dLength +
+					  " bytes";
+
+			throw Exception( "RecvDspFile", sMsg );
+		}
+
+		sFileName = File.createTempFile( "ARC", "lod" ).getAbsolutePath();
+
+		RecvFile( sFileName, dLength );
+
+		return sFileName;
+	}
+
+	return this;
+}
+
+apiServer = APIServer();
+apiServer.init( 5000 );
+

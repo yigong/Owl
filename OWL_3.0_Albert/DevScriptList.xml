@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<params>
+
+	<!-- =================================================== -->
+	<!--  PCI SCRIPTS ( Put ALL PCI script here )            -->
+	<!-- =================================================== -->
+	<pci>
+		<name>PCI</name>
+
+		<devscript>
+			<script>PCIDownloadDC();</script>
+			<text>PCI File Download</text>
+			<action>PCI_DLOAD_SCRIPT</action>
+		</devscript>
+	</pci>
+
+	<!-- =================================================== -->
+	<!--  PCIe SCRIPTS ( Put ALL PCIe script here )          -->
+	<!-- =================================================== -->
+	<pcie>
+		<name>PCIe</name>
+
+		<devscript>
+			<script>PCIeStatus();</script>
+			<text>PCIe Status</text>
+			<action>PCIe_STATUS_SCRIPT</action>
+		</devscript>
+
+		<devscript>
+			<script>PCIeCmd();</script>
+			<text>PCIe Command</text>
+			<action>PCIe_CMD_SCRIPT</action>
+		</devscript>
+	</pcie>
+
+</params>

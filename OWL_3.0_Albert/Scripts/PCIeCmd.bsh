@@ -1,0 +1,336 @@
+// +-------------------------------------------------------------------+
+// |  PCIeCmd Class                                                    |
+// +-------------------------------------------------------------------+
+// |  Allows the user to send commands manually to the PCIe board.     |
+// +-------------------------------------------------------------------+
+import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
+import javax.swing.ImageIcon;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.CCParams.CCScriptFrame;
+import owl.gui.utils.OwlUtilities;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlToggleLabel;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.MainApp;
+
+
+
+public class PCIeCmdFrame extends CCScriptFrame implements Runnable, ItemListener
+{
+	final String RUN_ACTION				= "RUN";
+	final String STOP_ACTION			= "STOP";
+
+	final String REG_CMD_HEADER			= "<html><font color=\"#657383\">[ 0x00 ]</font> - CMD HEADER</html>";
+	final String REG_CMD_COMMAND		= "<html><font color=\"#657383\">[ 0x04 ]</font> - CMD COMMAND</html>";
+	final String REG_CMD_ARG0			= "<html><font color=\"#657383\">[ 0x08 ]</font> - CMD ARG0</html>";
+	final String REG_CMD_ARG1			= "<html><font color=\"#657383\">[ 0x0C ]</font> - CMD ARG1</html>";
+	final String REG_CMD_ARG2			= "<html><font color=\"#657383\">[ 0x10 ]</font> - CMD ARG2</html>";
+	final String REG_CMD_ARG3			= "<html><font color=\"#657383\">[ 0x14 ]</font> - CMD ARG3</html>";
+	final String REG_CMD_ARG4			= "<html><font color=\"#657383\">[ 0x18 ]</font> - CMD ARG4</html>";
+	final String REG_RESET				= "<html><font color=\"#657383\">[ 0x20 ]</font> - RESET</html>";
+	final String REG_INIT_IMG_ADDR		= "<html><font color=\"#657383\">[ 0x38 ]</font> - INIT IMAGE ADDR</html>";
+	final String REG_FIBER_2X_CTRL		= "<html><font color=\"#657383\">[ 0x5C ]</font> - FIBER 2X CTRL</html>";
+	final String REG_STATUS				= "<html><font color=\"#657383\">[ 0x60 ]</font> - STATUS</html>";
+	final String REG_CMD_REPLY			= "<html><font color=\"#657383\">[ 0x64 ]</font> - CMD REPLY</html>";
+	final String REG_CTLR_ARG1			= "<html><font color=\"#657383\">[ 0x68 ]</font> - CONTROLLER ARG1</html>";
+	final String REG_CTLR_ARG2			= "<html><font color=\"#657383\">[ 0x6C ]</font> - CONTROLLER ARG2</html>";
+	final String REG_PIXEL_COUNT		= "<html><font color=\"#657383\">[ 0x70 ]</font> - PIXEL COUNT</html>";
+	final String REG_FRAME_COUNT		= "<html><font color=\"#657383\">[ 0x74 ]</font> - FRAME COUNT</html>";
+	final String REG_ID_LO				= "<html><font color=\"#657383\">[ 0x78 ]</font> - ID LO</html>";
+	final String REG_ID_HI				= "<html><font color=\"#657383\">[ 0x7C ]</font> - ID HI</html>";
+	final String REG_CTLR_SPECIAL_CMD	= "<html><font color=\"#657383\">[ 0x1C ]</font> - CTLR SPECIAL CMD</html>";
+
+
+	JToolBar		m_toolbar;
+	TreeMap			m_regMap;
+	JComboBox		m_regComboBox;
+	JRadioButton	m_readRadioButton;
+	JRadioButton	m_writeRadioButton;
+	OwlBoldButton	m_runButton;
+	OwlNumberField	m_valueTxtfld;
+	JLabel			m_valueLabel;
+	JPanel			m_writeValuePanel;
+	JPanel			m_readValuePanel;
+	JPanel			m_rdwrPanel;
+
+
+	// +-------------------------------------------------------------------+
+	// |  Constructor                                                      |
+	// +-------------------------------------------------------------------+
+	// |  Creates the window                                               |
+	// +-------------------------------------------------------------------+
+	public PCIeCmdFrame()
+	{
+		super( "PCIe Cmd" );
+		super.setIconImage( ( new ImageIcon( MainApp.getBitmapPath() + "PCI.gif" ) ).getImage() );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = super.createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		super.appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  createComponents                                                 |
+	// +-------------------------------------------------------------------+
+	// |  Creates the window components                                    |
+	// +-------------------------------------------------------------------+
+	private JPanel createComponents()
+	{
+		m_regMap = new TreeMap();
+
+		m_regMap.put( REG_CMD_HEADER, 0x00 );
+		m_regMap.put( REG_CMD_COMMAND, 0x04 );
+		m_regMap.put( REG_CMD_ARG0, 0x08 );
+		m_regMap.put( REG_CMD_ARG1, 0x0C );
+		m_regMap.put( REG_CMD_ARG2, 0x10 );
+		m_regMap.put( REG_CMD_ARG3, 0x14 );
+		m_regMap.put( REG_CMD_ARG4, 0x18 );
+		m_regMap.put( REG_RESET, 0x20 );
+		m_regMap.put( REG_INIT_IMG_ADDR, 0x38 );
+		m_regMap.put( REG_FIBER_2X_CTRL, 0x5C );
+		m_regMap.put( REG_STATUS, 0x60 );
+		m_regMap.put( REG_CMD_REPLY, 0x64 );
+		m_regMap.put( REG_CTLR_ARG1, 0x68 );
+		m_regMap.put( REG_CTLR_ARG2, 0x6C );
+		m_regMap.put( REG_PIXEL_COUNT, 0x70 );
+		m_regMap.put( REG_FRAME_COUNT, 0x74 );
+		m_regMap.put( REG_ID_LO, 0x78 );
+		m_regMap.put( REG_ID_HI, 0x7C );
+		m_regMap.put( REG_CTLR_SPECIAL_CMD, 0x1C );
+
+		keys = m_regMap.keySet().toArray( new String[ m_regMap.size() ] );
+
+		JPanel regPanel = new JPanel();
+		regPanel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createLineBorder( Color.gray ), "BAR2 Register" ) );
+
+		m_regComboBox = new JComboBox( keys );
+		m_regComboBox.addItemListener( this );
+		regPanel.add( m_regComboBox );
+
+		m_rdwrPanel = new JPanel();
+		m_rdwrPanel.setVisible( false );
+
+		m_readRadioButton = new JRadioButton( "Read", true );
+		m_readRadioButton.addItemListener( this );
+		m_rdwrPanel.add( m_readRadioButton );
+
+		m_writeRadioButton = new JRadioButton( "Write" );
+		m_writeRadioButton.addItemListener( this );
+		m_rdwrPanel.add( m_writeRadioButton );
+
+		rwButtonGrp = new ButtonGroup();
+		rwButtonGrp.add( m_readRadioButton );
+		rwButtonGrp.add( m_writeRadioButton );
+
+		m_writeValuePanel = new JPanel();
+		m_writeValuePanel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createLineBorder( Color.gray ), "Write Value" ) );
+
+		m_valueTxtfld = new OwlNumberField( "", 10 );
+		m_writeValuePanel.add( new JLabel( "0x" ) );
+		m_writeValuePanel.add( m_valueTxtfld );
+
+		m_readValuePanel = new JPanel();
+		m_readValuePanel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createLineBorder( Color.gray ), "Read Value" ) );
+		m_readValuePanel.setVisible( false );
+
+		m_valueLabel  = new JLabel( "0x0" );
+		m_readValuePanel.add( m_valueLabel );
+
+		JPanel panel = new JPanel();
+		panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+		panel.add( regPanel );
+		panel.add( m_rdwrPanel );
+		panel.add( m_writeValuePanel );
+		panel.add( m_readValuePanel );
+
+		return panel;
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  destroy                                                          |
+	// +-------------------------------------------------------------------+
+	// |  Destroys the window                                              |
+	// +-------------------------------------------------------------------+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  actionPerformed                                                  |
+	// +-------------------------------------------------------------------+
+	// |  ToolBar button event handler                                     |
+	// +-------------------------------------------------------------------+
+	public void actionPerformed( ActionEvent ae )
+	{
+		if ( ae.getActionCommand().equals( RUN_ACTION ) )
+		{
+			( new Thread( this ) ).start();
+		}
+
+		else if ( ae.getActionCommand().equals( STOP_ACTION ) )
+		{
+			stop = true;
+		}
+
+		else
+		{
+			super.actionPerformed( ae );
+		}
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  itemStateChanged                                                 |
+	// +-------------------------------------------------------------------+
+	// |  Read/Write radioButton and register comboBox event handler.      |
+	// +-------------------------------------------------------------------+
+	public void itemStateChanged( ItemEvent e )
+	{
+		//  Handle the Read/Write radio button selections
+		// +---------------------------------------------------+
+		if ( e.getItem() instanceof javax.swing.JRadioButton )
+		{
+			sItem = ( ( JRadioButton )e.getItem() ).getText();
+
+			if ( sItem.equals( "Read" ) )
+			{
+				m_writeValuePanel.setVisible( false );
+				m_readValuePanel.setVisible( true );
+			}
+
+			else
+			{
+				m_writeValuePanel.setVisible( true );
+				m_readValuePanel.setVisible( false );
+			}
+		}
+
+		//  Handle the register selections
+		// +---------------------------------------------------+
+		else
+		{
+			sItem = e.getItem();
+
+			//  Handle the write only registers
+			// +---------------------------------------------------+
+			if ( sItem.equals( REG_CMD_HEADER )       ||
+				 sItem.equals( REG_CMD_COMMAND )      ||
+				 sItem.equals( REG_CMD_ARG0 )         ||
+				 sItem.equals( REG_CMD_ARG1 )         ||
+				 sItem.equals( REG_CMD_ARG2 )         ||
+				 sItem.equals( REG_CMD_ARG3 )         ||
+				 sItem.equals( REG_CMD_ARG4 )         ||
+				 sItem.equals( REG_RESET )            ||
+				 sItem.equals( REG_CTLR_SPECIAL_CMD ) ||
+				 sItem.equals( REG_INIT_IMG_ADDR )    ||
+				 sItem.equals( REG_FIBER_2X_CTRL ) )
+			{
+				m_rdwrPanel.setVisible( false );
+				m_writeValuePanel.setVisible( true );
+				m_readValuePanel.setVisible( false );
+				m_valueTxtfld.setText( "" );
+			}
+
+			//  Handle the read/write registers
+			// +---------------------------------------------------+
+			else if ( sItem.equals( REG_STATUS ) )
+			{
+				m_rdwrPanel.setVisible( true );
+
+				if ( m_writeRadioButton.isSelected() )
+				{
+					m_writeValuePanel.setVisible( true );
+				}
+				else
+				{
+					m_writeValuePanel.setVisible( false );
+				}
+
+				if ( m_readRadioButton.isSelected() )
+				{
+					m_readValuePanel.setVisible( true );
+				}
+				else
+				{
+					m_readValuePanel.setVisible( false );
+				}
+
+				m_valueLabel.setText( "0x0" );
+				m_valueLabel.setToolTipText( "0x0" );
+				m_valueTxtfld.setText( "" );
+			}
+
+			//  Handle the read only registers
+			// +---------------------------------------------------+
+			else
+			{
+				m_rdwrPanel.setVisible( false );
+				m_writeValuePanel.setVisible( false );
+				m_readValuePanel.setVisible( true );
+				m_valueLabel.setText( "0x0" );
+				m_valueLabel.setToolTipText( "0x0" );
+			}
+		}
+
+		pack();
+	}
+
+	// +-------------------------------------------------------------------+
+	// |  run                                                              |
+	// +-------------------------------------------------------------------+
+	// |  Thread runnable method that sends commands to PCIe board.        |
+	// +-------------------------------------------------------------------+
+	public void run()
+	{
+		m_runButton.setColored( STOP_ACTION );
+
+		try
+		{
+			int dReg = m_regMap.get( m_regComboBox.getSelectedItem() );
+
+			if ( m_writeValuePanel.isVisible() )
+			{
+				CameraAPI.WriteBar( 0x2, dReg, m_valueTxtfld.getInt( 16 ) );
+
+				m_valueTxtfld.setText( "" );
+			}
+
+			else if ( m_readValuePanel.isVisible() )
+			{
+				dValue = CameraAPI.ReadBar( 0x2, dReg );
+				m_valueLabel.setText( "0x" + Integer.toHexString( dValue ).toUpperCase() );
+				m_valueLabel.setToolTipText( owl.gui.utils.OwlUtilities.intToAscii( dValue ) );
+			}
+		}
+		catch ( Exception e )
+		{
+			MainApp.error ( e.what() );
+		}
+
+		m_runButton.setBlack( RUN_ACTION );
+	}
+}
+
+
+
+PCIeCmd()
+{
+	CCScriptFrame frame = null;
+
+	frame = ( CCScriptFrame )( new PCIeCmdFrame() );
+	frame.setVisible( true );
+
+	return frame;
+}

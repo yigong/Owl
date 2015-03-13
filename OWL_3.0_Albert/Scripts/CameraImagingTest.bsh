@@ -1,0 +1,414 @@
+import java.text.DecimalFormat;
+import owl.CCParams.CCScriptFrame;
+import owl.main.owltypes.OwlFileChooser;
+import owl.main.owltypes.OwlBoldButton;
+import owl.main.owltypes.OwlNumberField;
+import owl.main.owltypes.OwlTextField;
+import owl.main.owltypes.OwlInfoTable;
+import owl.main.exposure.ExposeRunnable;
+import owl.gui.utils.OwlUtilities;
+import owl.cameraAPI.CameraAPI;
+import owl.cameraAPI.ReplyException;
+import owl.img.analysis.*;
+import owl.main.*;
+
+
+// +-----------------------------------------------------------------------------------+
+// |  CamImgTestFrame Class
+// +-----------------------------------------------------------------------------------+
+// |  Takes an exposure, quad ccd deinterlaces, saves image to FITS, then checks the 
+// |  std dev against a defined max and exits if std dev greater than defined max. If 
+// |  not, a second image is taken and its std dev checked. If this image is ok, then 
+// |  the means of the two images are compared.  If the means differ by a defined max 
+// |  value, then the program stops; otherwise, the entire process repeats. The 
+// |  running stats are logged to a file.
+// +-----------------------------------------------------------------------------------+
+public class CamImgTestFrame extends CCScriptFrame implements ActionListener, Runnable
+{
+	final String RUN_ACTION		=	"RUN";
+	final String STOP_ACTION	=	"ABORT";
+	final String VIEW_ACTION	=	"VIEW";
+	final String BROWSE_ACTION	=	"BROWSE";
+
+	String[] COL_NAMES	=	{ "Img #", "Quad", "Mean", "Mean Dif", "StdDev" };
+
+	JToolBar			m_toolbar;
+	OwlBoldButton		m_runButton;
+	OwlNumberField		m_maxStdDevTxtfld;
+	OwlNumberField		m_meanDiffTxtfld;
+	OwlNumberField[][]	m_numFields;
+	OwlTextField		m_logTxtfld;
+	OwlInfoTable		m_table;
+	JCheckBox			m_stopTxtfld;
+	DecimalFormat		m_formatter;
+	ImageStats[]		m_stats;
+	ExposeRunnable		m_expRun;
+	Thread				m_thread;
+	boolean				m_bAbort;
+
+	// +-----------------------------------------------------------------------------+
+	// |  Constructor
+	// +-----------------------------------------------------------------------------+
+	public CamImgTestFrame()
+	{
+		super( "Camera Image Test" );
+
+		m_toolbar = new JToolBar();
+		m_toolbar.setFloatable( false );
+
+		m_runButton = super.createBoldToolbarButton( RUN_ACTION, Color.red );
+		m_toolbar.add( m_runButton );
+
+		super.appendToolbar( m_toolbar );
+
+		getContentPane().add( m_toolbar, BorderLayout.PAGE_START );
+		getContentPane().add( createComponents(), BorderLayout.CENTER );
+
+		pack();
+		OwlUtilities.centerFrame( this );
+
+		m_formatter	= new DecimalFormat( "#0.00" );
+		m_stats		= new ImageStats[ 4 ];
+		m_expRun	= new ExposeRunnable( MainApp.mainFrame.exposePanel, null );
+		m_thread	= null;
+		m_bAbort	= false;
+
+		loadPreferences();
+	}
+
+	// +-----------------------------------------------------------------------------+
+	// |  Destroy
+	// +-----------------------------------------------------------------------------+
+	public void destroy()
+	{
+		dispose();
+	}
+
+	// +-----------------------------------------------------------------------------+
+	// |  Action Listener Event Handler
+	// +-----------------------------------------------------------------------------+
+	public void actionPerformed( ActionEvent event )
+	{
+		if ( event.getActionCommand().equals( RUN_ACTION ) )
+		{
+			if ( m_thread == null || m_thread.getState() == Thread.State.TERMINATED )
+			{
+				m_thread = new Thread( this );
+			}
+
+			m_thread.start();
+		}
+
+		else if ( event.getActionCommand().equals( STOP_ACTION ) )
+		{
+			m_expRun.stop();
+			m_bAbort = true;
+		}
+
+		else if ( event.getActionCommand().equals( BROWSE_ACTION ) )
+		{
+			OwlFileChooser chooser =
+					new OwlFileChooser( new File( m_logTxtfld.getText() ) );
+
+			if ( chooser.openDialog() )
+			{
+				m_logTxtfld.setText( chooser.getFile().getCanonicalPath() );
+			}
+		}
+
+		else if ( event.getActionCommand().equals( VIEW_ACTION ) )
+		{
+			MainApp.launchTextEditor( m_logTxtfld.getText() );
+		}
+
+		else
+		{
+			super.actionPerformed( event );
+		}
+	}
+
+	// +-----------------------------------------------------------------------------+
+	// |  Runnable "run" Override
+	// +-----------------------------------------------------------------------------+
+	public void run()
+	{
+		FileWriter  fw = null;
+		PrintWriter pw = null;
+
+		double[] gLastMean = { 0.0, 0.0, 0.0, 0.0 };
+		double   gMeanDif  = 0;
+
+		int dCount = 0;
+
+		m_runButton.setColored( STOP_ACTION );
+
+		m_bAbort = false;
+
+		try
+		{
+			if ( !MainApp.mainFrame.exposePanel.isSaveToDisk() )
+			{
+				throw new Exception(
+							"The \"Save\" option MUST be selected in the " +
+							"\"Image File Options\" panel! Please fix the problem." );
+			}
+
+			fw = new FileWriter( m_logTxtfld.getText(), false );
+			pw = new PrintWriter( fw, true );
+
+			logger.infoStart( "Reading image dimensions" );
+			dimen = CameraAPI.GetImageSize();
+			logger.infoEnd();
+
+			while ( true )
+			{
+				if ( m_bAbort ) { break; }
+
+				pw.print( Integer.toString( dCount ) );
+
+				if ( m_bAbort ) { break; }
+
+				// Read the filename here in case the increment filename
+				// option is selected, which will cause the filename to
+				// change before the stats can be calculated.
+				sFitsFile = MainApp.mainFrame.exposePanel.getFilename();
+
+				m_expRun.run();
+
+				if ( m_bAbort ) { break; }
+
+				String[][] sTableData = new String[ 4 ][ 5 ];
+
+				for ( int quad=0; quad<4; quad++ )
+				{
+					if ( m_bAbort ) { break; }
+
+					m_stats[ quad ] = CameraAPI.GetImageStats( sFitsFile,
+															   m_numFields[ quad ][ 0 ].getInt(),
+															   m_numFields[ quad ][ 1 ].getInt(),
+															   m_numFields[ quad ][ 2 ].getInt(),
+															   m_numFields[ quad ][ 3 ].getInt() );
+
+					if ( dCount > 0 )
+					{
+						gMeanDif = Math.abs( m_stats[ quad ].gMean - gLastMean[ quad ] );
+					}
+
+					pw.print( "\t" + m_formatter.format( m_stats[ quad ].gMean ) +
+							  "\t" + m_formatter.format( gMeanDif ) +
+							  "\t" + m_formatter.format( m_stats[ quad ].gStdDev ) );
+
+					sTableData[ quad ][ 0 ] = Integer.toString( dCount );
+					sTableData[ quad ][ 1 ] = Integer.toString( quad );
+					sTableData[ quad ][ 2 ] = m_formatter.format( m_stats[ quad ].gMean );
+					sTableData[ quad ][ 3 ] = m_formatter.format( gMeanDif );
+					sTableData[ quad ][ 4 ] = m_formatter.format( m_stats[ quad ].gStdDev );
+
+					setTableData( sTableData );
+
+					if ( m_stats[ quad ].gStdDev > m_maxStdDevTxtfld.getInt() )
+					{
+						sTableData[ quad ][ 0 ] = Integer.toString( dCount );
+						sTableData[ quad ][ 1 ] = Integer.toString( quad );
+						sTableData[ quad ][ 2 ] = m_formatter.format( m_stats[ quad ].gMean );
+						sTableData[ quad ][ 3 ] = m_formatter.format( gMeanDif );
+						sTableData[ quad ][ 4 ] = new String( "<html><font color=\"#FF0000\">" +
+															  m_formatter.format( m_stats[ quad ].gStdDev ) +
+															  "</font></html>" );
+
+						setTableData( sTableData );
+
+						if ( m_stopTxtfld.isSelected() )
+						{
+							throw new Exception( "Image " + dCount +
+												 " quadrant " + quad +
+												 " STD DEV is out of range!" );
+						}
+					}
+
+					if ( m_bAbort ) { break; }
+
+					if ( dCount > 0 )
+					{
+						if ( gMeanDif > m_meanDiffTxtfld.getInt() )
+						{
+							sTableData[ quad ][ 0 ] = Integer.toString( dCount );
+							sTableData[ quad ][ 1 ] = Integer.toString( quad );
+							sTableData[ quad ][ 4 ] = m_formatter.format( m_stats[ quad ].gStdDev );
+							sTableData[ quad ][ 2 ] = new String( "<html><font color=\"#FF0000\">" +
+																  m_formatter.format( m_stats[ quad ].gMean ) +
+																  "</font></html>" );
+							sTableData[ quad ][ 3 ] = new String( "<html><font color=\"#FF0000\">" +
+																  m_formatter.format( gMeanDif ) +
+																  "</font></html>" );
+
+							setTableData( sTableData );
+
+							if ( m_stopTxtfld.isSelected() )
+							{
+								throw new Exception(
+										"Image quadrant " + quad + " MEANS are out of range!" );
+							}
+						}
+
+						gLastMean[ quad ] = m_stats[ quad ].gMean;
+					}
+				}	// end for
+
+				pw.println( "\n" );
+
+				if ( m_bAbort ) { break; }
+
+				dCount++;
+
+			}	// end while
+		}
+		catch ( Exception e )
+		{
+			logger.error( e.getMessage() );
+		}
+		finally
+		{
+			m_runButton.setBlack( RUN_ACTION );
+
+			if ( fw != null )
+			{
+				fw.close();
+			}
+			
+			if ( pw != null )
+			{
+				pw.close();
+			}
+		}
+	}
+
+	// +-----------------------------------------------------------------------------+
+	// |  SetTableData
+	// +-----------------------------------------------------------------------------+
+	private void setTableData( Object[][] data )
+	{
+		if ( m_table != null && data != null )
+		{
+			m_table.setTableData( COL_NAMES, data );
+			m_table.setColumnWidth( 0, 50 );
+			m_table.setColumnWidth( 1, 50 );
+			m_table.setColumnWidth( 2, 100 );
+			m_table.setColumnWidth( 3, 100 );
+			m_table.setColumnWidth( 4, 100 );
+		}
+	}
+
+	// +-----------------------------------------------------------------------------+
+	// |  ClearTableData
+	// +-----------------------------------------------------------------------------+
+	private void clearTableData()
+	{
+		Object[][] data = { { "", "", "", "", "" },
+							{ "", "", "", "", "" },
+							{ "", "", "", "", "" },
+							{ "", "", "", "", "" } };
+
+		setTableData( data );
+	}
+
+	// +-----------------------------------------------------------------------------+
+	// |  CreateComponents
+	// +-----------------------------------------------------------------------------+
+	private JPanel createComponents()
+	{
+		JPanel panel = new JPanel();
+		panel.setLayout( gbl );
+
+		m_maxStdDevTxtfld = new OwlNumberField( 4, 6 );
+		m_maxStdDevTxtfld.setBackground( java.awt.Color.WHITE );
+		m_maxStdDevTxtfld.setHorizontalAlignment( JTextField.RIGHT );
+		m_maxStdDevTxtfld.setBorder( javax.swing.BorderFactory.createLineBorder( Color.green.darker() ) );
+		m_maxStdDevTxtfld.setName( "MaxStdDev" );
+
+		m_meanDiffTxtfld = new OwlNumberField( 100, 6 );
+		m_meanDiffTxtfld.setBackground( java.awt.Color.WHITE );
+		m_meanDiffTxtfld.setHorizontalAlignment( JTextField.RIGHT );
+		m_meanDiffTxtfld.setBorder( javax.swing.BorderFactory.createLineBorder( Color.magenta ) );
+		m_meanDiffTxtfld.setName( "MaxMeanDif" );
+
+		m_stopTxtfld = new JCheckBox( "Stop On Error", false );
+		m_stopTxtfld.setName( "StopOnError" );
+
+		JPanel maxValPanel = new JPanel();
+		maxValPanel.setBorder( BorderFactory.createTitledBorder( "ERROR CONTROL VALUES" ) );
+		maxValPanel.setLayout( new FlowLayout( FlowLayout.CENTER ) );
+		maxValPanel.add( new JLabel( "Max Std Dev: " ) );
+		maxValPanel.add( m_maxStdDevTxtfld );
+		maxValPanel.add( Box.createHorizontalStrut( 3 ) );
+		maxValPanel.add( new JLabel( "Max Mean Dif: " ) );
+		maxValPanel.add( m_meanDiffTxtfld );
+		maxValPanel.add( Box.createHorizontalStrut( 3 ) );
+		maxValPanel.add( m_stopTxtfld );
+
+		m_logTxtfld =
+					new OwlTextField( MainApp.mainFrame.exposePanel.getFilePath() +
+									  "CameraImageTest.txt", 32 );
+		m_logTxtfld.setName( "LogFile" );
+
+		JButton browseButton =
+					OwlUtilities.createIconButton( "folder.gif", "Browse", BROWSE_ACTION, this );
+
+		JButton viewButton =
+					OwlUtilities.createIconButton( "edit.gif", "View File", VIEW_ACTION, this );
+
+		JPanel logPanel = new JPanel();
+		logPanel.setBorder( BorderFactory.createTitledBorder( "LOG FILE" ) );
+		logPanel.setLayout( new FlowLayout() );
+		logPanel.add( new JLabel( " Log File: " ) );
+		logPanel.add( m_logTxtfld );
+		logPanel.add( viewButton );
+		logPanel.add( browseButton );
+
+		JPanel boxPanel = new JPanel();
+		boxPanel.setBorder( BorderFactory.createTitledBorder( "QUADRANT REGIONS" ) );
+		boxPanel.setLayout( gbl );
+
+		String[] numTitles = { "Lower Left ( Quad 0 )", "Lower Right ( Quad 1 )", "Upper Right ( Quad 2 )", "Upper Left ( Quad 3 )" };
+		String[] boxLabels = { "Row 1", "Row 2", "Col 1", "Col 2" };
+		JPanel[] numPanels = new JPanel[ 4 ];
+		m_numFields = new OwlNumberField[ 4 ][ 4 ];
+
+		for ( int i=0; i<4; i++ )
+		{
+			numPanels[ i ] = new JPanel();
+			numPanels[ i ].setBorder( BorderFactory.createTitledBorder( numTitles[ i ] ) );
+			numPanels[ i ].setLayout( new GridLayout( 2, 4, 5, 5 ) );
+
+			for ( int j=0; j<4; j++ )
+			{
+				m_numFields[ i ][ j ] = new OwlNumberField( "0", 4 );
+				m_numFields[ i ][ j ].setName( ( "Quad" + i + boxLabels[ j ] ).trim() );
+
+				numPanels[ i ].add( m_numFields[ i ][ j ] );
+				numPanels[ i ].add( new JLabel( boxLabels[ j ] ) );
+			}
+		}
+
+		addComponent( boxPanel, numPanels[ 3 ], 0, 0, 0, 0, GridBagConstraints.BOTH, GridBagConstraints.CENTER, 0, 0, 1, 1 );
+		addComponent( boxPanel, numPanels[ 2 ], 0, 9, 0, 0, GridBagConstraints.BOTH, GridBagConstraints.CENTER, 0, 1, 1, 1 );
+		addComponent( boxPanel, numPanels[ 0 ], 5, 0, 0, 0, GridBagConstraints.BOTH, GridBagConstraints.CENTER, 1, 0, 1, 1 );
+		addComponent( boxPanel, numPanels[ 1 ], 5, 9, 0, 0, GridBagConstraints.BOTH, GridBagConstraints.CENTER, 1, 1, 1, 1 );
+
+		m_table = new OwlInfoTable();
+		clearTableData();
+
+		JScrollPane tablePane = new JScrollPane( m_table );
+		tablePane.setPreferredSize( new Dimension( 400, 90 ) );
+
+		addComponent( panel, maxValPanel,                    0, 0, 0, 0, GridBagConstraints.BOTH, GridBagConstraints.CENTER, 0, 0, 1, 1 );
+		addComponent( panel, boxPanel,                       0, 0, 0, 0, GridBagConstraints.BOTH, GridBagConstraints.CENTER, 1, 0, 1, 1 );
+		addComponent( panel, logPanel,                       0, 0, 0, 0, GridBagConstraints.BOTH, GridBagConstraints.CENTER, 2, 0, 1, 1 );
+		addComponent( panel, tablePane,                      5, 0, 5, 5, GridBagConstraints.BOTH, GridBagConstraints.CENTER, 3, 0, 1, 1 );
+ 
+		return panel;
+	}
+}
+
+camFrame = new CamImgTestFrame();
+camFrame.setVisible( true );

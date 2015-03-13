@@ -1,0 +1,47 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">SetSyntheticImageMode</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+CameraAPI.SetSyntheticImageMode( mode );
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+<table width="600" border="0">
+<tr>
+<td width="150" valign="top"><span class="code">boolean mode</span></td>
+<td valign="top">True to activate synthetic image mode; false otherwise.
+</td>
+</tr>
+</table>
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Remarks</div>
+Sets the camera image mode to synthetic, which produces an image that
+continuously ramps up over the 16-bit data range from 0 to 65535 adu.
+The image is produced by the timing board DSP and not the camera array.
+Throws java.lang.Exception if an error occurs. All exceptions can be
+caught using a <a href="../exceptions/TryCatchBlock.html">try/catch</a> 
+block.
+
+</div>
+
+</body>
+
+</html>

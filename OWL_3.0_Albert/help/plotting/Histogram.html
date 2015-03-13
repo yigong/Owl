@@ -1,0 +1,120 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../help.css" />
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="bigheader">Histogram</div>
+
+<div id="header">Syntax</div>
+<div id="indent">
+<span class="code">
+Histogram();
+</span>
+</div>
+
+<div id="header">Parameters</div>
+<div id="indent">
+None
+</div>
+
+<div id="header">Returns</div>
+<div id="indent">
+<span class="code">
+Histogram Object
+</span>
+</div>
+<br>
+
+<div id="header">Class Methods</div>
+<div id="indent">
+<span class="code">
+<table width="600" border="1">
+<tr>
+<td width="150" valign="top"><span style="font-weight: bold">METHOD</span></td>
+<td><span style="font-weight: bold">DESCRIPTION</span></td>
+</tr>
+
+<tr>
+<td valign="top">void setData( Point2D.Float[] pointData )</td>
+<td>Set the data to be plotted. Expects an array of point data,
+where y represents the the number of x values.</td>
+</tr>
+
+<tr>
+<td valign="top">void setTitle( String title )</td>
+<td>Sets the plot title.</td>
+</tr>
+
+<tr>
+<td valign="top">String getTitle()</td>
+<td>Returns the plot title.</td>
+</tr>
+
+<tr>
+<td valign="top">void setXLabel( String text )</td>
+<td>Sets the x-axis label.</td>
+</tr>
+
+<tr>
+<td valign="top">void setYLabel( String text )</td>
+<td>Sets the y-axis label.</td>
+</tr>
+
+<tr>
+<td valign="top">JFrame showFrame()</td>
+<td>Creates a javax.swing.JFrame and packs the histrogram
+panel into it. The frame is automatically displayed and
+returned to the user for further use (if desired).</td>
+</tr>
+</table>
+</span>
+</div>
+<br>
+
+<div id="header">Remarks</div>
+Returns what is ultimately a javax.swing.JPanel that displays a 
+histogram for the specified set of data. This panel should be
+placed within a frame/window; which can be done by calling the
+showFrame() method.
+
+<br><br>
+Example #1:
+<pre>
+	import java.awt.geom.Point2D;
+
+	data = new Point2D.Float[ 11 ];
+
+	for ( i=0; i<data.length; i++ )
+		data[ i ] = new Point2D.Float( ( float )i, ( float )i );
+
+	hist = new Histogram();
+	hist.setTitle( "My Plot" );
+	hist.setXLabel( "ex data" );
+	hist.setYLabel( "why data" );
+	hist.setData( data );
+	hist.showFrame();
+</pre>
+
+<br>
+Example #2:
+<pre>
+	... Assumes a histogram panel was previously created,
+          as in example #1 ...
+	frame = hist.showFrame();
+
+	... The existing frame can have its plot data changed ...
+	hist.setData( newData );
+
+	... And if the frame is closed, it can be re-shown ...
+	frame.setVisible( true );
+</pre>
+
+</div>
+
+</body>
+
+</html>

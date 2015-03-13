@@ -1,0 +1,247 @@
+<?xml version="1.0"?>
+
+<!--
+###############################################################################
+#
+#  Owl Controller Configuration Script List
+#
+#  Scott Streit - March 16, 2011
+#
+#  This file specifies the scripts that will be associated with a specific controller configuration
+#  parameter. The script can be a single line of Bean Shell code or the filename of a Bean Shell
+#  script file.
+#
+#  Example:	BinningCC( true );		// Single line of Bean Shell code
+#			C:/Scripts/FitsTest.bsh	// Bean Shell script filename
+#
+#  Each entry in this file is given by a keyword/value pair.  The keyword is the name of the
+#  controller configuration parameter (see below).  Keywords are specified by enclosing the
+#  keyword text within square brackets ( Exampe: [BINNING] ). The value must be on the next
+#  line below the keyword and can be either a single line of Bean Shell code or a Bean Shell
+#  script filename (see above example).  If the value is a filename, the filename must contain
+#  the fully qualified directory and must use "/" as the path separator, regardless of OS.
+#
+###############################################################################
+-->
+
+<params>
+
+	<!-- =================================================== -->
+	<!--  VIDEO OFFSETS                                      -->
+	<!-- =================================================== -->
+	<group>
+    <ccscript>
+      <script>ARC47VideoOffsetCC();</script>
+      <text>ARC-47 4x CCD video board</text>
+      <action>ARC47</action>
+      <bits>0x000007</bits>
+    </ccscript>
+
+    <ccscript>
+      <script>ARC48VideoOffsetCC();</script>
+      <text>ARC-48 8x CCD video board</text>
+      <action>ARC48</action>
+      <bits>0x000006</bits>
+    </ccscript>
+
+    <ccscript>
+			<script>ARC46VideoOffsetCC();</script>
+			<text>ARC-46 8x IR video board</text>
+			<action>ARC46</action>
+			<bits>0x000005</bits>
+		</ccscript>
+
+		<ccscript>
+			<script>VideoOffsetCC();</script>
+			<text>ARC-45 2x CCD video board</text>
+			<action>ARC45</action>
+			<bits>0x000004</bits>
+		</ccscript>
+
+		<ccscript>
+			<script>VideoOffsetCC();</script>
+			<text>ARC-42 2x IR video board</text>
+			<action>ARC42</action>
+			<bits>0x000002</bits>
+		</ccscript>
+
+		<ccscript>
+			<script>VideoOffsetCC();</script>
+			<text>ARC-41 2x CCD video board</text>
+			<action>ARC41</action>
+			<bits>0x000000</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  TIMING BOARDS                                      -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<infoOnly></infoOnly>
+			<text>ARC-22 Timing Revision ( 250 MHz )</text>
+			<bits>0x000010</bits>
+		</ccscript>
+
+		<ccscript>
+			<infoOnly></infoOnly>
+			<text>ARC-20 Timing Revision ( 50 MHz )</text>
+			<bits>0x000000</bits>
+		</ccscript>
+
+		<ccscript>
+			<infoOnly></infoOnly>
+			<text>GEN I Timing ( 40 MHz )</text>
+			<bits>0x000008</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  ARC-50 UTILITY BOARD                               -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<infoOnly></infoOnly>
+			<text>ARC-50 Utility</text>
+			<bits>0x000020</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  READOUTS                                           -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<script>ReadoutCC();</script>
+			<text>Quad readout</text>
+			<action>SPLIT_SERIAL_PARALLEL</action>
+			<bits>0x003000</bits>
+		</ccscript>
+
+		<ccscript>
+			<script>ReadoutCC();</script>
+			<text>Serial readout</text>
+			<action>SPLIT_SERIAL</action>
+			<bits>0x001000</bits>
+		</ccscript>
+
+		<ccscript>
+			<script>ReadoutCC();</script>
+			<text>Parallel readout</text>
+			<action>SPLIT_PARALLEL</action>
+			<bits>0x002000</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  SHUTTER                                            -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<infoOnly></infoOnly>
+			<text>Shutter supported</text>
+			<bits>0x000080</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  TEMPERATURE CONTROL                                -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<script>TemperatureCC();</script>
+			<text>SiDiode temperature</text>
+			<action>TEMP_SIDIODE</action>
+			<bits>0x000100</bits>
+		</ccscript>
+
+		<ccscript>
+			<script>TemperatureCC();</script>
+			<text>Linear temperature</text>
+			<action>TEMP_LINEAR</action>
+			<bits>0x000200</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  BINNING                                            -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+      <script>BinningCC();</script>
+			<text>Binning</text>
+			<action>BINNING</action>
+			<bits>0x000800</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  SUBARRAY                                           -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<script>SubArray();</script>
+			<text>Sub-array</text>
+			<action>SUBARRAY</action>
+			<bits>0x000400</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  CONTINUOUS READOUT                                 -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<script>ContinuousReadoutCC();</script>
+			<text>Continuous readout</text>
+			<action>CONT_RD</action>
+			<bits>0x100000</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  FO 2x TRANSMITTER                                  -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<script>FO2xXmitCC();</script>
+			<text>2x Fiber Transmitters</text>
+			<action>FO_2X_TRANSMITR</action>
+			<bits>0x060000</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  MPP ( Multi Pinned Phase )                         -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<infoOnly></infoOnly>
+			<text>Inverted clocks supported</text>
+			<bits>0x004000</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  MLO ( Mt. Laguna Observatory )                     -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<infoOnly></infoOnly>
+			<text>MLO functions available</text>
+			<bits>0x020000</bits>
+		</ccscript>
+	</group>
+
+	<!-- =================================================== -->
+	<!--  NGST                                               -->
+	<!-- =================================================== -->
+	<group>
+		<ccscript>
+			<infoOnly></infoOnly>
+			<text>NGST Aladdin implementation</text>
+			<bits>0x040000</bits>
+		</ccscript>
+	</group>
+
+</params>
