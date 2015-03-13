@@ -132,15 +132,12 @@ DUMMY2  SET     @CVI((BRDNUM_\NAME<<20)|(BRDTYP_\NAME<<18)|(DAC_\NAME<<14)|DUMMY
 	VDEF	RL_LO,CLK,2,43,-13.0,+13.0	; lower reset
 
 ; Video offsets - 0 to $3fff video offset value,Rang=0~4.3V
-OFFSET	EQU	$2fff	; 2.43V @ $2400
-OFFSET_LOW EQU  0
-OFFSET_HIGH EQU $2280
-OFFSET_HIGH2 EQU $3000
-OFFSET_HIGH3 EQU $5000
+OFFSET		EQU	$2280
+OFFSET_Q1_2	EQU	$800
 
 OFFSET0	EQU	OFFSET
-OFFSET1	EQU	OFFSET
-OFFSET2	EQU	OFFSET
+OFFSET1	EQU	OFFSET_Q1_2
+OFFSET2	EQU	OFFSET_Q1_2
 OFFSET3	EQU	OFFSET
 OFFSET4	EQU	OFFSET
 OFFSET5	EQU	OFFSET
@@ -391,9 +388,9 @@ SXRL	DC      $00F0C0
 END_SERIAL_READ_SPLIT
 
 VSUBN
-	VOLTS	VSUB,20.0		; Vsub  0.0 140 V, pin #
+	VOLTS	VSUB,130		; Vsub  0.0 140 V, pin #
 ERHI	DC EREND-ERHI-1
-	VOLTS	VSUB,0		; Vsub  0.0 140 V, pin #
+	VOLTS	VSUB,130		; Vsub  0.0 140 V, pin #
 	VOLTS	V1_HI,9		; Vertical High 
 	VOLTS	V1_LO,9		; Vertical Low  
 	VOLTS	V2_HI,9		; Vertical High 
@@ -462,7 +459,7 @@ DACS	DC	END_DACS-DACS-1
 	VOLTS	RL_LO,0.0	 
 
 ; Set the ARC-48 video gain, one of 16 possible values
-	DC	VID0+$0C0008			; Image data FIFO Reset
+	DC	VID0+$0C0140	; integrator time constant: $0C01t0, t is the time constant from 0 to F; larger values -> more gain	
 	DC	VID0+$0D000C			; Gain from 0 to $F
 
 ; Initialize the DAC gain and offset registers for the ARC-48 video board
@@ -534,7 +531,7 @@ DACS	DC	END_DACS-DACS-1
 	DC	VID0+$0FC000+OFFSET7
 
 ; LBNL high voltage bias board
-	VOLTS	VSUB,140		; Vsub  0.0 140 V
+	VOLTS	VSUB,130			; Vsub  0.0 140 V
 	VOLTS	RAMP,5.0		; Vsub  AVG RAMP RATE
 	VOLTS	VDD1,-22.0		; Vdd  -5.1 -25V
 	VOLTS	VDD2,-22.0		; Vdd  -5.1 -25V
@@ -551,6 +548,6 @@ DACS	DC	END_DACS-DACS-1
 
 END_DACS
 
-BIAS_ON	VOLTS	VSUB,20.0		; Vsub  0.0 140 V
+BIAS_ON	VOLTS	VSUB,130			; Vsub  0.0 140 V
 							
-BIAS_OFF VOLTS	VSUB,0.0		; Vsub  0.0 140 V
+BIAS_OFF VOLTS	VSUB,130			; Vsub  0.0 140 V

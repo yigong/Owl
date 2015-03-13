@@ -1,4 +1,4 @@
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 1
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  tim.asm  Page 1
 
 
 
@@ -64,7 +64,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 1
 60     
 61                         ; Port B general purpose I/O
 62        FFFFC4           HPCR      EQU     $FFFFC4                           ; Control register (bits 1-6 cleared for GPIO)
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 2
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 2
 
 
 
@@ -130,7 +130,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
 122       000000           CDAC      EQU     0                                 ; Clear the analog board DACs
 123       000002           ENCK      EQU     2                                 ; Enable the clock outputs
 124       000004           SHUTTER   EQU     4                                 ; Control the shutter
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 3
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 3
 
 
 
@@ -196,7 +196,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
 184                        10              Subarray readout
 185                                                0       Not supported
 186                                                1       Yes supported
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 4
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 4
 
 
 
@@ -262,7 +262,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
 246       002000                     EQU     $002000                           ; Split parallel supported
 247       004000           MPP_CC    EQU     $004000                           ; Inverted clocks supported
 248       018000           CLKDRVGENI EQU    $018000                           ; No clock driver board - Gen I
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 5
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 5
 
 
 
@@ -328,7 +328,7 @@ e
 307       P:000052 P:000052 0D001A            JSR     CLR_ERR                           ; SCI receive error interrupt
 308       P:000053 P:000053 000000            NOP
 309    
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 6
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 6
 
 
 
@@ -394,7 +394,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
 360       P:000081 P:000081 205B00            MOVE              (R3)+
 361       P:000082 P:000082 205B00            MOVE              (R3)+                   ; Point R3 to the first argument
 362       P:000083 P:000083 302800            MOVE              #<COM_TBL,R0            ; Get the command table starting address
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 7
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 7
 
 
 
@@ -460,7 +460,7 @@ k
 413    
 414       P:0000B1 P:0000B1 08F4BB            MOVEP             #$028FE2,X:BCR          ; Slow down RDFO access
                             028FE2
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 8
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 8
 
 
 
@@ -526,7 +526,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
 458    
 459                                 ; Transmit the word in B1 to the host computer over the fiber optic data link
 460                                 XMT_WRD
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 9
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 9
 
 
 
@@ -592,7 +592,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
 510       P:00011C P:00011C 47E000            MOVE              X:(R0),Y1               ; Write to X data memory
 511       P:00011D P:00011D 0C0090            JMP     <FINISH1                          ; Send out a header with the value
 512       P:00011E P:00011E 0ACF16  RDY       JCLR    #22,B,RDR                         ; Test address bit for Y: memory
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 10
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 10
 
 
 
@@ -658,7 +658,7 @@ ry
 562       P:000155 P:000155 013D22            BSET    #WRENA,X:PDRC                     ; WR_ENA* = 1 to disable EEPROM writing
 563       P:000156 P:000156 0C008F            JMP     <FINISH
 564    
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 11
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 11
 
 
 
@@ -724,7 +724,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
                             00C350
 617       P:000185 P:000185 06C400            DO      X0,L_DELAY
                             000188
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 12
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 12
 
 
 
@@ -790,7 +790,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
 665                                 ;       PB7 = STATUS3           PB15 = SELSCI
 666    
 667                                 ; Program the serial port ESSI0 = Port C for serial communication with
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 13
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 13
 
 
 
@@ -856,7 +856,7 @@ ut)
 716                                                                                     ; SCD2 = 1 so frame sync SC2 is an output
 717                                                                                     ; SHFD = 0 for MSB shifted first
 718                                                                                     ; CKP = 0 for rising clock edge transitions
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 14
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 14
 
 
 
@@ -922,7 +922,7 @@ ler
 761       P:0001DB P:0001DB 08F4BE            MOVEP             #>$80,X:IPRP            ; Enable SCI interrupt only, IPR = 1
                             000080
 762       P:0001DD P:0001DD 00FCB8            ANDI    #$FC,MR                           ; Unmask all interrupt levels
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 15
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 15
 
 
 
@@ -988,7 +988,7 @@ rs
 807    
 808                                 ; Transmit contents of accumulator A1 over the synchronous serial transmitter
 809                                 XMIT_A_WORD
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 16
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 16
 
 
 
@@ -1054,7 +1054,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
 865       000001                    FO_HDR    EQU     STATUS+1                          ; Fiber optic write bytes
 866       000005                    HEADER    EQU     FO_HDR+4                          ; Command header
 867       000006                    NWORDS    EQU     HEADER+1                          ; Number of words in the command
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 17
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 17
 
 
 
@@ -1120,7 +1120,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Pa
 931    
 932                                           IF      @SCP("HOST","ROM")
 934                                           ENDIF
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timboot.asm  Page 18
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timboot.asm  Page 18
 
 
 
@@ -1186,7 +1186,7 @@ RALLEL
 996       P:000249 P:000249 4C1200            MOVE                          X0,Y:<NS_SKP1
 997       P:00024A P:00024A 4C1300            MOVE                          X0,Y:<NS_SKP2
 998       P:00024B P:00024B 4C0A00            MOVE                          X0,Y:<NR_BIAS
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 19
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  tim.asm  Page 19
 
 
 
@@ -1252,7 +1252,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 1
                             0002B0
 1057      P:000281 P:000281 688E00            MOVE                          Y:<PARALLEL,R0
 1058                                          CLOCK
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 20
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  tim.asm  Page 20
 
 
 
@@ -1318,7 +1318,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 2
 1126      P:0002BA P:0002BA 0A0004            BCLR    #ST_RDC,X:<STATUS                 ; Set status to not reading out
 1127      P:0002BB P:0002BB 0C0054            JMP     <START
 1128   
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 21
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  tim.asm  Page 21
 
 
 
@@ -1384,7 +1384,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 2
 1180      P:0002E4 P:0002E4 0A0F01            BCLR    #1,X:<LATCH                       ; Separate updates of clock driver
 1181      P:0002E5 P:0002E5 0A0F20            BSET    #CDAC,X:<LATCH                    ; Disable clearing of DACs
 1182      P:0002E6 P:0002E6 0A0F22            BSET    #ENCK,X:<LATCH                    ; Enable clock and DAC output switches
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 22
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 22
 
 
 
@@ -1450,7 +1450,7 @@ es
 1231      P:000312 P:000312 0A0023  OSHUT     BSET    #ST_SHUT,X:<STATUS                ; Set status bit to mean shutter open
 1232      P:000313 P:000313 0A0F24            BSET    #SHUTTER,X:<LATCH                 ; Set (DC) hardware shutter bit to open
 1233      P:000314 P:000314 09F0B5            MOVEP             X:LATCH,Y:WRLATCH       ; Write it to the hardware
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 23
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 23
 
 
 
@@ -1516,7 +1516,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
                             FFFF8D
 1289      P:000343 P:000343 0A8989  CHK_RCV   JCLR    #EF,X:HDR,CHK_TIM                 ; Simple test for fast execution
                             000348
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 24
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 24
 
 
 
@@ -1582,7 +1582,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
 1339                                READ_EXPOSURE_TIME
 1340      P:000371 P:000371 018FA0            JSET    #TIM_BIT,X:TCSR0,RD_TIM           ; Read DSP timer if its running
                             000375
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 25
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 25
 
 
 
@@ -1648,7 +1648,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
 1391      P:0003A1 P:0003A1 000000            NOP
 1392                                LPR_TST
 1393      P:0003A2 P:0003A2 0C02B1            JMP     <RDC_END                          ; Normal exit
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 26
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 26
 
 
 
@@ -1714,7 +1714,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
 1447                                ; Wait for the clocking to be complete before proceeding
 1448                                WAIT_TO_FINISH_CLOCKING
 1449      P:0003D5 P:0003D5 01ADA1            JSET    #SSFEF,X:PDRD,*                   ; Wait for the SS FIFO to be empty
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 27
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 27
 
 
 
@@ -1780,7 +1780,7 @@ f
 1503      P:0003FF P:0003FF 0C008F            JMP     <FINISH
 1504   
 1505                                ; For ARC32 do some trickiness to set the chip select and address bits
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 28
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 28
 
 
 
@@ -1846,7 +1846,7 @@ f
 1562   
 1563                                ; Specify the MUX value to be output on the clock driver board
 1564                                ; Command syntax is  SMX  #clock_driver_board #MUX1 #MUX2
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 29
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 29
 
 
 
@@ -1912,7 +1912,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
                             0001C0
 1615      P:00046D P:00046D 20004E            AND     X0,B
 1616      P:00046E P:00046E 44F400            MOVE              #>$600,X0
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 30
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 30
 
 
 
@@ -1978,7 +1978,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
 1672   
 1673      P:0004A0 P:0004A0 4C8B00  SEL_OS    MOVE                          Y:<OS,X0    ; Get amplifier(s) name
 1674      P:0004A1 P:0004A1 56F400            MOVE              #'ALL',A                ; All Amplifiers = readout #0 to #3
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 31
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 31
 
 
 
@@ -2044,7 +2044,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
                             000086
 1713      P:0004DC P:0004DC 0A0005            BCLR    #SPLIT_S,X:STATUS
 1714      P:0004DD P:0004DD 0A0006            BCLR    #SPLIT_P,X:STATUS
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 32
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 32
 
 
 
@@ -2110,7 +2110,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
 1757      P:000515 P:000515 0D020C            JSR     <XMIT_A_WORD                      ; Transmit it to TIM-A-STD
 1758      P:000516 P:000516 0D03D8            JSR     <PAL_DLY
 1759      P:000517 P:000517 012F03            BCLR    #3,X:PCRD                         ; Turn off the serial clock
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 33
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 33
 
 
 
@@ -2176,7 +2176,7 @@ r
 1813      P:000548 P:000548 0C0560            JMP     <SVO_XMT
 1814      P:000549 P:000549 014485  CMP4      CMP     #4,A
 1815      P:00054A P:00054A 0E254F            JNE     <CMP5
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 34
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 34
 
 
 
@@ -2242,7 +2242,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
 1870      P:00057D P:00057D 44F400            MOVE              #>1,X0                  ; Check for gain = x1
                             000001
 1871      P:00057F P:00057F 200045            CMP     X0,A                              ; Gain value (1,2,5 or 10) is in Acc A1
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm  Page 35
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  timCCDmisc.asm  Page 35
 
 
 
@@ -2308,7 +2308,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  timCCDmisc.asm 
 1923   
 1924                                 TIMBOOT_X_MEMORY
 1925      0005AE                              EQU     @LCV(L)
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 36
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  tim.asm  Page 36
 
 
 
@@ -2374,7 +2374,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 3
 1987                                          ENDIF
 1988   
 1989                                ; Now let's go for the timing waveform tables
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  tim.asm  Page 37
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  tim.asm  Page 37
 
 
 
@@ -2440,7 +2440,7 @@ ddress  (NEW)
 2046      000708                    NSCLR     EQU     1800                              ; Horizontal clocks to clear (NEW)
 2047      000708                    NPCLR     EQU     1800                              ; Parallel clocks to clear (SAME)
 2048      000032                    SH_DEL    EQU     50                                ; Shutter delay (SAME)
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 38
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 38
 
 
 
@@ -2506,7 +2506,7 @@ s (ARC22)
 2100                                VOLTS     MACRO   NAME,F
 2101 m 
 2102 m                              DUMMY     SET     @CVI(@MIN(4095,@MAX(0,(F-LO_\NAME)/(HI_\NAME-LO_\NAME)*4096.)))
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 39
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 39
 
 
 
@@ -2572,7 +2572,7 @@ ls bank0
 2414                                          VDEF    V3_LO,CLK,2,5,-13.0,+13.0         ; Vertical Low
 **** 2426 [LBNL_3.5k.waveforms 98]: Defining voltage V3_LO type CLK board 2 dac 5 with limits -13.0 +13.0
 2427   
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 40
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 40
 
 
 
@@ -2638,7 +2638,7 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.wavef
 2795                                          VDEF    RL_HI,CLK,2,42,-13.0,+13.0        ; Reset High wrong polarity....
 **** 2807 [LBNL_3.5k.waveforms 131]: Defining voltage RL_HI type CLK board 2 dac 42 with limits -13.0 +13.0
 2808                                          VDEF    RL_LO,CLK,2,43,-13.0,+13.0        ; lower reset
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 41
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 41
 
 
 
@@ -2648,549 +2648,551 @@ Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.wavef
 2823      002280                    OFFSET    EQU     $2280
 2824                                 OFFSET_Q1_2
 2825      000800                              EQU     $800
-2826   
-2827      002280                    OFFSET0   EQU     OFFSET
-2828      000800                    OFFSET1   EQU     OFFSET_Q1_2
-2829      000800                    OFFSET2   EQU     OFFSET_Q1_2
-2830      002280                    OFFSET3   EQU     OFFSET
-2831      002280                    OFFSET4   EQU     OFFSET
-2832      002280                    OFFSET5   EQU     OFFSET
-2833      002280                    OFFSET6   EQU     OFFSET
-2834      002280                    OFFSET7   EQU     OFFSET
-2835   
-2836                                ; Define switch state bits for the lower CCD clock driver bank CLK3
-2837      000001                    RGL       EQU     1                                 ; Reset Gate Left Pin 1
-2838      000002                    H1L       EQU     2                                 ; Horizontal #1 Left Pin 2
-2839      000004                    H2L       EQU     4                                 ; Horizontal #2 Left Pin 3
-2840      000008                    H3L       EQU     8                                 ; Horizontal #3 Left Pin 4
-2841      000010                    SWL       EQU     $10                               ; Summing Well Left Pin 5
-2842      000020                    RGR       EQU     $20                               ; Reset Gate Right Pin 6
-2843      000040                    H1R       EQU     $40                               ; Horizontal #1 Right Pin 7
-2844      000080                    H2R       EQU     $80                               ; Horizontal #2 Right Pin 8
-2845      000100                    H3R       EQU     $100                              ; Horizontal #3 Right Pin 9
-2846      000200                    SWR       EQU     $200                              ; Summing Well Lower Pin 10
-2847      000021                    RG        EQU     RGL+RGR                           ; Left and Right are always clocked the same
-2848      000210                    SW        EQU     SWL+SWR
-2849      000042                    H1        EQU     H1L+H1R
-2850      000084                    H2        EQU     H2L+H2R
-2851      000108                    H3        EQU     H3L+H3R
-2852                                ; Pins 11-12 are not used
-2853   
-2854                                ; Define switch state bits for the CCD clocks of the LBNL CCD
-2855                                ;Bank 0
-2856      000000                    V1L       EQU     0
-2857      000001                    V1H       EQU     $1
-2858      000000                    V2L       EQU     0                                 ; VERTICAL register, phase #2
-2859      000002                    V2H       EQU     $2
-2860      000000                    V3L       EQU     0                                 ; VERTICAL register, phase #3
-2861      000004                    V3H       EQU     $4
-2862      000000                    FS1L      EQU     0
-2863      000008                    FS1H      EQU     $8
-2864      000000                    FS2L      EQU     0
-2865      000010                    FS2H      EQU     $10
-2866      000000                    FS3L      EQU     0
-2867      000020                    FS3H      EQU     $20
-2868   
-2869      000000                    TL        EQU     0                                 ; Transfer gate
-2870      0000C0                    TH        EQU     $c0                               ; both transfer gates concurrently
-2871   
-2872                                ;Bank 1
-2873      000000                    HU1L      EQU     0
-2874      000001                    HU1H      EQU     $1
-2875      000000                    HU2L      EQU     0
-2876      000002                    HU2H      EQU     $2
-2877      000000                    HU3L      EQU     0
-2878      000004                    HU3H      EQU     $4
-2879      000000                    HL1L      EQU     0                                 ; Serial shift register, phase #1
-2880      000008                    HL1H      EQU     $8
-2881      000000                    HL2L      EQU     0                                 ; Serial shift register, phase #2
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 42
+2826                                 OFFSET_LEFT
+2827      002300                              EQU     $2300
+2828   
+2829      002300                    OFFSET0   EQU     OFFSET_LEFT
+2830      002300                    OFFSET1   EQU     OFFSET_LEFT
+2831      002280                    OFFSET2   EQU     OFFSET
+2832      002280                    OFFSET3   EQU     OFFSET
+2833      002280                    OFFSET4   EQU     OFFSET
+2834      002280                    OFFSET5   EQU     OFFSET
+2835      002280                    OFFSET6   EQU     OFFSET
+2836      002280                    OFFSET7   EQU     OFFSET
+2837   
+2838                                ; Define switch state bits for the lower CCD clock driver bank CLK3
+2839      000001                    RGL       EQU     1                                 ; Reset Gate Left Pin 1
+2840      000002                    H1L       EQU     2                                 ; Horizontal #1 Left Pin 2
+2841      000004                    H2L       EQU     4                                 ; Horizontal #2 Left Pin 3
+2842      000008                    H3L       EQU     8                                 ; Horizontal #3 Left Pin 4
+2843      000010                    SWL       EQU     $10                               ; Summing Well Left Pin 5
+2844      000020                    RGR       EQU     $20                               ; Reset Gate Right Pin 6
+2845      000040                    H1R       EQU     $40                               ; Horizontal #1 Right Pin 7
+2846      000080                    H2R       EQU     $80                               ; Horizontal #2 Right Pin 8
+2847      000100                    H3R       EQU     $100                              ; Horizontal #3 Right Pin 9
+2848      000200                    SWR       EQU     $200                              ; Summing Well Lower Pin 10
+2849      000021                    RG        EQU     RGL+RGR                           ; Left and Right are always clocked the same
+2850      000210                    SW        EQU     SWL+SWR
+2851      000042                    H1        EQU     H1L+H1R
+2852      000084                    H2        EQU     H2L+H2R
+2853      000108                    H3        EQU     H3L+H3R
+2854                                ; Pins 11-12 are not used
+2855   
+2856                                ; Define switch state bits for the CCD clocks of the LBNL CCD
+2857                                ;Bank 0
+2858      000000                    V1L       EQU     0
+2859      000001                    V1H       EQU     $1
+2860      000000                    V2L       EQU     0                                 ; VERTICAL register, phase #2
+2861      000002                    V2H       EQU     $2
+2862      000000                    V3L       EQU     0                                 ; VERTICAL register, phase #3
+2863      000004                    V3H       EQU     $4
+2864      000000                    FS1L      EQU     0
+2865      000008                    FS1H      EQU     $8
+2866      000000                    FS2L      EQU     0
+2867      000010                    FS2H      EQU     $10
+2868      000000                    FS3L      EQU     0
+2869      000020                    FS3H      EQU     $20
+2870   
+2871      000000                    TL        EQU     0                                 ; Transfer gate
+2872      0000C0                    TH        EQU     $c0                               ; both transfer gates concurrently
+2873   
+2874                                ;Bank 1
+2875      000000                    HU1L      EQU     0
+2876      000001                    HU1H      EQU     $1
+2877      000000                    HU2L      EQU     0
+2878      000002                    HU2H      EQU     $2
+2879      000000                    HU3L      EQU     0
+2880      000004                    HU3H      EQU     $4
+2881      000000                    HL1L      EQU     0                                 ; Serial shift register, phase #1
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 42
 
 
 
-2882      000010                    HL2H      EQU     $10
-2883      000000                    HL3L      EQU     0                                 ; Serial shift register, phase #3
-2884      000020                    HL3H      EQU     $20
-2885      000000                    WL        EQU     0                                 ; Both summing wells clocked together
-2886      0000C0                    WH        EQU     $0c0
-2887      000000                    RL        EQU     0                                 ; Reset both output nodes
-2888      000300                    RH        EQU     $300
-2889   
-2890                                ; Define switch state bits for the upper CCD clock driver bank CLK2
-2891      000008                    TGL       EQU     8                                 ; Transfer Gate Left, Pin 16
-2892      000010                    V1R       EQU     $10                               ; Image, phase #1 Right, Pin 17
-2893      000020                    V2R       EQU     $20                               ; Image, phase #2 Right, Pin 18
-2894      000040                    V3R       EQU     $40                               ; Image, phase #3 Right, Pin 19
-2895      000800                    TGR       EQU     $800                              ; Transfer Gate Right, Pin 37
-2896      000010                    V1        EQU     V1L+V1R
-2897      000020                    V2        EQU     V2L+V2R
-2898      000040                    V3        EQU     V3L+V3R
-2899      000808                    TG        EQU     TGL+TGR
-2900                                ;  ***  Definitions for Y: memory waveform tables  *****
-2901                                PARALLEL_UP                                         ;this is the parallel split waveform since h
+2882      000008                    HL1H      EQU     $8
+2883      000000                    HL2L      EQU     0                                 ; Serial shift register, phase #2
+2884      000010                    HL2H      EQU     $10
+2885      000000                    HL3L      EQU     0                                 ; Serial shift register, phase #3
+2886      000020                    HL3H      EQU     $20
+2887      000000                    WL        EQU     0                                 ; Both summing wells clocked together
+2888      0000C0                    WH        EQU     $0c0
+2889      000000                    RL        EQU     0                                 ; Reset both output nodes
+2890      000300                    RH        EQU     $300
+2891   
+2892                                ; Define switch state bits for the upper CCD clock driver bank CLK2
+2893      000008                    TGL       EQU     8                                 ; Transfer Gate Left, Pin 16
+2894      000010                    V1R       EQU     $10                               ; Image, phase #1 Right, Pin 17
+2895      000020                    V2R       EQU     $20                               ; Image, phase #2 Right, Pin 18
+2896      000040                    V3R       EQU     $40                               ; Image, phase #3 Right, Pin 19
+2897      000800                    TGR       EQU     $800                              ; Transfer Gate Right, Pin 37
+2898      000010                    V1        EQU     V1L+V1R
+2899      000020                    V2        EQU     V2L+V2R
+2900      000040                    V3        EQU     V3L+V3R
+2901      000808                    TG        EQU     TGL+TGR
+2902                                ;  ***  Definitions for Y: memory waveform tables  *****
+2903                                PARALLEL_UP                                         ;this is the parallel split waveform since h
 ardware is restrictive
-2902      Y:00001A Y:00001A                   DC      END_PARALLEL_UP-PARALLEL_UP-1
-2903      Y:00001B Y:00001B                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
-2904      Y:00001C Y:00001C                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
-2905      Y:00001D Y:00001D                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TL
-2906      Y:00001E Y:00001E                   DC      CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
-2907      Y:00001F Y:00001F                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
-2908      Y:000020 Y:000020                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
-2909      Y:000021 Y:000021                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH ; shut TG
-2910                                END_PARALLEL_UP
-2911   
-2912                                PARALLEL_DOWN                                       ;this is the parallel split waveform since h
+2904      Y:00001A Y:00001A                   DC      END_PARALLEL_UP-PARALLEL_UP-1
+2905      Y:00001B Y:00001B                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+2906      Y:00001C Y:00001C                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
+2907      Y:00001D Y:00001D                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TL
+2908      Y:00001E Y:00001E                   DC      CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
+2909      Y:00001F Y:00001F                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
+2910      Y:000020 Y:000020                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
+2911      Y:000021 Y:000021                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH ; shut TG
+2912                                END_PARALLEL_UP
+2913   
+2914                                PARALLEL_DOWN                                       ;this is the parallel split waveform since h
 ardware is restrictive
-2913      Y:000022 Y:000022                   DC      END_PARALLEL_DOWN-PARALLEL_DOWN-1
-2914      Y:000023 Y:000023                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
-2915      Y:000024 Y:000024                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
-2916      Y:000025 Y:000025                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TL
-2917      Y:000026 Y:000026                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
-2918      Y:000027 Y:000027                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
-2919      Y:000028 Y:000028                   DC      CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
-2920      Y:000029 Y:000029                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TH ; shut TG
-2921                                END_PARALLEL_DOWN
-2922   
-2923                                PARALLEL_SPLIT
-2924      Y:00002A Y:00002A                   DC      END_PARALLEL_SPLIT-PARALLEL_SPLIT-1
-2925      Y:00002B Y:00002B                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
-2926      Y:00002C Y:00002C                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
-2927      Y:00002D Y:00002D                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TL
-2928      Y:00002E Y:00002E                   DC      CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
-2929      Y:00002F Y:00002F                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
-2930      Y:000030 Y:000030                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
-2931      Y:000031 Y:000031                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH ; shut TG
-2932                                END_PARALLEL_SPLIT
-2933   
-2934                                PARALLEL_CLEAR_SPLIT                                ;just another copy of parallel split
-2935      Y:000032 Y:000032                   DC      END_PARALLEL_CLEAR_SPLIT-PARALLEL_CLEAR_SPLIT-1
-2936      Y:000033 Y:000033                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
-2937      Y:000034 Y:000034                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
-2938      Y:000035 Y:000035                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TL
-2939      Y:000036 Y:000036                   DC      CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
-2940      Y:000037 Y:000037                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
-2941      Y:000038 Y:000038                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 43
+2915      Y:000022 Y:000022                   DC      END_PARALLEL_DOWN-PARALLEL_DOWN-1
+2916      Y:000023 Y:000023                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+2917      Y:000024 Y:000024                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
+2918      Y:000025 Y:000025                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TL
+2919      Y:000026 Y:000026                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
+2920      Y:000027 Y:000027                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
+2921      Y:000028 Y:000028                   DC      CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
+2922      Y:000029 Y:000029                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TH ; shut TG
+2923                                END_PARALLEL_DOWN
+2924   
+2925                                PARALLEL_SPLIT
+2926      Y:00002A Y:00002A                   DC      END_PARALLEL_SPLIT-PARALLEL_SPLIT-1
+2927      Y:00002B Y:00002B                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+2928      Y:00002C Y:00002C                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
+2929      Y:00002D Y:00002D                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TL
+2930      Y:00002E Y:00002E                   DC      CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
+2931      Y:00002F Y:00002F                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
+2932      Y:000030 Y:000030                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
+2933      Y:000031 Y:000031                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH ; shut TG
+2934                                END_PARALLEL_SPLIT
+2935   
+2936                                PARALLEL_CLEAR_SPLIT                                ;just another copy of parallel split
+2937      Y:000032 Y:000032                   DC      END_PARALLEL_CLEAR_SPLIT-PARALLEL_CLEAR_SPLIT-1
+2938      Y:000033 Y:000033                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+2939      Y:000034 Y:000034                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TL
+2940      Y:000035 Y:000035                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3L+V1H+V2L+V3L+TL
+2941      Y:000036 Y:000036                   DC      CLK2+P_DELAY+FS1H+FS2H+FS3L+V1H+V2H+V3L+TL
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 43
 
 
 
-2942      Y:000039 Y:000039                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH ; shut TG
-2943                                END_PARALLEL_CLEAR_SPLIT
-2944   
-2945                                PARALLELS_DURING_EXPOSURE                           ; this is redundant since clocks are already
+2942      Y:000037 Y:000037                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3L+V1L+V2H+V3L+TL
+2943      Y:000038 Y:000038                   DC      CLK2+P_DELAY+FS1L+FS2H+FS3H+V1L+V2H+V3H+TL
+2944      Y:000039 Y:000039                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH ; shut TG
+2945                                END_PARALLEL_CLEAR_SPLIT
+2946   
+2947                                PARALLELS_DURING_EXPOSURE                           ; this is redundant since clocks are already
  in proper state
-2946      Y:00003A Y:00003A                   DC      END_PARALLELS_DURING_EXPOSURE-PARALLELS_DURING_EXPOSURE-1
-2947      Y:00003B Y:00003B                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH ; shut TG
-2948                                END_PARALLELS_DURING_EXPOSURE
-2949   
-2950                                PARALLELS_DURING_READOUT                            ; redundant, clocks should be O.K.
-2951      Y:00003C Y:00003C                   DC      END_PARALLELS_DURING_READOUT-PARALLELS_DURING_READOUT-1
-2952      Y:00003D Y:00003D                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TH
-2953                                END_PARALLELS_DURING_READOUT
-2954   
-2955                                ; Video processor bit definition
-2956                                ; ARC48      xfer, A/D, integ, polarity, not used, not used, rst (1 => switch open)
-2957   
-2958                                SERIAL_IDLE                                         ; Clock serial charge from both L and R ends
-2959      Y:00003E Y:00003E                   DC      END_SERIAL_IDLE-SERIAL_IDLE-1
-2960      Y:00003F Y:00003F                   DC      VIDEO+$000000+%1110100
-2961      Y:000040 Y:000040                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
-2962      Y:000041 Y:000041                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1H+HL2L+HL3L+WL ;h2->hi
-2963      Y:000042 Y:000042                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1H+HL2H+HL3L+WL ;h1->lo
-2964      Y:000043 Y:000043                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
-2965      Y:000044 Y:000044                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1L+HL2H+HL3H+WL ;h2->lo
-2966      Y:000045 Y:000045                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1L+HL2L+HL3H+WL ;h1->hi
-2967      Y:000046 Y:000046                   DC      CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay*/
-2968      Y:000047 Y:000047                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;dummy for transmit delay
-2969      Y:000048 Y:000048                   DC      VIDEO+$000000+%1110111
-2970      Y:000049 Y:000049                   DC      VIDEO+I_DELAY+%0000111
-2971      Y:00004A Y:00004A                   DC      VIDEO+$000000+%0011011
-2972      Y:00004B Y:00004B                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
-2973      Y:00004C Y:00004C                   DC      CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
-2974      Y:00004D Y:00004D                   DC      VIDEO+I_DELAY+%0001011
-2975      Y:00004E Y:00004E                   DC      VIDEO+$000000+%0011011
-2976      Y:00004F Y:00004F                   DC      VIDEO+DCRST_DELAY+%1110111
-2977                                END_SERIAL_IDLE
-2978   
-2979                                ; These are the three skipping tables
-2980                                SERIAL_SKIP_LEFT                                    ; Serial clocking waveform for skipping left
-2981      Y:000050 Y:000050                   DC      END_SERIAL_SKIP_LEFT-SERIAL_SKIP_LEFT-1
-2982      Y:000051 Y:000051                   DC      VIDEO+$000000+%1110100
-2983      Y:000052 Y:000052                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h2->hi
-2984      Y:000053 Y:000053                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h1->lo
-2985      Y:000054 Y:000054                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
-2986      Y:000055 Y:000055                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h2->lo
-2987      Y:000056 Y:000056                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h1->hi
-2988      Y:000057 Y:000057                   DC      CLK3+S_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
-2989      Y:000058 Y:000058                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
-2990                                END_SERIAL_SKIP_LEFT
-2991   
-2992                                SERIAL_SKIP_RIGHT                                   ; Serial clocking waveform for skipping righ
+2948      Y:00003A Y:00003A                   DC      END_PARALLELS_DURING_EXPOSURE-PARALLELS_DURING_EXPOSURE-1
+2949      Y:00003B Y:00003B                   DC      CLK2+P_DELAY+FS1L+FS2L+FS3H+V1L+V2L+V3H+TH ; shut TG
+2950                                END_PARALLELS_DURING_EXPOSURE
+2951   
+2952                                PARALLELS_DURING_READOUT                            ; redundant, clocks should be O.K.
+2953      Y:00003C Y:00003C                   DC      END_PARALLELS_DURING_READOUT-PARALLELS_DURING_READOUT-1
+2954      Y:00003D Y:00003D                   DC      CLK2+P_DELAY+FS1H+FS2L+FS3H+V1H+V2L+V3H+TH
+2955                                END_PARALLELS_DURING_READOUT
+2956   
+2957                                ; Video processor bit definition
+2958                                ; ARC48      xfer, A/D, integ, polarity, not used, not used, rst (1 => switch open)
+2959   
+2960                                SERIAL_IDLE                                         ; Clock serial charge from both L and R ends
+2961      Y:00003E Y:00003E                   DC      END_SERIAL_IDLE-SERIAL_IDLE-1
+2962      Y:00003F Y:00003F                   DC      VIDEO+$000000+%1110100
+2963      Y:000040 Y:000040                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
+2964      Y:000041 Y:000041                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1H+HL2L+HL3L+WL ;h2->hi
+2965      Y:000042 Y:000042                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1H+HL2H+HL3L+WL ;h1->lo
+2966      Y:000043 Y:000043                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+2967      Y:000044 Y:000044                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1L+HL2H+HL3H+WL ;h2->lo
+2968      Y:000045 Y:000045                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1L+HL2L+HL3H+WL ;h1->hi
+2969      Y:000046 Y:000046                   DC      CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay*/
+2970      Y:000047 Y:000047                   DC      CLK3+$000000+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;dummy for transmit delay
+2971      Y:000048 Y:000048                   DC      VIDEO+$000000+%1110111
+2972      Y:000049 Y:000049                   DC      VIDEO+I_DELAY+%0000111
+2973      Y:00004A Y:00004A                   DC      VIDEO+$000000+%0011011
+2974      Y:00004B Y:00004B                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
+2975      Y:00004C Y:00004C                   DC      CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+2976      Y:00004D Y:00004D                   DC      VIDEO+I_DELAY+%0001011
+2977      Y:00004E Y:00004E                   DC      VIDEO+$000000+%0011011
+2978      Y:00004F Y:00004F                   DC      VIDEO+DCRST_DELAY+%1110111
+2979                                END_SERIAL_IDLE
+2980   
+2981                                ; These are the three skipping tables
+2982                                SERIAL_SKIP_LEFT                                    ; Serial clocking waveform for skipping left
+2983      Y:000050 Y:000050                   DC      END_SERIAL_SKIP_LEFT-SERIAL_SKIP_LEFT-1
+2984      Y:000051 Y:000051                   DC      VIDEO+$000000+%1110100
+2985      Y:000052 Y:000052                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h2->hi
+2986      Y:000053 Y:000053                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h1->lo
+2987      Y:000054 Y:000054                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+2988      Y:000055 Y:000055                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h2->lo
+2989      Y:000056 Y:000056                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h1->hi
+2990      Y:000057 Y:000057                   DC      CLK3+S_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+2991      Y:000058 Y:000058                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
+2992                                END_SERIAL_SKIP_LEFT
+2993   
+2994                                SERIAL_SKIP_RIGHT                                   ; Serial clocking waveform for skipping righ
 t
-2993      Y:000059 Y:000059                   DC      END_SERIAL_SKIP_RIGHT-SERIAL_SKIP_RIGHT-1
-2994      Y:00005A Y:00005A                   DC      VIDEO+$000000+%1110100
-2995      Y:00005B Y:00005B                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h2->hi
-2996      Y:00005C Y:00005C                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h1->lo
-2997      Y:00005D Y:00005D                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
-2998      Y:00005E Y:00005E                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h2->lo
-2999      Y:00005F Y:00005F                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h1->hi
-3000      Y:000060 Y:000060                   DC      CLK3+S_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
-3001      Y:000061 Y:000061                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 44
+2995      Y:000059 Y:000059                   DC      END_SERIAL_SKIP_RIGHT-SERIAL_SKIP_RIGHT-1
+2996      Y:00005A Y:00005A                   DC      VIDEO+$000000+%1110100
+2997      Y:00005B Y:00005B                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h2->hi
+2998      Y:00005C Y:00005C                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h1->lo
+2999      Y:00005D Y:00005D                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+3000      Y:00005E Y:00005E                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h2->lo
+3001      Y:00005F Y:00005F                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h1->hi
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 44
 
 
 
-3002                                END_SERIAL_SKIP_RIGHT
-3003   
-3004                                SERIAL_SKIP_SPLIT                                   ; Serial clocking waveform for skipping spli
+3002      Y:000060 Y:000060                   DC      CLK3+S_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+3003      Y:000061 Y:000061                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
+3004                                END_SERIAL_SKIP_RIGHT
+3005   
+3006                                SERIAL_SKIP_SPLIT                                   ; Serial clocking waveform for skipping spli
 t
-3005      Y:000062 Y:000062                   DC      END_SERIAL_SKIP_SPLIT-SERIAL_SKIP_SPLIT-1
-3006      Y:000063 Y:000063                   DC      VIDEO+$000000+%1110100
-3007      Y:000064 Y:000064                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1L+HL2L+HL3H+WL ;h2->hi
-3008      Y:000065 Y:000065                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1L+HL2H+HL3H+WL ;h1->lo
-3009      Y:000066 Y:000066                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
-3010      Y:000067 Y:000067                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1H+HL2H+HL3L+WL ;h2->lo
-3011      Y:000068 Y:000068                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1H+HL2L+HL3L+WL ;h1->hi
-3012      Y:000069 Y:000069                   DC      CLK3+S_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
-3013      Y:00006A Y:00006A                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
-3014                                END_SERIAL_SKIP_SPLIT
-3015   
-3016                                SERIAL_READ_LEFT                                    ; Berkeley calls this the LOWER readout of t
+3007      Y:000062 Y:000062                   DC      END_SERIAL_SKIP_SPLIT-SERIAL_SKIP_SPLIT-1
+3008      Y:000063 Y:000063                   DC      VIDEO+$000000+%1110100
+3009      Y:000064 Y:000064                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1L+HL2L+HL3H+WL ;h2->hi
+3010      Y:000065 Y:000065                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1L+HL2H+HL3H+WL ;h1->lo
+3011      Y:000066 Y:000066                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+3012      Y:000067 Y:000067                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1H+HL2H+HL3L+WL ;h2->lo
+3013      Y:000068 Y:000068                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1H+HL2L+HL3L+WL ;h1->hi
+3014      Y:000069 Y:000069                   DC      CLK3+S_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+3015      Y:00006A Y:00006A                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
+3016                                END_SERIAL_SKIP_SPLIT
+3017   
+3018                                SERIAL_READ_LEFT                                    ; Berkeley calls this the LOWER readout of t
 he CCD
-3017      Y:00006B Y:00006B                   DC      END_SERIAL_READ_LEFT-SERIAL_READ_LEFT-1
-3018      Y:00006C Y:00006C                   DC      VIDEO+$000000+%1110100
-3019      Y:00006D Y:00006D                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
-3020      Y:00006E Y:00006E                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h2->hi
-3021      Y:00006F Y:00006F                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h1->lo
-3022      Y:000070 Y:000070                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
-3023      Y:000071 Y:000071                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h2->lo
-3024      Y:000072 Y:000072                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h1->hi
-3025      Y:000073 Y:000073                   DC      CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
-3026      Y:000074 Y:000074         SXL       DC      $00F000
-3027      Y:000075 Y:000075                   DC      VIDEO+$000000+%1110111
-3028      Y:000076 Y:000076                   DC      VIDEO+I_DELAY+%0000111
-3029      Y:000077 Y:000077                   DC      VIDEO+$000000+%0011011
-3030      Y:000078 Y:000078                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
-3031      Y:000079 Y:000079                   DC      CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
-3032      Y:00007A Y:00007A                   DC      VIDEO+I_DELAY+%0001011
-3033      Y:00007B Y:00007B                   DC      VIDEO+$000000+%0011011
-3034      Y:00007C Y:00007C                   DC      VIDEO+DCRST_DELAY+%1110111
-3035                                END_SERIAL_READ_LEFT
-3036   
-3037                                SERIAL_READ_RIGHT                                   ; Berkeley calls this the UPPER readout of t
+3019      Y:00006B Y:00006B                   DC      END_SERIAL_READ_LEFT-SERIAL_READ_LEFT-1
+3020      Y:00006C Y:00006C                   DC      VIDEO+$000000+%1110100
+3021      Y:00006D Y:00006D                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
+3022      Y:00006E Y:00006E                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h2->hi
+3023      Y:00006F Y:00006F                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h1->lo
+3024      Y:000070 Y:000070                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+3025      Y:000071 Y:000071                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h2->lo
+3026      Y:000072 Y:000072                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h1->hi
+3027      Y:000073 Y:000073                   DC      CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+3028      Y:000074 Y:000074         SXL       DC      $00F000
+3029      Y:000075 Y:000075                   DC      VIDEO+$000000+%1110111
+3030      Y:000076 Y:000076                   DC      VIDEO+I_DELAY+%0000111
+3031      Y:000077 Y:000077                   DC      VIDEO+$000000+%0011011
+3032      Y:000078 Y:000078                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
+3033      Y:000079 Y:000079                   DC      CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+3034      Y:00007A Y:00007A                   DC      VIDEO+I_DELAY+%0001011
+3035      Y:00007B Y:00007B                   DC      VIDEO+$000000+%0011011
+3036      Y:00007C Y:00007C                   DC      VIDEO+DCRST_DELAY+%1110111
+3037                                END_SERIAL_READ_LEFT
+3038   
+3039                                SERIAL_READ_RIGHT                                   ; Berkeley calls this the UPPER readout of t
 he CCD
-3038      Y:00007D Y:00007D                   DC      END_SERIAL_READ_RIGHT-SERIAL_READ_RIGHT-1
-3039      Y:00007E Y:00007E                   DC      VIDEO+$000000+%1110100
-3040      Y:00007F Y:00007F                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
-3041      Y:000080 Y:000080                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h2->hi
-3042      Y:000081 Y:000081                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h1->lo
-3043      Y:000082 Y:000082                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
-3044      Y:000083 Y:000083                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h2->lo
-3045      Y:000084 Y:000084                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h1->hi
-3046      Y:000085 Y:000085                   DC      CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
-3047      Y:000086 Y:000086         SXR       DC      $00F0C2
-3048      Y:000087 Y:000087                   DC      VIDEO+$000000+%1110111
-3049      Y:000088 Y:000088                   DC      VIDEO+I_DELAY+%0000111
-3050      Y:000089 Y:000089                   DC      VIDEO+$000000+%0011011
-3051      Y:00008A Y:00008A                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
-3052      Y:00008B Y:00008B                   DC      CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
-3053      Y:00008C Y:00008C                   DC      VIDEO+I_DELAY+%0001011
-3054      Y:00008D Y:00008D                   DC      VIDEO+$000000+%0011011
-3055      Y:00008E Y:00008E                   DC      VIDEO+DCRST_DELAY+%1110111
-3056                                END_SERIAL_READ_RIGHT
-3057   
-3058                                SERIAL_READ_SPLIT
-3059      Y:00008F Y:00008F                   DC      END_SERIAL_READ_SPLIT-SERIAL_READ_SPLIT-1
-3060      Y:000090 Y:000090                   DC      VIDEO+$000000+%1110100
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 45
+3040      Y:00007D Y:00007D                   DC      END_SERIAL_READ_RIGHT-SERIAL_READ_RIGHT-1
+3041      Y:00007E Y:00007E                   DC      VIDEO+$000000+%1110100
+3042      Y:00007F Y:00007F                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
+3043      Y:000080 Y:000080                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1H+HL2L+HL3L+WL ;h2->hi
+3044      Y:000081 Y:000081                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1H+HL2H+HL3L+WL ;h1->lo
+3045      Y:000082 Y:000082                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+3046      Y:000083 Y:000083                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1L+HL2H+HL3H+WL ;h2->lo
+3047      Y:000084 Y:000084                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1L+HL2L+HL3H+WL ;h1->hi
+3048      Y:000085 Y:000085                   DC      CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+3049      Y:000086 Y:000086         SXR       DC      $00F0C2
+3050      Y:000087 Y:000087                   DC      VIDEO+$000000+%1110111
+3051      Y:000088 Y:000088                   DC      VIDEO+I_DELAY+%0000111
+3052      Y:000089 Y:000089                   DC      VIDEO+$000000+%0011011
+3053      Y:00008A Y:00008A                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
+3054      Y:00008B Y:00008B                   DC      CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+3055      Y:00008C Y:00008C                   DC      VIDEO+I_DELAY+%0001011
+3056      Y:00008D Y:00008D                   DC      VIDEO+$000000+%0011011
+3057      Y:00008E Y:00008E                   DC      VIDEO+DCRST_DELAY+%1110111
+3058                                END_SERIAL_READ_RIGHT
+3059   
+3060                                SERIAL_READ_SPLIT
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 45
 
 
 
-3061      Y:000091 Y:000091                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
-3062      Y:000092 Y:000092                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1H+HL2L+HL3L+WL ;h2->hi
-3063      Y:000093 Y:000093                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1H+HL2H+HL3L+WL ;h1->lo
-3064      Y:000094 Y:000094                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
-3065      Y:000095 Y:000095                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1L+HL2H+HL3H+WL ;h2->lo
-3066      Y:000096 Y:000096                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1L+HL2L+HL3H+WL ;h1->hi
-3067      Y:000097 Y:000097                   DC      CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
-3068      Y:000098 Y:000098         SXRL      DC      $00F0C0
-3069      Y:000099 Y:000099                   DC      VIDEO+$000000+%1110111
-3070      Y:00009A Y:00009A                   DC      VIDEO+I_DELAY+%0000111
-3071      Y:00009B Y:00009B                   DC      VIDEO+$000000+%0011011
-3072      Y:00009C Y:00009C                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
-3073      Y:00009D Y:00009D                   DC      CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
-3074      Y:00009E Y:00009E                   DC      VIDEO+I_DELAY+%0001011
-3075      Y:00009F Y:00009F                   DC      VIDEO+$000000+%0011011
-3076      Y:0000A0 Y:0000A0                   DC      VIDEO+DCRST_DELAY+%1110111
-3077                                END_SERIAL_READ_SPLIT
-3078   
-3079                                VSUBN
-3080                                          VOLTS   VSUB,130                          ; Vsub  0.0 140 V, pin #
-**** 3085 [LBNL_3.5k.waveforms 391]: Setting voltage VSUB 130V 2651
-3086      Y:0000A2 Y:0000A2         ERHI      DC      EREND-ERHI-1
-3087                                          VOLTS   VSUB,130                          ; Vsub  0.0 140 V, pin #
-**** 3092 [LBNL_3.5k.waveforms 393]: Setting voltage VSUB 130V 2651
-3093                                          VOLTS   V1_HI,9                           ; Vertical High
-**** 3098 [LBNL_3.5k.waveforms 394]: Setting voltage V1_HI 9V 3465
-3099                                          VOLTS   V1_LO,9                           ; Vertical Low
-**** 3104 [LBNL_3.5k.waveforms 395]: Setting voltage V1_LO 9V 3465
-3105                                          VOLTS   V2_HI,9                           ; Vertical High
-**** 3110 [LBNL_3.5k.waveforms 396]: Setting voltage V2_HI 9V 3465
-3111                                          VOLTS   V2_LO,9                           ; Vertical Low
-**** 3116 [LBNL_3.5k.waveforms 397]: Setting voltage V2_LO 9V 3465
-3117                                          VOLTS   V3_HI,9                           ; Vertical High
-**** 3122 [LBNL_3.5k.waveforms 398]: Setting voltage V3_HI 9V 3465
-3123                                          VOLTS   V3_LO,9                           ; Vertical Low
-**** 3128 [LBNL_3.5k.waveforms 399]: Setting voltage V3_LO 9V 3465
-3129                                          VOLTS   FS1_HI,9                          ; Vertical High
-**** 3134 [LBNL_3.5k.waveforms 400]: Setting voltage FS1_HI 9V 3465
-3135                                          VOLTS   FS1_LO,9                          ; Vertical Low
-**** 3140 [LBNL_3.5k.waveforms 401]: Setting voltage FS1_LO 9V 3465
-3141                                          VOLTS   FS2_HI,9                          ; Vertical High
-**** 3146 [LBNL_3.5k.waveforms 402]: Setting voltage FS2_HI 9V 3465
-3147                                          VOLTS   FS2_LO,9                          ; Vertical Low
-**** 3152 [LBNL_3.5k.waveforms 403]: Setting voltage FS2_LO 9V 3465
-3153                                          VOLTS   FS3_HI,9                          ; Vertical High
-**** 3158 [LBNL_3.5k.waveforms 404]: Setting voltage FS3_HI 9V 3465
-3159                                          VOLTS   FS3_LO,9                          ; Vertical Low
-**** 3164 [LBNL_3.5k.waveforms 405]: Setting voltage FS3_LO 9V 3465
-3165      Y:0000B0 Y:0000B0         EREND     DC      EREND2-EREND-1
-3166                                          VOLTS   V1_HI,5.0                         ; Vertical High
-**** 3171 [LBNL_3.5k.waveforms 407]: Setting voltage V1_HI 5.0V 2835
-3172                                          VOLTS   V1_LO,-3.0                        ; Vertical Low
-**** 3177 [LBNL_3.5k.waveforms 408]: Setting voltage V1_LO -3.0V 1575
-3178                                          VOLTS   V2_HI,5.0                         ; Vertical High
-**** 3183 [LBNL_3.5k.waveforms 409]: Setting voltage V2_HI 5.0V 2835
-3184                                          VOLTS   V2_LO,-3.0                        ; Vertical Low
-**** 3189 [LBNL_3.5k.waveforms 410]: Setting voltage V2_LO -3.0V 1575
-3190                                          VOLTS   V3_HI,5.0                         ; Vertical High
-**** 3195 [LBNL_3.5k.waveforms 411]: Setting voltage V3_HI 5.0V 2835
-3196                                          VOLTS   V3_LO,-3.0                        ; Vertical Low
-**** 3201 [LBNL_3.5k.waveforms 412]: Setting voltage V3_LO -3.0V 1575
-3202                                          VOLTS   FS1_HI,5.0                        ; Vertical High
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 46
+3061      Y:00008F Y:00008F                   DC      END_SERIAL_READ_SPLIT-SERIAL_READ_SPLIT-1
+3062      Y:000090 Y:000090                   DC      VIDEO+$000000+%1110100
+3063      Y:000091 Y:000091                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;h3->lo,SW->lo,Reset_On
+3064      Y:000092 Y:000092                   DC      CLK3+S_DELAY+RH+HU1L+HU2L+HU3H+HL1H+HL2L+HL3L+WL ;h2->hi
+3065      Y:000093 Y:000093                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3H+HL1H+HL2H+HL3L+WL ;h1->lo
+3066      Y:000094 Y:000094                   DC      CLK3+S_DELAY+RH+HU1L+HU2H+HU3L+HL1L+HL2H+HL3L+WL ;h3->hi
+3067      Y:000095 Y:000095                   DC      CLK3+S_DELAY+RH+HU1H+HU2H+HU3L+HL1L+HL2H+HL3H+WL ;h2->lo
+3068      Y:000096 Y:000096                   DC      CLK3+S_DELAY+RH+HU1H+HU2L+HU3L+HL1L+HL2L+HL3H+WL ;h1->hi
+3069      Y:000097 Y:000097                   DC      CLK3+PRE_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;Reset_Off+Delay
+3070      Y:000098 Y:000098         SXRL      DC      $00F0C0
+3071      Y:000099 Y:000099                   DC      VIDEO+$000000+%1110111
+3072      Y:00009A Y:00009A                   DC      VIDEO+I_DELAY+%0000111
+3073      Y:00009B Y:00009B                   DC      VIDEO+$000000+%0011011
+3074      Y:00009C Y:00009C                   DC      CLK3+SW_DELAY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WH ;SW->hi
+3075      Y:00009D Y:00009D                   DC      CLK3+POST_SET_DLY+RL+HU1H+HU2L+HU3H+HL1H+HL2L+HL3H+WL ;SW->lo
+3076      Y:00009E Y:00009E                   DC      VIDEO+I_DELAY+%0001011
+3077      Y:00009F Y:00009F                   DC      VIDEO+$000000+%0011011
+3078      Y:0000A0 Y:0000A0                   DC      VIDEO+DCRST_DELAY+%1110111
+3079                                END_SERIAL_READ_SPLIT
+3080   
+3081                                VSUBN
+3082                                          VOLTS   VSUB,130                          ; Vsub  0.0 140 V, pin #
+**** 3087 [LBNL_3.5k.waveforms 392]: Setting voltage VSUB 130V 2651
+3088      Y:0000A2 Y:0000A2         ERHI      DC      EREND-ERHI-1
+3089                                          VOLTS   VSUB,130                          ; Vsub  0.0 140 V, pin #
+**** 3094 [LBNL_3.5k.waveforms 394]: Setting voltage VSUB 130V 2651
+3095                                          VOLTS   V1_HI,9                           ; Vertical High
+**** 3100 [LBNL_3.5k.waveforms 395]: Setting voltage V1_HI 9V 3465
+3101                                          VOLTS   V1_LO,9                           ; Vertical Low
+**** 3106 [LBNL_3.5k.waveforms 396]: Setting voltage V1_LO 9V 3465
+3107                                          VOLTS   V2_HI,9                           ; Vertical High
+**** 3112 [LBNL_3.5k.waveforms 397]: Setting voltage V2_HI 9V 3465
+3113                                          VOLTS   V2_LO,9                           ; Vertical Low
+**** 3118 [LBNL_3.5k.waveforms 398]: Setting voltage V2_LO 9V 3465
+3119                                          VOLTS   V3_HI,9                           ; Vertical High
+**** 3124 [LBNL_3.5k.waveforms 399]: Setting voltage V3_HI 9V 3465
+3125                                          VOLTS   V3_LO,9                           ; Vertical Low
+**** 3130 [LBNL_3.5k.waveforms 400]: Setting voltage V3_LO 9V 3465
+3131                                          VOLTS   FS1_HI,9                          ; Vertical High
+**** 3136 [LBNL_3.5k.waveforms 401]: Setting voltage FS1_HI 9V 3465
+3137                                          VOLTS   FS1_LO,9                          ; Vertical Low
+**** 3142 [LBNL_3.5k.waveforms 402]: Setting voltage FS1_LO 9V 3465
+3143                                          VOLTS   FS2_HI,9                          ; Vertical High
+**** 3148 [LBNL_3.5k.waveforms 403]: Setting voltage FS2_HI 9V 3465
+3149                                          VOLTS   FS2_LO,9                          ; Vertical Low
+**** 3154 [LBNL_3.5k.waveforms 404]: Setting voltage FS2_LO 9V 3465
+3155                                          VOLTS   FS3_HI,9                          ; Vertical High
+**** 3160 [LBNL_3.5k.waveforms 405]: Setting voltage FS3_HI 9V 3465
+3161                                          VOLTS   FS3_LO,9                          ; Vertical Low
+**** 3166 [LBNL_3.5k.waveforms 406]: Setting voltage FS3_LO 9V 3465
+3167      Y:0000B0 Y:0000B0         EREND     DC      EREND2-EREND-1
+3168                                          VOLTS   V1_HI,5.0                         ; Vertical High
+**** 3173 [LBNL_3.5k.waveforms 408]: Setting voltage V1_HI 5.0V 2835
+3174                                          VOLTS   V1_LO,-3.0                        ; Vertical Low
+**** 3179 [LBNL_3.5k.waveforms 409]: Setting voltage V1_LO -3.0V 1575
+3180                                          VOLTS   V2_HI,5.0                         ; Vertical High
+**** 3185 [LBNL_3.5k.waveforms 410]: Setting voltage V2_HI 5.0V 2835
+3186                                          VOLTS   V2_LO,-3.0                        ; Vertical Low
+**** 3191 [LBNL_3.5k.waveforms 411]: Setting voltage V2_LO -3.0V 1575
+3192                                          VOLTS   V3_HI,5.0                         ; Vertical High
+**** 3197 [LBNL_3.5k.waveforms 412]: Setting voltage V3_HI 5.0V 2835
+3198                                          VOLTS   V3_LO,-3.0                        ; Vertical Low
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 46
 
 
 
-**** 3207 [LBNL_3.5k.waveforms 413]: Setting voltage FS1_HI 5.0V 2835
-3208                                          VOLTS   FS1_LO,-3.0                       ; Vertical Low
-**** 3213 [LBNL_3.5k.waveforms 414]: Setting voltage FS1_LO -3.0V 1575
-3214                                          VOLTS   FS2_HI,5.0                        ; Vertical High
-**** 3219 [LBNL_3.5k.waveforms 415]: Setting voltage FS2_HI 5.0V 2835
-3220                                          VOLTS   FS2_LO,-3.0                       ; Vertical Low
-**** 3225 [LBNL_3.5k.waveforms 416]: Setting voltage FS2_LO -3.0V 1575
-3226                                          VOLTS   FS3_HI,5.0                        ; Vertical High
-**** 3231 [LBNL_3.5k.waveforms 417]: Setting voltage FS3_HI 5.0V 2835
-3232                                          VOLTS   FS3_LO,-3.0                       ; Vertical Low
-**** 3237 [LBNL_3.5k.waveforms 418]: Setting voltage FS3_LO -3.0V 1575
-3238                                EREND2
-3239   
-3240                                ; Initialization of clock driver and video processor DACs and switches
-3241      Y:0000BD Y:0000BD         DACS      DC      END_DACS-DACS-1
-3242                                          VOLTS   V1_HI,5.0                         ; Vertical High
-**** 3247 [LBNL_3.5k.waveforms 423]: Setting voltage V1_HI 5.0V 2835
-3248                                          VOLTS   V1_LO,-3.0                        ; Vertical Low
-**** 3253 [LBNL_3.5k.waveforms 424]: Setting voltage V1_LO -3.0V 1575
-3254                                          VOLTS   V2_HI,5.0                         ; Vertical High
-**** 3259 [LBNL_3.5k.waveforms 425]: Setting voltage V2_HI 5.0V 2835
-3260                                          VOLTS   V2_LO,-3.0                        ; Vertical Low
-**** 3265 [LBNL_3.5k.waveforms 426]: Setting voltage V2_LO -3.0V 1575
-3266                                          VOLTS   V3_HI,5.0                         ; Vertical High
-**** 3271 [LBNL_3.5k.waveforms 427]: Setting voltage V3_HI 5.0V 2835
-3272                                          VOLTS   V3_LO,-3.0                        ; Vertical Low
-**** 3277 [LBNL_3.5k.waveforms 428]: Setting voltage V3_LO -3.0V 1575
-3278                                          VOLTS   FS1_HI,5.0                        ; frame store High
-**** 3283 [LBNL_3.5k.waveforms 429]: Setting voltage FS1_HI 5.0V 2835
-3284                                          VOLTS   FS1_LO,-3.0                       ; frame store Low
-**** 3289 [LBNL_3.5k.waveforms 430]: Setting voltage FS1_LO -3.0V 1575
-3290                                          VOLTS   FS2_HI,5.0                        ; frame store High
-**** 3295 [LBNL_3.5k.waveforms 431]: Setting voltage FS2_HI 5.0V 2835
-3296                                          VOLTS   FS2_LO,-3.0                       ; frame store Low
-**** 3301 [LBNL_3.5k.waveforms 432]: Setting voltage FS2_LO -3.0V 1575
-3302                                          VOLTS   FS3_HI,5.0                        ; frame store High
-**** 3307 [LBNL_3.5k.waveforms 433]: Setting voltage FS3_HI 5.0V 2835
-3308                                          VOLTS   FS3_LO,-3.0                       ; frame store Low
-**** 3313 [LBNL_3.5k.waveforms 434]: Setting voltage FS3_LO -3.0V 1575
-3314                                          VOLTS   T1_HI,5.0                         ; Transfer gate High
-**** 3319 [LBNL_3.5k.waveforms 435]: Setting voltage T1_HI 5.0V 2835
-3320                                          VOLTS   T1_LO,-3.0                        ; Transfer gate Low
-**** 3325 [LBNL_3.5k.waveforms 436]: Setting voltage T1_LO -3.0V 1575
-3326                                          VOLTS   T2_HI,5.0                         ; Transfer gate High
-**** 3331 [LBNL_3.5k.waveforms 437]: Setting voltage T2_HI 5.0V 2835
-3332                                          VOLTS   T2_LO,-3.0                        ; Transfer gate Low
-**** 3337 [LBNL_3.5k.waveforms 438]: Setting voltage T2_LO -3.0V 1575
-3338   
-3339                                          VOLTS   H1U_HI,+6.0                       ; Horizontal High
-**** 3344 [LBNL_3.5k.waveforms 440]: Setting voltage H1U_HI +6.0V 2993
-3345                                          VOLTS   H1U_LO,-4.0                       ; Horizontal Low
-**** 3350 [LBNL_3.5k.waveforms 441]: Setting voltage H1U_LO -4.0V 1417
-3351                                          VOLTS   H2U_HI,+6.0                       ; HoVR2rizontal High
-**** 3356 [LBNL_3.5k.waveforms 442]: Setting voltage H2U_HI +6.0V 2993
-3357                                          VOLTS   H2U_LO,-4.0                       ; Horizontal Low
-**** 3362 [LBNL_3.5k.waveforms 443]: Setting voltage H2U_LO -4.0V 1417
-3363                                          VOLTS   H3U_HI,+6.0                       ; Horizontal High
-**** 3368 [LBNL_3.5k.waveforms 444]: Setting voltage H3U_HI +6.0V 2993
-3369                                          VOLTS   H3U_LO,-4.0                       ; Horizontal Low
-**** 3374 [LBNL_3.5k.waveforms 445]: Setting voltage H3U_LO -4.0V 1417
-3375                                          VOLTS   H1L_HI,+6.0                       ; Horizontal High
-**** 3380 [LBNL_3.5k.waveforms 446]: Setting voltage H1L_HI +6.0V 2993
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 47
+**** 3203 [LBNL_3.5k.waveforms 413]: Setting voltage V3_LO -3.0V 1575
+3204                                          VOLTS   FS1_HI,5.0                        ; Vertical High
+**** 3209 [LBNL_3.5k.waveforms 414]: Setting voltage FS1_HI 5.0V 2835
+3210                                          VOLTS   FS1_LO,-3.0                       ; Vertical Low
+**** 3215 [LBNL_3.5k.waveforms 415]: Setting voltage FS1_LO -3.0V 1575
+3216                                          VOLTS   FS2_HI,5.0                        ; Vertical High
+**** 3221 [LBNL_3.5k.waveforms 416]: Setting voltage FS2_HI 5.0V 2835
+3222                                          VOLTS   FS2_LO,-3.0                       ; Vertical Low
+**** 3227 [LBNL_3.5k.waveforms 417]: Setting voltage FS2_LO -3.0V 1575
+3228                                          VOLTS   FS3_HI,5.0                        ; Vertical High
+**** 3233 [LBNL_3.5k.waveforms 418]: Setting voltage FS3_HI 5.0V 2835
+3234                                          VOLTS   FS3_LO,-3.0                       ; Vertical Low
+**** 3239 [LBNL_3.5k.waveforms 419]: Setting voltage FS3_LO -3.0V 1575
+3240                                EREND2
+3241   
+3242                                ; Initialization of clock driver and video processor DACs and switches
+3243      Y:0000BD Y:0000BD         DACS      DC      END_DACS-DACS-1
+3244                                          VOLTS   V1_HI,5.0                         ; Vertical High
+**** 3249 [LBNL_3.5k.waveforms 424]: Setting voltage V1_HI 5.0V 2835
+3250                                          VOLTS   V1_LO,-3.0                        ; Vertical Low
+**** 3255 [LBNL_3.5k.waveforms 425]: Setting voltage V1_LO -3.0V 1575
+3256                                          VOLTS   V2_HI,5.0                         ; Vertical High
+**** 3261 [LBNL_3.5k.waveforms 426]: Setting voltage V2_HI 5.0V 2835
+3262                                          VOLTS   V2_LO,-3.0                        ; Vertical Low
+**** 3267 [LBNL_3.5k.waveforms 427]: Setting voltage V2_LO -3.0V 1575
+3268                                          VOLTS   V3_HI,5.0                         ; Vertical High
+**** 3273 [LBNL_3.5k.waveforms 428]: Setting voltage V3_HI 5.0V 2835
+3274                                          VOLTS   V3_LO,-3.0                        ; Vertical Low
+**** 3279 [LBNL_3.5k.waveforms 429]: Setting voltage V3_LO -3.0V 1575
+3280                                          VOLTS   FS1_HI,5.0                        ; frame store High
+**** 3285 [LBNL_3.5k.waveforms 430]: Setting voltage FS1_HI 5.0V 2835
+3286                                          VOLTS   FS1_LO,-3.0                       ; frame store Low
+**** 3291 [LBNL_3.5k.waveforms 431]: Setting voltage FS1_LO -3.0V 1575
+3292                                          VOLTS   FS2_HI,5.0                        ; frame store High
+**** 3297 [LBNL_3.5k.waveforms 432]: Setting voltage FS2_HI 5.0V 2835
+3298                                          VOLTS   FS2_LO,-3.0                       ; frame store Low
+**** 3303 [LBNL_3.5k.waveforms 433]: Setting voltage FS2_LO -3.0V 1575
+3304                                          VOLTS   FS3_HI,5.0                        ; frame store High
+**** 3309 [LBNL_3.5k.waveforms 434]: Setting voltage FS3_HI 5.0V 2835
+3310                                          VOLTS   FS3_LO,-3.0                       ; frame store Low
+**** 3315 [LBNL_3.5k.waveforms 435]: Setting voltage FS3_LO -3.0V 1575
+3316                                          VOLTS   T1_HI,5.0                         ; Transfer gate High
+**** 3321 [LBNL_3.5k.waveforms 436]: Setting voltage T1_HI 5.0V 2835
+3322                                          VOLTS   T1_LO,-3.0                        ; Transfer gate Low
+**** 3327 [LBNL_3.5k.waveforms 437]: Setting voltage T1_LO -3.0V 1575
+3328                                          VOLTS   T2_HI,5.0                         ; Transfer gate High
+**** 3333 [LBNL_3.5k.waveforms 438]: Setting voltage T2_HI 5.0V 2835
+3334                                          VOLTS   T2_LO,-3.0                        ; Transfer gate Low
+**** 3339 [LBNL_3.5k.waveforms 439]: Setting voltage T2_LO -3.0V 1575
+3340   
+3341                                          VOLTS   H1U_HI,+6.0                       ; Horizontal High
+**** 3346 [LBNL_3.5k.waveforms 441]: Setting voltage H1U_HI +6.0V 2993
+3347                                          VOLTS   H1U_LO,-4.0                       ; Horizontal Low
+**** 3352 [LBNL_3.5k.waveforms 442]: Setting voltage H1U_LO -4.0V 1417
+3353                                          VOLTS   H2U_HI,+6.0                       ; HoVR2rizontal High
+**** 3358 [LBNL_3.5k.waveforms 443]: Setting voltage H2U_HI +6.0V 2993
+3359                                          VOLTS   H2U_LO,-4.0                       ; Horizontal Low
+**** 3364 [LBNL_3.5k.waveforms 444]: Setting voltage H2U_LO -4.0V 1417
+3365                                          VOLTS   H3U_HI,+6.0                       ; Horizontal High
+**** 3370 [LBNL_3.5k.waveforms 445]: Setting voltage H3U_HI +6.0V 2993
+3371                                          VOLTS   H3U_LO,-4.0                       ; Horizontal Low
+**** 3376 [LBNL_3.5k.waveforms 446]: Setting voltage H3U_LO -4.0V 1417
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 47
 
 
 
-3381                                          VOLTS   H1L_LO,-4.0                       ; Horizontal Low
-**** 3386 [LBNL_3.5k.waveforms 447]: Setting voltage H1L_LO -4.0V 1417
-3387                                          VOLTS   H2L_HI,+6.0                       ; Horizontal High
-**** 3392 [LBNL_3.5k.waveforms 448]: Setting voltage H2L_HI +6.0V 2993
-3393                                          VOLTS   H2L_LO,-4.0                       ; Horizontal Low
-**** 3398 [LBNL_3.5k.waveforms 449]: Setting voltage H2L_LO -4.0V 1417
-3399                                          VOLTS   H3L_HI,+6.0                       ; Horizontal High
-**** 3404 [LBNL_3.5k.waveforms 450]: Setting voltage H3L_HI +6.0V 2993
-3405                                          VOLTS   H3L_LO,-4.0                       ; Horizontal Low
-**** 3410 [LBNL_3.5k.waveforms 451]: Setting voltage H3L_LO -4.0V 1417
-3411                                          VOLTS   SWU_HI,5.0                        ; Output transfer gate High
-**** 3416 [LBNL_3.5k.waveforms 452]: Setting voltage SWU_HI 5.0V 2835
-3417                                          VOLTS   SWU_LO,-5.0                       ; Output transfer gate Low
-**** 3422 [LBNL_3.5k.waveforms 453]: Setting voltage SWU_LO -5.0V 1260
-3423                                          VOLTS   SWL_HI,5.0
-**** 3428 [LBNL_3.5k.waveforms 454]: Setting voltage SWL_HI 5.0V 2835
-3429                                          VOLTS   SWL_LO,-5.0
-**** 3434 [LBNL_3.5k.waveforms 455]: Setting voltage SWL_LO -5.0V 1260
-3435                                          VOLTS   RU_HI,-6.0                        ; Reset ACTIVE wrong polarity....
-**** 3440 [LBNL_3.5k.waveforms 456]: Setting voltage RU_HI -6.0V 1102
-3441                                          VOLTS   RU_LO,0.0                         ; Reset INACTIVE
-**** 3446 [LBNL_3.5k.waveforms 457]: Setting voltage RU_LO 0.0V 2048
-3447                                          VOLTS   RL_HI,-6.0
-**** 3452 [LBNL_3.5k.waveforms 458]: Setting voltage RL_HI -6.0V 1102
-3453                                          VOLTS   RL_LO,0.0
-**** 3458 [LBNL_3.5k.waveforms 459]: Setting voltage RL_LO 0.0V 2048
-3459   
-3460                                ; Set the ARC-48 video gain, one of 16 possible values
-3461      Y:0000E2 Y:0000E2                   DC      VID0+$0C0140                      ; integrator time constant: $0C01t0, t is th
+3377                                          VOLTS   H1L_HI,+6.0                       ; Horizontal High
+**** 3382 [LBNL_3.5k.waveforms 447]: Setting voltage H1L_HI +6.0V 2993
+3383                                          VOLTS   H1L_LO,-4.0                       ; Horizontal Low
+**** 3388 [LBNL_3.5k.waveforms 448]: Setting voltage H1L_LO -4.0V 1417
+3389                                          VOLTS   H2L_HI,+6.0                       ; Horizontal High
+**** 3394 [LBNL_3.5k.waveforms 449]: Setting voltage H2L_HI +6.0V 2993
+3395                                          VOLTS   H2L_LO,-4.0                       ; Horizontal Low
+**** 3400 [LBNL_3.5k.waveforms 450]: Setting voltage H2L_LO -4.0V 1417
+3401                                          VOLTS   H3L_HI,+6.0                       ; Horizontal High
+**** 3406 [LBNL_3.5k.waveforms 451]: Setting voltage H3L_HI +6.0V 2993
+3407                                          VOLTS   H3L_LO,-4.0                       ; Horizontal Low
+**** 3412 [LBNL_3.5k.waveforms 452]: Setting voltage H3L_LO -4.0V 1417
+3413                                          VOLTS   SWU_HI,5.0                        ; Output transfer gate High
+**** 3418 [LBNL_3.5k.waveforms 453]: Setting voltage SWU_HI 5.0V 2835
+3419                                          VOLTS   SWU_LO,-5.0                       ; Output transfer gate Low
+**** 3424 [LBNL_3.5k.waveforms 454]: Setting voltage SWU_LO -5.0V 1260
+3425                                          VOLTS   SWL_HI,5.0
+**** 3430 [LBNL_3.5k.waveforms 455]: Setting voltage SWL_HI 5.0V 2835
+3431                                          VOLTS   SWL_LO,-5.0
+**** 3436 [LBNL_3.5k.waveforms 456]: Setting voltage SWL_LO -5.0V 1260
+3437                                          VOLTS   RU_HI,-6.0                        ; Reset ACTIVE wrong polarity....
+**** 3442 [LBNL_3.5k.waveforms 457]: Setting voltage RU_HI -6.0V 1102
+3443                                          VOLTS   RU_LO,0.0                         ; Reset INACTIVE
+**** 3448 [LBNL_3.5k.waveforms 458]: Setting voltage RU_LO 0.0V 2048
+3449                                          VOLTS   RL_HI,-6.0
+**** 3454 [LBNL_3.5k.waveforms 459]: Setting voltage RL_HI -6.0V 1102
+3455                                          VOLTS   RL_LO,0.0
+**** 3460 [LBNL_3.5k.waveforms 460]: Setting voltage RL_LO 0.0V 2048
+3461   
+3462                                ; Set the ARC-48 video gain, one of 16 possible values
+3463      Y:0000E2 Y:0000E2                   DC      VID0+$0C0140                      ; integrator time constant: $0C01t0, t is th
 e time constant from 0 to F; larger values -> more gain
-3462      Y:0000E3 Y:0000E3                   DC      VID0+$0D000C                      ; Gain from 0 to $F
-3463   
-3464                                ; Initialize the DAC gain and offset registers for the ARC-48 video board
-3465      Y:0000E4 Y:0000E4                   DC      VID0+DAC_ADDR+$0000F8             ; Select all #8 channels of the DAC.
-3466      Y:0000E5 Y:0000E5                   DC      VID0+DAC_RegC+$003FFF             ; Set c(Offset register)=0x3FFF (at max)
-3467      Y:0000E6 Y:0000E6                   DC      VID0+DAC_ADDR+$0000F9             ; Select all #9 channels of the DAC.
-3468      Y:0000E7 Y:0000E7                   DC      VID0+DAC_RegC+$003FFF             ; Set c=0x3FFF
-3469   
-3470      Y:0000E8 Y:0000E8                   DC      VID0+DAC_ADDR+$0000F8             ; Select all channels #8 of the DAC.
-3471      Y:0000E9 Y:0000E9                   DC      VID0+DAC_RegM+$000FFF             ; Set m(Gain register)=0x0FFF,Rang=0--4.3V
-3472      Y:0000EA Y:0000EA                   DC      VID0+DAC_ADDR+$0000F9             ; Select all channels #9 of the DAC.
-3473      Y:0000EB Y:0000EB                   DC      VID0+DAC_RegM+$000FFF             ; Set m=0x0FFF,Rang=0--4.3V
-3474   
-3475      Y:0000EC Y:0000EC                   DC      VID0+DAC_ADDR+$0000F8             ; Output register of 9th, 10th channels so o
+3464      Y:0000E3 Y:0000E3                   DC      VID0+$0D000C                      ; Gain from 0 to $F
+3465   
+3466                                ; Initialize the DAC gain and offset registers for the ARC-48 video board
+3467      Y:0000E4 Y:0000E4                   DC      VID0+DAC_ADDR+$0000F8             ; Select all #8 channels of the DAC.
+3468      Y:0000E5 Y:0000E5                   DC      VID0+DAC_RegC+$003FFF             ; Set c(Offset register)=0x3FFF (at max)
+3469      Y:0000E6 Y:0000E6                   DC      VID0+DAC_ADDR+$0000F9             ; Select all #9 channels of the DAC.
+3470      Y:0000E7 Y:0000E7                   DC      VID0+DAC_RegC+$003FFF             ; Set c=0x3FFF
+3471   
+3472      Y:0000E8 Y:0000E8                   DC      VID0+DAC_ADDR+$0000F8             ; Select all channels #8 of the DAC.
+3473      Y:0000E9 Y:0000E9                   DC      VID0+DAC_RegM+$000FFF             ; Set m(Gain register)=0x0FFF,Rang=0--4.3V
+3474      Y:0000EA Y:0000EA                   DC      VID0+DAC_ADDR+$0000F9             ; Select all channels #9 of the DAC.
+3475      Y:0000EB Y:0000EB                   DC      VID0+DAC_RegM+$000FFF             ; Set m=0x0FFF,Rang=0--4.3V
+3476   
+3477      Y:0000EC Y:0000EC                   DC      VID0+DAC_ADDR+$0000F8             ; Output register of 9th, 10th channels so o
 utput
-3476      Y:0000ED Y:0000ED                   DC      VID0+DAC_RegD+$002500             ;  is 2.5 volts
-3477      Y:0000EE Y:0000EE                   DC      VID0+DAC_ADDR+$0000F9
-3478      Y:0000EF Y:0000EF                   DC      VID0+DAC_RegD+$002500
-3479   
-3480      Y:0000F0 Y:0000F0                   DC      VID0+DAC_ADDR+$000030             ; Gain register of channels #0 to 7 at max.
-3481      Y:0000F1 Y:0000F1                   DC      VID0+DAC_RegM+$001FFF             ;  This is for the groups A&B
-3482      Y:0000F2 Y:0000F2                   DC      VID0+DAC_ADDR+$000031
-3483      Y:0000F3 Y:0000F3                   DC      VID0+DAC_RegM+$001FFF
-3484      Y:0000F4 Y:0000F4                   DC      VID0+DAC_ADDR+$000032
-3485      Y:0000F5 Y:0000F5                   DC      VID0+DAC_RegM+$001FFF
-3486      Y:0000F6 Y:0000F6                   DC      VID0+DAC_ADDR+$000033
-3487      Y:0000F7 Y:0000F7                   DC      VID0+DAC_RegM+$001FFF
-3488      Y:0000F8 Y:0000F8                   DC      VID0+DAC_ADDR+$000034
-3489      Y:0000F9 Y:0000F9                   DC      VID0+DAC_RegM+$001FFF
-3490      Y:0000FA Y:0000FA                   DC      VID0+DAC_ADDR+$000035
-3491      Y:0000FB Y:0000FB                   DC      VID0+DAC_RegM+$001FFF
-3492      Y:0000FC Y:0000FC                   DC      VID0+DAC_ADDR+$000036
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 48
+3478      Y:0000ED Y:0000ED                   DC      VID0+DAC_RegD+$002500             ;  is 2.5 volts
+3479      Y:0000EE Y:0000EE                   DC      VID0+DAC_ADDR+$0000F9
+3480      Y:0000EF Y:0000EF                   DC      VID0+DAC_RegD+$002500
+3481   
+3482      Y:0000F0 Y:0000F0                   DC      VID0+DAC_ADDR+$000030             ; Gain register of channels #0 to 7 at max.
+3483      Y:0000F1 Y:0000F1                   DC      VID0+DAC_RegM+$001FFF             ;  This is for the groups A&B
+3484      Y:0000F2 Y:0000F2                   DC      VID0+DAC_ADDR+$000031
+3485      Y:0000F3 Y:0000F3                   DC      VID0+DAC_RegM+$001FFF
+3486      Y:0000F4 Y:0000F4                   DC      VID0+DAC_ADDR+$000032
+3487      Y:0000F5 Y:0000F5                   DC      VID0+DAC_RegM+$001FFF
+3488      Y:0000F6 Y:0000F6                   DC      VID0+DAC_ADDR+$000033
+3489      Y:0000F7 Y:0000F7                   DC      VID0+DAC_RegM+$001FFF
+3490      Y:0000F8 Y:0000F8                   DC      VID0+DAC_ADDR+$000034
+3491      Y:0000F9 Y:0000F9                   DC      VID0+DAC_RegM+$001FFF
+3492      Y:0000FA Y:0000FA                   DC      VID0+DAC_ADDR+$000035
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 48
 
 
 
-3493      Y:0000FD Y:0000FD                   DC      VID0+DAC_RegM+$001FFF
-3494      Y:0000FE Y:0000FE                   DC      VID0+DAC_ADDR+$000037
-3495      Y:0000FF Y:0000FF                   DC      VID0+DAC_RegM+$001FFF
-3496   
-3497      Y:000100 Y:000100                   DC      VID0+DAC_ADDR+$000030             ; Offset register of channels #0 to 7 at max
+3493      Y:0000FB Y:0000FB                   DC      VID0+DAC_RegM+$001FFF
+3494      Y:0000FC Y:0000FC                   DC      VID0+DAC_ADDR+$000036
+3495      Y:0000FD Y:0000FD                   DC      VID0+DAC_RegM+$001FFF
+3496      Y:0000FE Y:0000FE                   DC      VID0+DAC_ADDR+$000037
+3497      Y:0000FF Y:0000FF                   DC      VID0+DAC_RegM+$001FFF
+3498   
+3499      Y:000100 Y:000100                   DC      VID0+DAC_ADDR+$000030             ; Offset register of channels #0 to 7 at max
 .
-3498      Y:000101 Y:000101                   DC      VID0+DAC_RegC+$003FFF             ;  This is for the groups A&B
-3499      Y:000102 Y:000102                   DC      VID0+DAC_ADDR+$000031
-3500      Y:000103 Y:000103                   DC      VID0+DAC_RegC+$003FFF
-3501      Y:000104 Y:000104                   DC      VID0+DAC_ADDR+$000032
-3502      Y:000105 Y:000105                   DC      VID0+DAC_RegC+$003FFF
-3503      Y:000106 Y:000106                   DC      VID0+DAC_ADDR+$000033
-3504      Y:000107 Y:000107                   DC      VID0+DAC_RegC+$003FFF
-3505      Y:000108 Y:000108                   DC      VID0+DAC_ADDR+$000034
-3506      Y:000109 Y:000109                   DC      VID0+DAC_RegC+$003FFF
-3507      Y:00010A Y:00010A                   DC      VID0+DAC_ADDR+$000035
-3508      Y:00010B Y:00010B                   DC      VID0+DAC_RegC+$003FFF
-3509      Y:00010C Y:00010C                   DC      VID0+DAC_ADDR+$000036
-3510      Y:00010D Y:00010D                   DC      VID0+DAC_RegC+$003FFF
-3511      Y:00010E Y:00010E                   DC      VID0+DAC_ADDR+$000037
-3512      Y:00010F Y:00010F                   DC      VID0+DAC_RegC+$003FFF
-3513   
-3514                                ; ARC-48 video Offsets
-3515      Y:000110 Y:000110                   DC      VID0+$0E0000+$000018
-3516      Y:000111 Y:000111                   DC      VID0+$0FC000+OFFSET0
-3517      Y:000112 Y:000112                   DC      VID0+$0E0000+$000019
-3518      Y:000113 Y:000113                   DC      VID0+$0FC000+OFFSET1
-3519      Y:000114 Y:000114                   DC      VID0+$0E0000+$000028
-3520      Y:000115 Y:000115                   DC      VID0+$0FC000+OFFSET2
-3521      Y:000116 Y:000116                   DC      VID0+$0E0000+$000029
-3522      Y:000117 Y:000117                   DC      VID0+$0FC000+OFFSET3
-3523      Y:000118 Y:000118                   DC      VID0+$0E0000+$000048
-3524      Y:000119 Y:000119                   DC      VID0+$0FC000+OFFSET4
-3525      Y:00011A Y:00011A                   DC      VID0+$0E0000+$000049
-3526      Y:00011B Y:00011B                   DC      VID0+$0FC000+OFFSET5
-3527      Y:00011C Y:00011C                   DC      VID0+$0E0000+$000088
-3528      Y:00011D Y:00011D                   DC      VID0+$0FC000+OFFSET6
-3529      Y:00011E Y:00011E                   DC      VID0+$0E0000+$000089
-3530      Y:00011F Y:00011F                   DC      VID0+$0FC000+OFFSET7
-3531   
-3532                                ; LBNL high voltage bias board
-3533                                          VOLTS   VSUB,130                          ; Vsub  0.0 140 V
-**** 3538 [LBNL_3.5k.waveforms 534]: Setting voltage VSUB 130V 2651
-3539                                          VOLTS   RAMP,5.0                          ; Vsub  AVG RAMP RATE
-**** 3544 [LBNL_3.5k.waveforms 535]: Setting voltage RAMP 5.0V 2048
-3545                                          VOLTS   VDD1,-22.0                        ; Vdd  -5.1 -25V
-**** 3550 [LBNL_3.5k.waveforms 536]: Setting voltage VDD1 -22.0V 3604
-3551                                          VOLTS   VDD2,-22.0                        ; Vdd  -5.1 -25V
-**** 3556 [LBNL_3.5k.waveforms 537]: Setting voltage VDD2 -22.0V 3604
-3557                                          VOLTS   VDD3,-22.0                        ; Vdd  -5.1 -25V
-**** 3562 [LBNL_3.5k.waveforms 538]: Setting voltage VDD3 -22.0V 3604
-3563                                          VOLTS   VDD4,-22.0                        ; Vdd  -5.1 -25V
-**** 3568 [LBNL_3.5k.waveforms 539]: Setting voltage VDD4 -22.0V 3604
-3569                                          VOLTS   VR1,-12.5                         ; Vr   -5.1 -25V
-**** 3574 [LBNL_3.5k.waveforms 540]: Setting voltage VR1 -12.5V 2048
-3575                                          VOLTS   VR2,-12.5                         ; Vr   -5.1 -25V
-**** 3580 [LBNL_3.5k.waveforms 541]: Setting voltage VR2 -12.5V 2048
-3581                                          VOLTS   VR3,-12.5                         ; Vr   -5.1 -25V
-**** 3586 [LBNL_3.5k.waveforms 542]: Setting voltage VR3 -12.5V 2048
-3587                                          VOLTS   VR4,-12.5                         ; Vr   -5.1 -25V
-**** 3592 [LBNL_3.5k.waveforms 543]: Setting voltage VR4 -12.5V 2048
-3593                                          VOLTS   VOG1,2.16                         ; Vopg  -10  10 V
-Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:32:20  LBNL_3.5k.waveforms  Page 49
+3500      Y:000101 Y:000101                   DC      VID0+DAC_RegC+$003FFF             ;  This is for the groups A&B
+3501      Y:000102 Y:000102                   DC      VID0+DAC_ADDR+$000031
+3502      Y:000103 Y:000103                   DC      VID0+DAC_RegC+$003FFF
+3503      Y:000104 Y:000104                   DC      VID0+DAC_ADDR+$000032
+3504      Y:000105 Y:000105                   DC      VID0+DAC_RegC+$003FFF
+3505      Y:000106 Y:000106                   DC      VID0+DAC_ADDR+$000033
+3506      Y:000107 Y:000107                   DC      VID0+DAC_RegC+$003FFF
+3507      Y:000108 Y:000108                   DC      VID0+DAC_ADDR+$000034
+3508      Y:000109 Y:000109                   DC      VID0+DAC_RegC+$003FFF
+3509      Y:00010A Y:00010A                   DC      VID0+DAC_ADDR+$000035
+3510      Y:00010B Y:00010B                   DC      VID0+DAC_RegC+$003FFF
+3511      Y:00010C Y:00010C                   DC      VID0+DAC_ADDR+$000036
+3512      Y:00010D Y:00010D                   DC      VID0+DAC_RegC+$003FFF
+3513      Y:00010E Y:00010E                   DC      VID0+DAC_ADDR+$000037
+3514      Y:00010F Y:00010F                   DC      VID0+DAC_RegC+$003FFF
+3515   
+3516                                ; ARC-48 video Offsets
+3517      Y:000110 Y:000110                   DC      VID0+$0E0000+$000018
+3518      Y:000111 Y:000111                   DC      VID0+$0FC000+OFFSET0
+3519      Y:000112 Y:000112                   DC      VID0+$0E0000+$000019
+3520      Y:000113 Y:000113                   DC      VID0+$0FC000+OFFSET1
+3521      Y:000114 Y:000114                   DC      VID0+$0E0000+$000028
+3522      Y:000115 Y:000115                   DC      VID0+$0FC000+OFFSET2
+3523      Y:000116 Y:000116                   DC      VID0+$0E0000+$000029
+3524      Y:000117 Y:000117                   DC      VID0+$0FC000+OFFSET3
+3525      Y:000118 Y:000118                   DC      VID0+$0E0000+$000048
+3526      Y:000119 Y:000119                   DC      VID0+$0FC000+OFFSET4
+3527      Y:00011A Y:00011A                   DC      VID0+$0E0000+$000049
+3528      Y:00011B Y:00011B                   DC      VID0+$0FC000+OFFSET5
+3529      Y:00011C Y:00011C                   DC      VID0+$0E0000+$000088
+3530      Y:00011D Y:00011D                   DC      VID0+$0FC000+OFFSET6
+3531      Y:00011E Y:00011E                   DC      VID0+$0E0000+$000089
+3532      Y:00011F Y:00011F                   DC      VID0+$0FC000+OFFSET7
+3533   
+3534                                ; LBNL high voltage bias board
+3535                                          VOLTS   VSUB,130                          ; Vsub  0.0 140 V
+**** 3540 [LBNL_3.5k.waveforms 535]: Setting voltage VSUB 130V 2651
+3541                                          VOLTS   RAMP,5.0                          ; Vsub  AVG RAMP RATE
+**** 3546 [LBNL_3.5k.waveforms 536]: Setting voltage RAMP 5.0V 2048
+3547                                          VOLTS   VDD1,-22.0                        ; Vdd  -5.1 -25V
+**** 3552 [LBNL_3.5k.waveforms 537]: Setting voltage VDD1 -22.0V 3604
+3553                                          VOLTS   VDD2,-22.0                        ; Vdd  -5.1 -25V
+**** 3558 [LBNL_3.5k.waveforms 538]: Setting voltage VDD2 -22.0V 3604
+3559                                          VOLTS   VDD3,-22.0                        ; Vdd  -5.1 -25V
+**** 3564 [LBNL_3.5k.waveforms 539]: Setting voltage VDD3 -22.0V 3604
+3565                                          VOLTS   VDD4,-22.0                        ; Vdd  -5.1 -25V
+**** 3570 [LBNL_3.5k.waveforms 540]: Setting voltage VDD4 -22.0V 3604
+3571                                          VOLTS   VR1,-12.5                         ; Vr   -5.1 -25V
+**** 3576 [LBNL_3.5k.waveforms 541]: Setting voltage VR1 -12.5V 2048
+3577                                          VOLTS   VR2,-12.5                         ; Vr   -5.1 -25V
+**** 3582 [LBNL_3.5k.waveforms 542]: Setting voltage VR2 -12.5V 2048
+3583                                          VOLTS   VR3,-12.5                         ; Vr   -5.1 -25V
+**** 3588 [LBNL_3.5k.waveforms 543]: Setting voltage VR3 -12.5V 2048
+3589                                          VOLTS   VR4,-12.5                         ; Vr   -5.1 -25V
+Motorola DSP56300 Assembler  Version 6.3.4   15-03-13  12:38:31  LBNL_3.5k.waveforms  Page 49
 
 
 
-**** 3598 [LBNL_3.5k.waveforms 544]: Setting voltage VOG1 2.16V 1769
-3599                                          VOLTS   VOG2,2.16                         ; Vopg  -10  10 V
-**** 3604 [LBNL_3.5k.waveforms 545]: Setting voltage VOG2 2.16V 1769
-3605                                          VOLTS   VOG3,2.16                         ; Vopg  -10  10 V
-**** 3610 [LBNL_3.5k.waveforms 546]: Setting voltage VOG3 2.16V 1769
-3611                                          VOLTS   VOG4,2.16                         ; Vopg  -10  10 V
-**** 3616 [LBNL_3.5k.waveforms 547]: Setting voltage VOG4 2.16V 1769
-3617   
-3618                                END_DACS
+**** 3594 [LBNL_3.5k.waveforms 544]: Setting voltage VR4 -12.5V 2048
+3595                                          VOLTS   VOG1,2.16                         ; Vopg  -10  10 V
+**** 3600 [LBNL_3.5k.waveforms 545]: Setting voltage VOG1 2.16V 1769
+3601                                          VOLTS   VOG2,2.16                         ; Vopg  -10  10 V
+**** 3606 [LBNL_3.5k.waveforms 546]: Setting voltage VOG2 2.16V 1769
+3607                                          VOLTS   VOG3,2.16                         ; Vopg  -10  10 V
+**** 3612 [LBNL_3.5k.waveforms 547]: Setting voltage VOG3 2.16V 1769
+3613                                          VOLTS   VOG4,2.16                         ; Vopg  -10  10 V
+**** 3618 [LBNL_3.5k.waveforms 548]: Setting voltage VOG4 2.16V 1769
 3619   
-3620                                BIAS_ON   VOLTS   VSUB,130                          ; Vsub  0.0 140 V
-**** 3625 [LBNL_3.5k.waveforms 551]: Setting voltage VSUB 130V 2651
-3626   
-3627                                BIAS_OFF  VOLTS   VSUB,130                          ; Vsub  0.0 140 V
-**** 3632 [LBNL_3.5k.waveforms 553]: Setting voltage VSUB 130V 2651
-3633   
-3634                                 END_APPLICATON_Y_MEMORY
-3635      000130                              EQU     @LCV(L)
-3636   
-3637                                ; End of program
-3638                                          END
+3620                                END_DACS
+3621   
+3622                                BIAS_ON   VOLTS   VSUB,130                          ; Vsub  0.0 140 V
+**** 3627 [LBNL_3.5k.waveforms 552]: Setting voltage VSUB 130V 2651
+3628   
+3629                                BIAS_OFF  VOLTS   VSUB,130                          ; Vsub  0.0 140 V
+**** 3634 [LBNL_3.5k.waveforms 554]: Setting voltage VSUB 130V 2651
+3635   
+3636                                 END_APPLICATON_Y_MEMORY
+3637      000130                              EQU     @LCV(L)
+3638   
+3639                                ; End of program
+3640                                          END
 
 0    Errors
 0    Warnings
